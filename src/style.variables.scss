@@ -1,0 +1,26 @@
+$theme-colors: (
+  "accent": #aec9ce,
+  "maindark": #3A474C,
+  "activedark": #242a2f,
+  "evwarning": #C05C11,
+  "evblue": #23779C
+);
+
+$grid-breakpoints: (
+	xs: 0,
+	sm: 576px,
+	md: 768px,
+	lg: 992px,
+	xl: 1200px,
+	xxl: 1900px
+);
+
+$container-max-widths: (
+	// sm: 540px,
+	// md: 720px,
+	sm: 940px,
+	md: 950px,
+	lg: 960px,
+	xl: 1140px,
+	xxl: 1200px
+);

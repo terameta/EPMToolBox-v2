@@ -1,0 +1,9 @@
+@import './style.variables';
+@import '../node_modules/bootstrap/scss/bootstrap';
+@import url('https://fonts.googleapis.com/css?family=Ubuntu:100,200,300,400,500,600,700,800,900');
+
+html, body {
+	font-size: 14px;
+	font-family: 'Ubuntu', sans-serif;
+	background-color: white;
+}
