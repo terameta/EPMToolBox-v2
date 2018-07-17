@@ -38,6 +38,11 @@
 				background: url(./assets/images/AsliToolboxLoaderOptimized.png) center center no-repeat;
 			}
 
+			.front-page-wrapper {
+				height: 100%;
+				background-color: silver;
+			}
+
 			.dime-loading .dime-spinner .dime-path {
 				stroke-dasharray: 1, 200;
 				stroke-dashoffset: 0;
@@ -70,17 +75,17 @@
 		</style>
 	</head>
 
-	<body class="skin-black fixed layout-top-nav">
-		<div class="wrapper">
-			<app-root>
-				<div class="dime-loading">
-					<div class="logo"></div>
-					<svg class="dime-spinner" viewBox="25 25 50 50">
-						<circle class="dime-path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10" />
-					</svg>
-				</div>
-			</app-root>
-		</div>
+	<body>
+		<!-- <div class="front-page-wrapper"> -->
+		<app-root>
+			<div class="dime-loading">
+				<div class="logo"></div>
+				<svg class="dime-spinner" viewBox="25 25 50 50">
+					<circle class="dime-path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10" />
+				</svg>
+			</div>
+		</app-root>
+		<!-- </div> -->
 	</body>
 
 </html>

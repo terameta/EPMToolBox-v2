@@ -10,7 +10,10 @@
 			true,
 			"check-space"
 		],
-		"curly": true,
+		"curly": [
+			true,
+			"ignore-same-line"
+		],
 		"deprecation": {
 			"severity": "warn"
 		},
@@ -29,7 +32,7 @@
 		"label-position": true,
 		"max-line-length": [
 			true,
-			140
+			280
 		],
 		"member-access": false,
 		"member-ordering": [
@@ -90,7 +93,8 @@
 		"radix": true,
 		"semicolon": [
 			true,
-			"always"
+			"always",
+			"ignore-interfaces"
 		],
 		"triple-equals": [
 			true,
