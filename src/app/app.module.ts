@@ -4,10 +4,13 @@ import { NgModule } from '@angular/core';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AppComponent } from './app.component';
-import { Routes, RouterModule } from '../../node_modules/@angular/router';
+import { Routes, RouterModule } from '@angular/router';
 import { SignInComponent } from './sign-in/sign-in.component';
 import { SignUpComponent } from './sign-up/sign-up.component';
 import { FrontPageComponent } from './front-page/front-page.component';
+import { AuthModule } from './auth/auth.module';
+import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 
 const routes: Routes = [
 	{ path: '', component: FrontPageComponent },
@@ -27,7 +30,10 @@ const routes: Routes = [
 	imports: [
 		BrowserModule,
 		NgbModule,
-		RouterModule.forRoot( routes )
+		RouterModule.forRoot( routes ),
+		FormsModule,
+		HttpClientModule,
+		AuthModule
 	],
 	providers: [],
 	bootstrap: [AppComponent]

@@ -1,3 +1,31 @@
-<p>
-  sign-up works!
-</p>
+<div class="container h-100">
+	<div class="row h-100">
+		<div class="mx-auto my-auto text-center">
+			<div class="card border-evwarning">
+				<img src="assets/images/AsliToolboxLoaderOptimized.png" alt="EPM Tool Box Logo" class="card-img-top mx-auto mt-3" style="max-width: 100px">
+				<div class="card-body">
+					<h3 class="card-title">Sign Up</h3>
+					<form (ngSubmit)="signUp(f)" #f="ngForm" class="form-signup">
+						<div class="form-label-group">
+							<input type="text" name="username" id="username" class="form-control" placeholder="Email address" required autofocus>
+							<label for="username">Email address</label>
+						</div>
+						<button type="submit" class="btn btn-lg btn-accent btn-block">Sign Up</button>
+
+					</form>
+				</div>
+				<div class="card-footer text-right">
+					Already have an account?
+					<a routerLink="/signin" class="btn btn-link text-evwarning">Sign In</a>
+				</div>
+				<div class="card-footer text-left text-muted" style="font-size:10px;">
+					<b>Notice:</b>
+					<br> All account registrations are subject to approval
+					<br> by the system administrator.
+					<br> You will receive a notification once the approval
+					<br> process is completed.
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
