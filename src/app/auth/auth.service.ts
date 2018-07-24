@@ -19,6 +19,8 @@ export class AuthService {
 	private checkSessionInterval: NodeJS.Timer = null;
 
 	constructor( private jwtHelper: JwtHelper ) {
+		console.log( 'Cross check mechanism' );
+		console.log( 'Implement logout buttons' );
 		this.initiateService();
 	}
 
