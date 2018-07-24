@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { AuthService } from '../auth/auth.service';
+import { CommunicationService } from '../communication/communication.service';
 
 @Component( {
 	selector: 'app-sign-in',
@@ -10,22 +11,15 @@ import { AuthService } from '../auth/auth.service';
 export class SignInComponent implements OnInit {
 	isSigningIn = false;
 
-	constructor(
-		private authService: AuthService
-	) { }
+	constructor( public authService: AuthService ) { }
 
-	ngOnInit() {
-	}
+	ngOnInit() { }
 
 	public signIn = ( form: NgForm ) => {
 		this.isSigningIn = true;
 		const username = form.value.username;
 		const password = form.value.password;
-		this.authService.signUserIn( username, password ).subscribe( ( result ) => {
-			console.log( result );
-		}, ( error ) => {
-			console.error( error );
-		} );
+		this.authService.signUserInInitiate( username, password );
 	}
 
 }

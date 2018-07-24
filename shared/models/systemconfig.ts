@@ -1,7 +1,8 @@
 export interface SystemConfig {
 	hash: string,
 	mysql: MysqlConfig,
-	numberofCPUs?: number
+	numberofCPUs?: number,
+	serverPort: number
 }
 
 export interface MysqlConfig {

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CentralStatusService } from './central-status.service';
+import { CommunicationService } from './communication/communication.service';
 
 @Component( {
 	selector: 'app-root',
@@ -8,6 +8,6 @@ import { CentralStatusService } from './central-status.service';
 } )
 export class AppComponent {
 	constructor(
-		public centralStatus: CentralStatusService
+		private cs: CommunicationService
 	) { }
 }

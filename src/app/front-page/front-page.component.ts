@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { DataStoreService } from '../data-store/data-store.service';
 
 @Component( {
 	selector: 'app-front-page',
@@ -7,7 +8,9 @@ import { Component, OnInit } from '@angular/core';
 } )
 export class FrontPageComponent implements OnInit {
 
-	constructor() { }
+	constructor(
+		private ds: DataStoreService
+	) { }
 
 	ngOnInit() {
 	}

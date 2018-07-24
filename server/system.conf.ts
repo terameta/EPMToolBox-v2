@@ -9,5 +9,6 @@ export const configuration: SystemConfig = {
 		'user': 'epmtoolboxdev',
 		'pass': 'O5Wh3SjP9c4unYM83du4mWoyojRrA3Yt',
 		'db': 'epmtoolboxdev'
-	}
+	},
+	'serverPort': 8000
 };

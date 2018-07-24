@@ -3,39 +3,58 @@ import { Router, NavigationEnd, Event } from '@angular/router';
 import { ATNotification, ATNotificationDefault, newATNotification } from 'shared/models/notification';
 import { BehaviorSubject } from 'rxjs';
 import { JSONDeepCopy } from 'shared/utilities/utilityFunctions';
+import { AuthService } from './auth/auth.service';
 
 @Injectable( {
 	providedIn: 'root'
 } )
 export class CentralStatusService {
-	public currentURL = '';
+	public currentURL = new BehaviorSubject<string>( '' );
 	public shouldShowHeader = true;
 	public shouldShowFooter = true;
 
 	public notifications$ = new BehaviorSubject<ATNotification[]>( [] );
 
 	private urlsToHideHeader = [
-		'/signin'
+		'/signin',
+		'/signup'
+	];
+	private urlsToGoToHome = [
+		'/signin',
+		'/signup'
 	];
 
 	constructor(
-		private router: Router
+		private router: Router,
+		private authService: AuthService
 	) {
 		this.router.events.subscribe( this.routeHandler );
+		this.currentURL.subscribe( this.urlHandler );
 		console.log( 'Constructed central-status.service' );
-		setInterval( this.notificationClear, 1000 );
+		setInterval( this.notificationClear, 10000 );
 	}
 
 	private routeHandler = ( event: Event ) => {
 		if ( event instanceof NavigationEnd ) {
-			this.currentURL = event.url;
+			this.currentURL.next( event.url );
 			this.shouldShowHeader = true;
 			this.shouldShowFooter = true;
-			if ( this.urlsToHideHeader.includes( this.currentURL ) ) {
-				console.log( 'We will hide header', this.currentURL );
+			if ( this.urlsToHideHeader.includes( event.url ) ) {
+				console.log( 'We will hide header', event.url );
 				this.shouldShowHeader = false;
 			} else {
-				console.log( 'We will not hide header', this.currentURL );
+				console.log( 'We will not hide header', event.url );
+			}
+		}
+	}
+
+	private urlHandler = ( url: string ) => {
+		const role = this.authService.user$.getValue().role;
+		if ( this.urlsToGoToHome.includes( url ) ) {
+			if ( role === 'admin' ) {
+				this.router.navigateByUrl( '/admin' );
+			} else if ( role === 'user' ) {
+				this.router.navigateByUrl( '/end-user' );
 			}
 		}
 	}

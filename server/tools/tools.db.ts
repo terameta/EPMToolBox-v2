@@ -24,10 +24,10 @@ export class DB {
 
 	}
 
-	public query = <T>( queryToExecute: string, queryArguments?: any ): Promise<{ result: T, fields: FieldInfo[] }> => {
+	public query = <T>( queryToExecute: string, queryArguments?: any ): Promise<{ result: T[], fields: FieldInfo[] }> => {
 		return new Promise( ( resolve, reject ) => {
 			if ( queryArguments !== undefined ) {
-				this.pool.query( queryToExecute, queryArguments, ( err, result: T, fields ) => {
+				this.pool.query( queryToExecute, queryArguments, ( err, result: T[], fields ) => {
 					if ( err ) {
 						reject( err );
 					} else {
@@ -35,7 +35,7 @@ export class DB {
 					}
 				} );
 			} else {
-				this.pool.query( queryToExecute, ( err, result: T, fields ) => {
+				this.pool.query( queryToExecute, ( err, result: T[], fields ) => {
 					if ( err ) {
 						reject( err );
 					} else {

@@ -5,12 +5,14 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AppComponent } from './app.component';
 import { Routes, RouterModule } from '@angular/router';
+import { JwtModule } from '@auth0/angular-jwt';
 import { SignInComponent } from './sign-in/sign-in.component';
 import { SignUpComponent } from './sign-up/sign-up.component';
 import { FrontPageComponent } from './front-page/front-page.component';
 import { AuthModule } from './auth/auth.module';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
+import { DataStoreModule } from './data-store/data-store.module';
 
 const routes: Routes = [
 	{ path: '', component: FrontPageComponent },
@@ -19,6 +21,10 @@ const routes: Routes = [
 	{ path: 'admin', loadChildren: './admin/admin.module#AdminModule' },
 	{ path: 'enduser', loadChildren: './end-user/end-user.module#EndUserModule' }
 ];
+
+export function tokenGetter() {
+	return localStorage.getItem( 'token' );
+}
 
 @NgModule( {
 	declarations: [
@@ -33,7 +39,13 @@ const routes: Routes = [
 		RouterModule.forRoot( routes ),
 		FormsModule,
 		HttpClientModule,
-		AuthModule
+		JwtModule.forRoot( {
+			config: {
+				tokenGetter: tokenGetter
+			}
+		} ),
+		AuthModule,
+		DataStoreModule
 	],
 	providers: [],
 	bootstrap: [AppComponent]

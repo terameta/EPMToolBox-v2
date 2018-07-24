@@ -105,7 +105,18 @@ export class MainTools {
 	}
 
 	signToken( toSign: any ): string {
-		// return jwt.sign( Object.assign( {}, toSign ), this.config.hash, { expiresIn: 60 * 60 * 24 * 30 } );
-		return jwt.sign( Object.assign( {}, toSign ), this.config.hash, { expiresIn: 60 * 1 * 1 * 1 } );
+		return jwt.sign( Object.assign( {}, toSign ), this.config.hash, { expiresIn: 60 * 60 * 24 * 5 } );
+		// return jwt.sign( Object.assign( {}, toSign ), this.config.hash, { expiresIn: 60 * 2.5 * 1 * 1 } );
+	}
+	verifyToken = ( payload ) => {
+		return new Promise( ( resolve, reject ) => {
+			jwt.verify( payload, this.config.hash, ( err, decoded ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( decoded );
+				}
+			} );
+		} );
 	}
 }

@@ -28,6 +28,7 @@ if ( cluster.isMaster ) {
 		console.log( '===============================================' );
 		console.log( '===============================================' );
 		console.log( '=== Remember to fix croner                  ===' );
+		console.log( '=== Remember to tools.main.signToken        ===' );
 		console.log( '===============================================' );
 		for ( let i = 0; i < numCPUs; i++ ) {
 			cluster.fork( worker_env );
