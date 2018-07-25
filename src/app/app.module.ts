@@ -1,7 +1,8 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+// ngx-bootstrap modules
+import { CollapseModule } from 'ngx-bootstrap/collapse';
 
 import { AppComponent } from './app.component';
 import { Routes, RouterModule } from '@angular/router';
@@ -13,13 +14,17 @@ import { AuthModule } from './auth/auth.module';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { DataStoreModule } from './data-store/data-store.module';
+import { AuthGuardService as AuthGuard } from './auth-guard.service';
+import { AdminComponent } from './admin/admin/admin.component';
+
 
 const routes: Routes = [
-	{ path: '', component: FrontPageComponent },
+	{ path: '', canActivate: [AuthGuard], component: FrontPageComponent },
 	{ path: 'signin', component: SignInComponent },
 	{ path: 'signup', component: SignUpComponent },
-	{ path: 'admin', loadChildren: './admin/admin.module#AdminModule' },
-	{ path: 'enduser', loadChildren: './end-user/end-user.module#EndUserModule' }
+	{ path: 'admin', canActivate: [AuthGuard], data: { expectedRole: 'admin' }, component: AdminComponent, loadChildren: './admin/admin.module#AdminModule' },
+	{ path: 'enduser', canActivate: [AuthGuard], data: { expectedRole: 'user' }, loadChildren: './end-user/end-user.module#EndUserModule' },
+	{ path: '**', redirectTo: '' }
 ];
 
 export function tokenGetter() {
@@ -35,7 +40,6 @@ export function tokenGetter() {
 	],
 	imports: [
 		BrowserModule,
-		NgbModule,
 		RouterModule.forRoot( routes ),
 		FormsModule,
 		HttpClientModule,
@@ -45,7 +49,8 @@ export function tokenGetter() {
 			}
 		} ),
 		AuthModule,
-		DataStoreModule
+		DataStoreModule,
+		CollapseModule.forRoot()
 	],
 	providers: [],
 	bootstrap: [AppComponent]

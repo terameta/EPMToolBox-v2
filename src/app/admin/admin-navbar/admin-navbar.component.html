@@ -1,3 +1,79 @@
-<p>
-  admin-navbar works!
-</p>
+<nav class="navbar navbar-expand-md navbar-light fixed-top bg-light">
+	<a class="navbar-brand" routerLink="./">
+		<img src="assets/images/AsliToolboxIcon.png" alt="EPMToolBox" width="32px" height="32px">
+	</a>
+	<button class="btn btn-light collapsed d-block d-md-none" (click)="isCollapsed = !isCollapsed" aria-expanded="false">
+		<i class="fas fa-bars"></i>
+	</button>
+	<div class="collapse navbar-collapse" [collapse]="isCollapsed">
+		<ul class="navbar-nav mr-auto">
+			<li class="nav-item" routerLinkActive="active">
+				<a class="nav-link" routerLink="environments" title="Environments">
+					<i class="fas fa-building fa-fw"></i>
+					<br>Environments</a>
+			</li>
+			<li class="nav-item" routerLinkActive="active">
+				<a class="nav-link" routerLink="streams" title="Streams">
+					<i class="fas fa-arrows-alt fa-fw"></i>
+					<br>Streams</a>
+			</li>
+			<li class="nav-item" routerLinkActive="active">
+				<a class="nav-link" routerLink="maps" title="Maps">
+					<i class="fas fa-globe fa-fw"></i>
+					<br>Maps</a>
+			</li>
+			<li class="nav-item" routerLinkActive="active">
+				<a class="nav-link" routerLink="matrices" title="Matrices">
+					<i class="fas fa-th fa-fw"></i>
+					<br>Matrices</a>
+			</li>
+			<li class="nav-item" routerLinkActive="active">
+				<a class="nav-link" routerLink="schedules" title="Schedules">
+					<i class="fas fa-calendar fa-fw"></i>
+					<br>Schedules</a>
+			</li>
+			<li class="nav-item" routerLinkActive="active">
+				<a class="nav-link" routerLink="processes" title="Processes">
+					<i class="fas fa-cogs fa-fw"></i>
+					<br>Processes</a>
+			</li>
+			<li class="nav-item" routerLinkActive="active">
+				<a class="nav-link" routerLink="asyncprocesses" title="Async Processes">
+					<i class="fas fa-link fa-fw"></i>
+					<br>AsyncBR</a>
+			</li>
+			<li class="nav-item" routerLinkActive="active">
+				<a class="nav-link" routerLink="settings" title="Settings">
+					<i class="fas fa-cog fa-fw"></i>
+					<br>Settings</a>
+			</li>
+			<li class="nav-item" routerLinkActive="active">
+				<a class="nav-link" routerLink="secrets" title="Secrets">
+					<i class="fas fa-lock fa-fw"></i>
+					<br>Secrets</a>
+			</li>
+			<li class="nav-item" routerLinkActive="active">
+				<a class="nav-link" routerLink="credentials" title="Credentials">
+					<i class="fas fa-key fa-fw"></i>
+					<br>Credentials</a>
+			</li>
+			<li class="nav-item" routerLinkActive="active">
+				<a class="nav-link" routerLink="tags" title="Tags">
+					<i class="fas fa-tags fa-fw"></i>
+					<br>Tags</a>
+			</li>
+			<li class="nav-item" routerLinkActive="active">
+				<a class="nav-link" routerLink="users" title="Users">
+					<i class="fas fa-user fa-fw"></i>
+					<br>Users</a>
+			</li>
+		</ul>
+		<ul class="navbar-nav navbar-right">
+			<li class="nav-item">
+				<a class="nav-link" (click)="signOut()" title="Sign Out">
+					<i class="fas fa-sign-out-alt fa-fw"></i>
+					<br>Sign Out</a>
+			</li>
+		</ul>
+	</div>
+</nav>

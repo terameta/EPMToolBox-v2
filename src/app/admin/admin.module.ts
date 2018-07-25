@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { AdminNavbarComponent } from './admin-navbar/admin-navbar.component';
 import { AdminFrontPageComponent } from './admin-front-page/admin-front-page.component';
 import { RouterModule } from '@angular/router';
+import { CollapseModule } from '../../../node_modules/ngx-bootstrap/collapse';
+import { AdminComponent } from './admin/admin.component';
 
 const routes = [
 	{ path: '', component: AdminFrontPageComponent }
@@ -11,11 +13,13 @@ const routes = [
 @NgModule( {
 	imports: [
 		CommonModule,
-		RouterModule.forChild( routes )
+		RouterModule.forChild( routes ),
+		CollapseModule
 	],
 	declarations: [
 		AdminNavbarComponent,
-		AdminFrontPageComponent
+		AdminFrontPageComponent,
+		AdminComponent
 	]
 } )
 export class AdminModule { }

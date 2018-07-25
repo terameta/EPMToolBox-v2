@@ -1,3 +1,229 @@
-<p>
-  admin-front-page works!
-</p>
+<div class="container-fluid">
+	<div class="row py-3">
+		<div class="col-3">
+			<div class="card text-center" routerLink="environments">
+				<div class="card-header">
+					<h5 class="card-title pb-0 mb-0">
+						<i class="fas fa-building fa-fw"></i>
+						<br>Environments
+					</h5>
+				</div>
+				<div class="card-body">
+					<p class="card-text">Stats</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-3">
+			<div class="card text-center" routerLink="streams">
+				<div class="card-header">
+					<h5 class="card-title pb-0 mb-0">
+						<i class="fas fa-arrows-alt fa-fw"></i>
+						<br>Streams
+					</h5>
+				</div>
+				<div class="card-body">
+					<p class="card-text">Stats</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-3">
+			<div class="card text-center" routerLink="maps">
+				<div class="card-header">
+					<h5 class="card-title pb-0 mb-0">
+						<i class="fas fa-globe fa-fw"></i>
+						<br>Maps
+					</h5>
+				</div>
+				<div class="card-body">
+					<p class="card-text">Stats</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-3">
+			<div class="card text-center" routerLink="matrices">
+				<div class="card-header">
+					<h5 class="card-title pb-0 mb-0">
+						<i class="fas fa-th fa-fw"></i>
+						<br>Matrices
+					</h5>
+				</div>
+				<div class="card-body">
+					<p class="card-text">Stats</p>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row py-3">
+		<div class="col-3">
+			<div class="card text-center" routerLink="schedules">
+				<div class="card-header">
+					<h5 class="card-title pb-0 mb-0">
+						<i class="fas fa-calendar fa-fw"></i>
+						<br>Schedules
+					</h5>
+				</div>
+				<div class="card-body">
+					<p class="card-text">Stats</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-3">
+			<div class="card text-center" routerLink="processes">
+				<div class="card-header">
+					<h5 class="card-title pb-0 mb-0">
+						<i class="fas fa-cogs fa-fw"></i>
+						<br>Processes
+					</h5>
+				</div>
+				<div class="card-body">
+					<p class="card-text">Stats</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-3">
+			<div class="card text-center" routerLink="asyncprocesses">
+				<div class="card-header">
+					<h5 class="card-title pb-0 mb-0">
+						<i class="fas fa-link fa-fw"></i>
+						<br>AsyncBR
+					</h5>
+				</div>
+				<div class="card-body">
+					<p class="card-text">Stats</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-3">
+			<div class="card text-center" routerLink="settings">
+				<div class="card-header">
+					<h5 class="card-title pb-0 mb-0">
+						<i class="fas fa-cog fa-fw"></i>
+						<br>Settings
+					</h5>
+				</div>
+				<div class="card-body">
+					<p class="card-text">Stats</p>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row py-3">
+		<div class="col-3">
+			<div class="card text-center" routerLink="secrets">
+				<div class="card-header">
+					<h5 class="card-title pb-0 mb-0">
+						<i class="fas fa-lock fa-fw"></i>
+						<br>Secrets
+					</h5>
+				</div>
+				<div class="card-body">
+					<p class="card-text">Stats</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-3">
+			<div class="card text-center" routerLink="credentials">
+				<div class="card-header">
+					<h5 class="card-title pb-0 mb-0">
+						<i class="fas fa-key fa-fw"></i>
+						<br>Credentials
+					</h5>
+				</div>
+				<div class="card-body">
+					<p class="card-text">Stats</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-3">
+			<div class="card text-center" routerLink="tags">
+				<div class="card-header">
+					<h5 class="card-title pb-0 mb-0">
+						<i class="fas fa-tags fa-fw"></i>
+						<br>Tags
+					</h5>
+				</div>
+				<div class="card-body">
+					<p class="card-text">Stats</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-3">
+			<div class="card text-center" routerLink="users">
+				<div class="card-header">
+					<h5 class="card-title pb-0 mb-0">
+						<i class="fas fa-user fa-fw"></i>
+						<br>Users
+					</h5>
+				</div>
+				<div class="card-body">
+					<p class="card-text">Stats</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!--
+<div class="container-fluid">
+	<div class="card-deck">
+		<div class="card">
+			<div class="card-body">
+				<h5 class="card-title">Environments</h5>
+				<p class="card-text">.</p>
+			</div>
+			<div class="card-footer">
+				<small class="text-muted">Last updated 3 mins ago</small>
+			</div>
+		</div>
+		<div class="card">
+			<img class="card-img-top" src=".../100px180/" alt="Card image cap">
+			<div class="card-body">
+				<h5 class="card-title">Card title</h5>
+				<p class="card-text">.</p>
+			</div>
+			<div class="card-footer">
+				<small class="text-muted">Last updated 3 mins ago</small>
+			</div>
+		</div>
+		<div class="card">
+			<img class="card-img-top" src=".../100px180/" alt="Card image cap">
+			<div class="card-body">
+				<h5 class="card-title">Card title</h5>
+				<p class="card-text">.</p>
+			</div>
+			<div class="card-footer">
+				<small class="text-muted">Last updated 3 mins ago</small>
+			</div>
+		</div>
+		<div class="card">
+			<img class="card-img-top" src=".../100px180/" alt="Card image cap">
+			<div class="card-body">
+				<h5 class="card-title">Card title</h5>
+				<p class="card-text">.</p>
+			</div>
+			<div class="card-footer">
+				<small class="text-muted">Last updated 3 mins ago</small>
+			</div>
+		</div>
+		<div class="card">
+			<img class="card-img-top" src=".../100px180/" alt="Card image cap">
+			<div class="card-body">
+				<h5 class="card-title">Card title</h5>
+				<p class="card-text">This card has supporting text below as a natural lead-in to additional content.</p>
+			</div>
+			<div class="card-footer">
+				<small class="text-muted">Last updated 3 mins ago</small>
+			</div>
+		</div>
+		<div class="card">
+			<img class="card-img-top" src=".../100px180/" alt="Card image cap">
+			<div class="card-body">
+				<h5 class="card-title">Card title</h5>
+				<p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This card has even longer content than the first to show that equal height action.</p>
+			</div>
+			<div class="card-footer">
+				<small class="text-muted">Last updated 3 mins ago</small>
+			</div>
+		</div>
+	</div>
+</div> -->

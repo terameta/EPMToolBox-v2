@@ -48,7 +48,7 @@ export function initiateApplicationWorker( refDB: DB, refConfig: SystemConfig ) 
 			console.log( 'user disconnected' );
 		} );
 		socket.on( 'communication', ( payload ) => {
-			api.respond( payload, socket );
+			api.respond( payload, socket ).catch( console.log );
 		} );
 	} );
 

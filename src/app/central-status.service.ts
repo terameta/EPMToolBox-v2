@@ -20,6 +20,7 @@ export class CentralStatusService {
 		'/signup'
 	];
 	private urlsToGoToHome = [
+		'/',
 		'/signin',
 		'/signup'
 	];
@@ -40,21 +41,20 @@ export class CentralStatusService {
 			this.shouldShowHeader = true;
 			this.shouldShowFooter = true;
 			if ( this.urlsToHideHeader.includes( event.url ) ) {
-				console.log( 'We will hide header', event.url );
 				this.shouldShowHeader = false;
-			} else {
-				console.log( 'We will not hide header', event.url );
 			}
 		}
 	}
 
 	private urlHandler = ( url: string ) => {
-		const role = this.authService.user$.getValue().role;
-		if ( this.urlsToGoToHome.includes( url ) ) {
-			if ( role === 'admin' ) {
-				this.router.navigateByUrl( '/admin' );
-			} else if ( role === 'user' ) {
-				this.router.navigateByUrl( '/end-user' );
+		if ( this.authService.user$.getValue() ) {
+			const role = this.authService.user$.getValue().role;
+			if ( this.urlsToGoToHome.includes( url ) ) {
+				if ( role === 'admin' ) {
+					this.router.navigateByUrl( '/admin' );
+				} else if ( role === 'user' ) {
+					this.router.navigateByUrl( '/end-user' );
+				}
 			}
 		}
 	}

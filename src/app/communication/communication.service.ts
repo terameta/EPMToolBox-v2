@@ -44,7 +44,7 @@ export class CommunicationService {
 				if ( response.framework === 'auth' ) {
 					this.as[response.action]( response.payload );
 				} else {
-					this.ds.react( response );
+					// this.ds.react( response );
 				}
 			} else if ( response.payload.status === 'error' ) {
 				console.log( 'Here we should handle with central status service.' );
@@ -65,7 +65,7 @@ export class CommunicationService {
 	}
 
 	private communicate = ( payload: ATApiCommunication ) => {
-		this.socket.emit( 'communication', { token: this.as.encodedToken, payload } );
+		this.socket.emit( 'communication', { token: this.as.encodedToken, ...payload } );
 	}
 
 	private processSignIn = ( user: ATUser ) => {
@@ -84,7 +84,7 @@ export class CommunicationService {
 		console.log( 'Communication came from server' );
 		console.log( 'Framework:', response.framework, 'Action:', response.action );
 		console.log( 'Payload Status:', response.payload.status );
-		console.log( 'Payload Result:', response.payload.result );
+		console.log( 'Payload Result:', response.payload.data );
 		console.log( '===========================================' );
 		console.log( '===========================================' );
 	}

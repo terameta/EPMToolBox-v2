@@ -7,6 +7,7 @@ import { ATUser } from '../../shared/models/at.user';
 import { ATDirectoryServer } from '../../shared/models/at.directoryserver';
 import { ATDirectoryServerTool } from './tools.directoryserver';
 import * as jwt from 'jsonwebtoken';
+import { ATApiPayload } from 'shared/models/at.socketrequest';
 
 interface AuthObjectDirectory {
 	username: string,
@@ -26,13 +27,14 @@ export class AuthTool {
 		this.directoryServerTool = new ATDirectoryServerTool( this.db, this.tools );
 	}
 
-	public signin = async ( payload: { username: string, password: string } ) => {
+	public signin = async ( payload: ATApiPayload ) => {
 		if ( !payload ) { return new Error( 'No credentials presented' ); }
-		if ( !payload.username || !payload.password ) { return new Error( 'Either username or password missing' ); }
-		return this.authenticate( payload );
+		if ( !payload.data ) { return new Error( 'No credentials presented' ); }
+		if ( !payload.data.username || !payload.data.password ) { return new Error( 'Either username or password missing' ); }
+		return this.authenticate( payload.data );
 	}
-	public reauthenticate = async ( payload ) => {
-		const oldToken: any = await this.tools.verifyToken( payload ).catch();
+	public reauthenticate = async ( payload: ATApiPayload ) => {
+		const oldToken: any = await this.tools.verifyToken( payload.data.token ).catch();
 		if ( oldToken ) {
 			delete oldToken.iat;
 			delete oldToken.exp;

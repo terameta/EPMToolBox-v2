@@ -3,8 +3,9 @@ import { JSONDeepCopy } from '../utilities/utilityFunctions';
 export interface ATNotification {
 	title: string,
 	detail: string,
-	type: 'error' | 'info' | 'success' | 'warning',
-	expires?: Date
+	type: 'fatal' | 'error' | 'info' | 'success' | 'warning',
+	expires?: Date,
+	shouldBlockUI?: boolean
 }
 
 export const ATNotificationDefault: ATNotification = { title: '', detail: '', type: 'info' };

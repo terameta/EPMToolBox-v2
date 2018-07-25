@@ -4,6 +4,7 @@ import { ATUser, ATUserDefault } from 'shared/models/at.user';
 import { JSONDeepCopy } from 'shared/utilities/utilityFunctions';
 import { JwtHelperService as JwtHelper } from '@auth0/angular-jwt';
 import { ATApiPayload } from 'shared/models/at.socketrequest';
+import { Router } from '@angular/router';
 
 @Injectable( {
 	providedIn: 'root'
@@ -16,11 +17,12 @@ export class AuthService {
 	public signInIssue = '';
 	public encodedToken = '';
 	public decodedToken: any;
-	private checkSessionInterval: NodeJS.Timer = null;
+	private checkSessionInterval: any = null;
 
-	constructor( private jwtHelper: JwtHelper ) {
-		console.log( 'Cross check mechanism' );
-		console.log( 'Implement logout buttons' );
+	constructor(
+		private jwtHelper: JwtHelper,
+		private router: Router
+	) {
 		this.initiateService();
 	}
 
@@ -38,7 +40,7 @@ export class AuthService {
 				this.isAuthenticated$.next( true );
 			}
 		} else {
-			this.user$.next( null );
+			this.user$.next( JSONDeepCopy( ATUserDefault ) );
 			this.isAuthenticated$.next( false );
 		}
 		this.checkSession();
@@ -53,17 +55,16 @@ export class AuthService {
 			} else if ( this.jwtHelper.isTokenExpired( this.encodedToken, 60 * 60 * 24 * 1 ) ) {
 				this.isReAuthenticating$.next( true );
 			}
-		} else {
-			console.log( 'Token has already vanished' );
 		}
 	}
 
 	private setSignedIn = ( token ) => {
 		localStorage.setItem( 'token', token );
 		this.initiateService();
+		this.router.navigate( ['/'] );
 	}
 
-	private setSignedOut = () => {
+	public setSignedOut = () => {
 		localStorage.removeItem( 'token' );
 		this.initiateService();
 	}
@@ -74,14 +75,14 @@ export class AuthService {
 	}
 
 	public signin = ( payload: ATApiPayload ) => {
-		this.setSignedIn( payload.result.token );
+		this.setSignedIn( payload.data.token );
 	}
 
 	public reauthenticate = ( payload: ATApiPayload ) => {
 		console.log( 'Reauthenticate result' );
 		console.log( payload );
 		this.isReAuthenticating$.next( false );
-		this.setSignedIn( payload.result.token );
+		this.setSignedIn( payload.data.token );
 	}
 
 
@@ -113,18 +114,5 @@ export class AuthService {
 	// 	console.log( payload );
 	// 	console.log( '===========================================' );
 	// 	console.log( '===========================================' );
-	// }
-	// public reauthenticate = ( payload ) => {
-	// 	console.log( '===========================================' );
-	// 	console.log( 'Reauthenticate' );
-	// 	console.log( '===========================================' );
-	// 	console.log( payload );
-	// 	console.log( '===========================================' );
-	// 	console.log( '===========================================' );
-	// }
-
-	// public signUserOut = () => {
-	// 	localStorage.removeItem( 'token' );
-	// 	this.isAuthenticated$.next( false );
 	// }
 }

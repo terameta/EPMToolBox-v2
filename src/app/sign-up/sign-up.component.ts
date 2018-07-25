@@ -18,13 +18,14 @@ export class SignUpComponent implements OnInit {
 	}
 
 	public signUp = ( form: NgForm ) => {
-		this.isSigningUp = true;
-		const username = form.value.username;
-		this.authService.signUserUp( username ).subscribe( ( result ) => {
-			console.log( result );
-		}, ( error ) => {
-			console.error( error );
-		} );
+		console.log( 'Let\'s implement signup later' );
+		// this.isSigningUp = true;
+		// const username = form.value.username;
+		// this.authService.signUserUp( username ).subscribe( ( result ) => {
+		// 	console.log( result );
+		// }, ( error ) => {
+		// 	console.error( error );
+		// } );
 	}
 
 }
