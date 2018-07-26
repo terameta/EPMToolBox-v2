@@ -1,3 +1,19 @@
+// After RTDB implementation
+
+export interface ATStreamSubject {
+	[key: number]: ATStream | ATStreamDetail
+}
+
+export interface ATStreamConcept {
+	subject: ATStreamSubject,
+	ids: number[]
+}
+
+export const ATStreamConceptDefault = (): ATStreamConcept => ( { subject: {}, ids: [] } );
+
+// Before new changes
+
+
 export interface ATStream {
 	id: number,
 	name: string,

@@ -7,7 +7,6 @@ export class DB {
 	public rtdb: RealtimeDB;
 
 	constructor( private dbConfig: MysqlConfig, serverid: number ) {
-		console.log( 'Relational database pool initializing @ tools.db.ts' );
 		this.pool = createPool( {
 			connectionLimit: 10,
 			queueLimit: 0,
@@ -17,11 +16,9 @@ export class DB {
 			password: dbConfig.pass,
 			database: dbConfig.db
 		} );
-		console.log( 'Relational database pool created @ tools.db.ts' );
-		console.log( 'Realtime database connection initializing @ tools.db.ts' );
-		this.rtdb = new RealtimeDB( dbConfig, serverid );
-		console.log( 'Realtime database connection initialization completed @ tools.db.ts' );
-
+		if ( process.env.isWorker === 'true' ) {
+			this.rtdb = new RealtimeDB( dbConfig, serverid );
+		}
 	}
 
 	public query = <T>( queryToExecute: string, queryArguments?: any ): Promise<{ result: T[], fields: FieldInfo[] }> => {

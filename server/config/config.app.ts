@@ -12,6 +12,9 @@ import { join } from 'path';
 import * as helmet from 'helmet';
 import * as logger from 'morgan';
 import { ATApi } from '../api/api';
+import { ATDataStoreInterest } from '../../shared/models/at.datastoreinterest';
+import { Subscription } from 'rxjs';
+import { Socket } from 'socket.io';
 
 export function initiateApplicationWorker( refDB: DB, refConfig: SystemConfig ) {
 	const app: express.Application = express();
@@ -39,18 +42,31 @@ export function initiateApplicationWorker( refDB: DB, refConfig: SystemConfig ) 
 		res.sendFile( join( __dirname, '../../dist/index.html' ) );
 	} );
 
+	setInterval( () => {
+		refDB.query( 'DELETE FROM logs LIMIT 1' );
+	}, 10000 );
+
 
 	io.on( 'connection', ( socket ) => {
-		console.log( 'a user connected' );
-		console.log( socket.client.id );
+		const interests: ATDataStoreInterest[] = [];
+		const changeSubscription: Subscription = refDB.rtdb.changes$.subscribe( c => console.log( 'RTDB Change detected on changes$,', c ) );
+		// console.log( 'a user connected' );
+		// console.log( socket.client.id );
 		// console.log( socket );
 		socket.on( 'disconnect', () => {
 			console.log( 'user disconnected' );
+			changeSubscription.unsubscribe();
 		} );
 		socket.on( 'communication', ( payload ) => {
 			api.respond( payload, socket ).catch( console.log );
 		} );
+		socket.on( 'interest', ( payload ) => {
+			handleInterests( interests, payload, socket, refDB );
+		} );
+
 	} );
+
+	for ( let a = 0; a < 100; a++ ) { console.log( 'I have stopped working on config.app.ts line 100' ); }
 
 	server.listen( refConfig.serverPort, () => {
 		console.log( 'Server is now running on port ' + refConfig.serverPort );
@@ -58,6 +74,38 @@ export function initiateApplicationWorker( refDB: DB, refConfig: SystemConfig ) 
 
 
 }
+
+const handleInterests = async ( interests: ATDataStoreInterest[], newInterests: ATDataStoreInterest[], socket: Socket, db: DB ) => {
+	// console.log( 'Current Interests', interests );
+	// console.log( 'New Interests', newInterests );
+	newInterests.forEach( interest => {
+		const toCompare = interestToString( interest );
+		if ( !interests.map( e => JSON.stringify( e ) ).includes( toCompare ) ) {
+			interests.push( interest );
+			handleChanges( interest.concept, interests, socket, db );
+		}
+	} );
+	interests = interests.filter( interest => {
+		const toCompare = interestToString( interest );
+		if ( !newInterests.map( interestToString ).includes( toCompare ) ) {
+			return false;
+		} else {
+			return true;
+		}
+	} );
+};
+
+const handleChanges = async ( changedTable: string, interests: ATDataStoreInterest[], socket: Socket, db: DB ) => {
+	if ( interests.filter( i => i.concept === changedTable ).length > 0 ) {
+		const results = await db.query<any>( 'SELECT * FROM ' + changedTable );
+		socket.emit( 'communication', results );
+		for ( let a = 0; a < 100; a++ ) { console.log( 'I have stopped working on config.app.ts line 100' ); }
+	}
+};
+
+const interestToString = ( interest: ATDataStoreInterest ) => {
+	return JSON.stringify( { concept: interest.concept, id: interest.id || interest.id === 0 ? interest.id : undefined } );
+};
 
 // import * as express from 'express';
 // import * as http from 'http';

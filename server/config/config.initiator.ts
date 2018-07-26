@@ -60,7 +60,7 @@ export class Initiator {
 			expectedCurrentVersion: -1,
 			operatorFunction: async () => {
 				let currentVersion = 0;
-				const resultSet = await this.db.query<{ version: number }[]>( 'SELECT version FROM currentversion' );
+				const resultSet = await this.db.query<{ version: number }>( 'SELECT version FROM currentversion' );
 				resultSet.result.map( tuple => currentVersion = tuple.version );
 				return currentVersion;
 			},
@@ -110,9 +110,9 @@ export class Initiator {
 		this.steps.push( {
 			expectedCurrentVersion: 41, operatorFunction: async () => {
 				const environmentTypeObject = _.keyBy( EnumToArray( DimeEnvironmentType ), 'label' );
-				const environmentResult = await this.db.query<any[]>( 'SELECT * FROM environments WHERE isconverted = 0' );
+				const environmentResult = await this.db.query<any>( 'SELECT * FROM environments WHERE isconverted = 0' );
 				const environmentList = environmentResult.result;
-				const typeResult = await this.db.query<any[]>( 'SELECT * FROM environmenttypes' );
+				const typeResult = await this.db.query<any>( 'SELECT * FROM environmenttypes' );
 				const typesObject = _.keyBy( typeResult.result, 'id' );
 				for ( const curEnvironment of environmentList ) {
 					curEnvironment.type = environmentTypeObject[typesObject[curEnvironment.type].value].value;
@@ -128,7 +128,7 @@ export class Initiator {
 		this.steps.push( { expectedCurrentVersion: 46, operatorFunction: () => this.utils.tableAddColumn( 'environments', 'credential BIGINT UNSIGNED NULL AFTER identitydomain' ) } );
 		this.steps.push( {
 			expectedCurrentVersion: 47, operatorFunction: async () => {
-				const environmentResult = await this.db.query<ATEnvironment[]>( 'SELECT * FROM environments' );
+				const environmentResult = await this.db.query<ATEnvironment>( 'SELECT * FROM environments' );
 				const environmentList = environmentResult.result;
 
 				for ( const curEnvironment of environmentList ) {
@@ -192,7 +192,7 @@ export class Initiator {
 		} );
 		this.steps.push( {
 			expectedCurrentVersion: 74, operatorFunction: async () => {
-				const settingResult = await this.db.query<any[]>( 'SELECT * FROM settings' );
+				const settingResult = await this.db.query<any>( 'SELECT * FROM settings' );
 				const newSetting: ATSetting = <ATSetting>{ host: '', port: 25 };
 				const rowsToDelete: number[] = [];
 
@@ -213,7 +213,7 @@ export class Initiator {
 		} );
 		this.steps.push( {
 			expectedCurrentVersion: 75, operatorFunction: async () => {
-				const settingResult = await this.db.query<any[]>( 'SELECT * FROM settings' );
+				const settingResult = await this.db.query<any>( 'SELECT * FROM settings' );
 				const newSetting: ATSetting = <ATSetting>{ emailaddress: '' };
 				const rowsToDelete: number[] = [];
 
@@ -232,7 +232,7 @@ export class Initiator {
 		this.steps.push( { expectedCurrentVersion: 78, operatorFunction: () => this.utils.tableAddColumn( 'streams', 'newtype BIGINT UNSIGNED NOT NULL DEFAULT 0 AFTER type' ) } );
 		this.steps.push( {
 			expectedCurrentVersion: 79, operatorFunction: async () => {
-				const streamTypeResult = await this.db.query<any[]>( 'SELECT * FROM streamtypes' );
+				const streamTypeResult = await this.db.query<any>( 'SELECT * FROM streamtypes' );
 				const types = _.keyBy( streamTypeResult.result, 'value' );
 				await this.db.query( 'UPDATE streams SET newtype = ? WHERE type = ?', [ATStreamType.HPDB, types.HPDB.id] );
 				await this.db.query( 'UPDATE streams SET newtype = ? WHERE type = ?', [ATStreamType.RDBT, types.RDBT.id] );
@@ -244,7 +244,7 @@ export class Initiator {
 		this.steps.push( { expectedCurrentVersion: 82, operatorFunction: () => this.db.query( 'UPDATE streamfields SET isDescribed = 1 WHERE stream IN (SELECT id FROM streams WHERE type = ?)', ATStreamType.HPDB ) } );
 		this.steps.push( {
 			expectedCurrentVersion: 83, operatorFunction: async () => {
-				const stepList = await this.db.query<any[]>( 'SELECT * FROM processsteps WHERE type = ?', ATProcessStepType.TargetProcedure );
+				const stepList = await this.db.query<any>( 'SELECT * FROM processsteps WHERE type = ?', ATProcessStepType.TargetProcedure );
 				for ( const row of stepList.result ) {
 					if ( row.details ) {
 						row.details = JSON.parse( row.details.toString() );
@@ -264,9 +264,9 @@ export class Initiator {
 		this.steps.push( { expectedCurrentVersion: 87, operatorFunction: () => this.utils.tableAddColumn( 'users', 'clearance TEXT NULL AFTER surname' ) } );
 		this.steps.push( {
 			expectedCurrentVersion: 88, operatorFunction: async () => {
-				const usersResult = await this.db.query<any[]>( 'SELECT * FROM users' );
+				const usersResult = await this.db.query<any>( 'SELECT * FROM users' );
 				const users = usersResult.result;
-				const assignmentsResult = await this.db.query<any[]>( 'SELECT * FROM userdimeprocesses' );
+				const assignmentsResult = await this.db.query<any>( 'SELECT * FROM userdimeprocesses' );
 				const assignments = assignmentsResult.result;
 				for ( const user of users ) {
 					if ( !user.clearance ) user.clearance = {};
@@ -311,7 +311,7 @@ export class Initiator {
 
 	public findCurrentVersion = async () => {
 		let currentVersion = -1;
-		const resultSet = await this.db.query<{ version: number }[]>( 'SELECT version FROM currentversion' );
+		const resultSet = await this.db.query<{ version: number }>( 'SELECT version FROM currentversion' );
 		resultSet.result.map( tuple => currentVersion = tuple.version );
 		return currentVersion;
 	}

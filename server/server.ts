@@ -10,16 +10,14 @@ const numCPUs = configuration.numberofCPUs ? configuration.numberofCPUs : cpus()
 
 const currentTimeStamp = Math.floor( Math.random() * Math.floor( 2 ** 32 - 1 ) );
 
-console.log( '>>>', currentTimeStamp, 2 ** 32 );
-
 const db: DB = new DB( configuration.mysql, currentTimeStamp );
 
 if ( cluster.isMaster ) {
 	let cronerpid: number;
 
-	interface ApplicationEnvironmentProperties { isCroner: boolean; }
-	const croner_env: ApplicationEnvironmentProperties = { isCroner: true };
-	const worker_env: ApplicationEnvironmentProperties = { isCroner: false };
+	interface ApplicationEnvironmentProperties { isCroner: boolean, isWorker: boolean }
+	const croner_env: ApplicationEnvironmentProperties = { isCroner: true, isWorker: false };
+	const worker_env: ApplicationEnvironmentProperties = { isCroner: false, isWorker: true };
 
 	const initiator = new Initiator( db, configuration );
 	initiator.initiate().then( () => {

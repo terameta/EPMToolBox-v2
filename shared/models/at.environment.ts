@@ -21,3 +21,14 @@ export interface ATEnvironmentDetail extends ATEnvironment {
 	username: string,
 	password: string
 }
+
+export interface ATEnvironmentSubject {
+	[key: number]: ATEnvironment | ATEnvironmentDetail
+}
+
+export interface ATEnvironmentConcept {
+	subject: ATEnvironmentSubject,
+	ids: number[]
+}
+
+export const ATEnvironmentConceptDefault = (): ATEnvironmentConcept => ( { subject: {}, ids: [] } );

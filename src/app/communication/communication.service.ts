@@ -5,10 +5,11 @@ import { configuration } from '../../../server/system.conf';
 import { AuthService } from '../auth/auth.service';
 import { DataStoreService } from '../data-store/data-store.service';
 import { withLatestFrom, map, filter } from 'rxjs/operators';
-import { BehaviorSubject } from '../../../node_modules/rxjs';
+import { BehaviorSubject, Subscription } from '../../../node_modules/rxjs';
 import { ATUser } from 'shared/models/at.user';
 import { ATApiCommunication } from 'shared/models/at.socketrequest';
 import { CentralStatusService } from '../central-status.service';
+import { ATDataStoreInterest } from '../../../shared/models/at.datastoreinterest';
 
 @Injectable( {
 	providedIn: 'root'
@@ -17,6 +18,7 @@ export class CommunicationService {
 	public baseURL = '';
 	public socket;
 	public isConnected$ = new BehaviorSubject<boolean>( false );
+	private interestSubscription: Subscription;
 
 	constructor(
 		platformLocation: PlatformLocation,
@@ -33,9 +35,14 @@ export class CommunicationService {
 		this.socket.on( 'connect', () => {
 			// console.log( 'Client side socket is connected', this.socket.id );
 			this.isConnected$.next( true );
+			this.interestSubscription = this.ds.interests$.subscribe( this.showInterest );
 		} );
 		this.socket.on( 'disconnect', () => {
 			// console.log( 'Client side socket is disconnected', this.socket.id );
+			if ( this.interestSubscription ) {
+				this.interestSubscription.unsubscribe();
+				this.interestSubscription = null;
+			}
 			this.isConnected$.next( false );
 		} );
 		this.socket.on( 'communication', ( response: ATApiCommunication ) => {
@@ -87,5 +94,9 @@ export class CommunicationService {
 		console.log( 'Payload Result:', response.payload.data );
 		console.log( '===========================================' );
 		console.log( '===========================================' );
+	}
+
+	private showInterest = ( payload: ATDataStoreInterest[] ) => {
+		this.socket.emit( 'interest', payload );
 	}
 }

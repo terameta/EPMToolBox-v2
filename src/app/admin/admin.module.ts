@@ -2,12 +2,13 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AdminNavbarComponent } from './admin-navbar/admin-navbar.component';
 import { AdminFrontPageComponent } from './admin-front-page/admin-front-page.component';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 import { CollapseModule } from '../../../node_modules/ngx-bootstrap/collapse';
 import { AdminComponent } from './admin/admin.component';
 
-const routes = [
-	{ path: '', component: AdminFrontPageComponent }
+const routes: Routes = [
+	{ path: '', component: AdminFrontPageComponent },
+	{ path: 'environments', loadChildren: './environments/environments.module#EnvironmentsModule' }
 ];
 
 @NgModule( {
