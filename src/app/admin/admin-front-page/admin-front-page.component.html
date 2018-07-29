@@ -1,5 +1,5 @@
 <div class="container-fluid">
-	<div class="row py-3">
+	<div class="row pb-3 pt-5">
 		<div class="col-3">
 			<div class="card text-center" routerLink="environments">
 				<div class="card-header">
@@ -9,8 +9,7 @@
 					</h5>
 				</div>
 				<div class="card-body">
-					<p class="card-text">Stats</p>
-					<pre>{{environments | json}}</pre>
+					<p class="card-text">{{verifiedEnvironments}} of {{environments.ids.length}} are verified.</p>
 				</div>
 			</div>
 		</div>
@@ -23,8 +22,7 @@
 					</h5>
 				</div>
 				<div class="card-body">
-					<p class="card-text">Stats</p>
-					<pre>{{streams | json}}</pre>
+					<p class="card-text">{{streams.ids.length}} streams exist.</p>
 				</div>
 			</div>
 		</div>
@@ -37,7 +35,7 @@
 					</h5>
 				</div>
 				<div class="card-body">
-					<p class="card-text">Stats</p>
+					<p class="card-text">{{maps.ids.length}} maps exist.</p>
 				</div>
 			</div>
 		</div>

@@ -21,25 +21,30 @@ export class DB {
 		}
 	}
 
-	public query = <T>( queryToExecute: string, queryArguments?: any ): Promise<{ result: T[], fields: FieldInfo[] }> => {
+	public query = <T>( queryToExecute: string, queryArguments?: any ): Promise<{ tuples: T[], fields: FieldInfo[] }> => {
 		return new Promise( ( resolve, reject ) => {
 			if ( queryArguments !== undefined ) {
-				this.pool.query( queryToExecute, queryArguments, ( err, result: T[], fields ) => {
+				this.pool.query( queryToExecute, queryArguments, ( err, tuples: T[], fields ) => {
 					if ( err ) {
 						reject( err );
 					} else {
-						resolve( { result, fields } );
+						resolve( { tuples, fields } );
 					}
 				} );
 			} else {
-				this.pool.query( queryToExecute, ( err, result: T[], fields ) => {
+				this.pool.query( queryToExecute, ( err, tuples: T[], fields ) => {
 					if ( err ) {
 						reject( err );
 					} else {
-						resolve( { result, fields } );
+						resolve( { tuples, fields } );
 					}
 				} );
 			}
 		} );
+	}
+	public queryOne = async <T>( queryToExecute: string, queryArguments?: any ): Promise<{ tuple: T, fields: FieldInfo[] }> => {
+		const { tuples, fields } = await this.query<T>( queryToExecute, queryArguments );
+		if ( tuples.length !== 1 ) throw new Error( 'Wrong number of records. 1 expected' );
+		return { tuple: tuples[0], fields };
 	}
 }

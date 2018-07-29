@@ -61,7 +61,7 @@ export class Initiator {
 			operatorFunction: async () => {
 				let currentVersion = 0;
 				const resultSet = await this.db.query<{ version: number }>( 'SELECT version FROM currentversion' );
-				resultSet.result.map( tuple => currentVersion = tuple.version );
+				resultSet.tuples.map( tuple => currentVersion = tuple.version );
 				return currentVersion;
 			},
 			shouldSetVersion: true
@@ -111,9 +111,9 @@ export class Initiator {
 			expectedCurrentVersion: 41, operatorFunction: async () => {
 				const environmentTypeObject = _.keyBy( EnumToArray( DimeEnvironmentType ), 'label' );
 				const environmentResult = await this.db.query<any>( 'SELECT * FROM environments WHERE isconverted = 0' );
-				const environmentList = environmentResult.result;
+				const environmentList = environmentResult.tuples;
 				const typeResult = await this.db.query<any>( 'SELECT * FROM environmenttypes' );
-				const typesObject = _.keyBy( typeResult.result, 'id' );
+				const typesObject = _.keyBy( typeResult.tuples, 'id' );
 				for ( const curEnvironment of environmentList ) {
 					curEnvironment.type = environmentTypeObject[typesObject[curEnvironment.type].value].value;
 					curEnvironment.isconverted = 1;
@@ -129,7 +129,7 @@ export class Initiator {
 		this.steps.push( {
 			expectedCurrentVersion: 47, operatorFunction: async () => {
 				const environmentResult = await this.db.query<ATEnvironment>( 'SELECT * FROM environments' );
-				const environmentList = environmentResult.result;
+				const environmentList = environmentResult.tuples;
 
 				for ( const curEnvironment of environmentList ) {
 
@@ -169,7 +169,7 @@ export class Initiator {
 		this.steps.push( {
 			expectedCurrentVersion: 71, operatorFunction: async () => {
 				const queryResult = await this.db.query<any[]>( 'SELECT * FROM settings WHERE name = \'emailserverhost\'' );
-				if ( queryResult.result.length === 0 ) {
+				if ( queryResult.tuples.length === 0 ) {
 					await this.db.query( 'INSERT INTO settings (name, value) VALUES (\'emailserverhost\', \'\')' );
 				}
 			}
@@ -177,7 +177,7 @@ export class Initiator {
 		this.steps.push( {
 			expectedCurrentVersion: 72, operatorFunction: async () => {
 				const queryResult = await this.db.query<any[]>( 'SELECT * FROM settings WHERE name = \'emailserverport\'' );
-				if ( queryResult.result.length === 0 ) {
+				if ( queryResult.tuples.length === 0 ) {
 					await this.db.query( 'INSERT INTO settings (name, value) VALUES (\'emailserverport\', \'\')' );
 				}
 			}
@@ -185,7 +185,7 @@ export class Initiator {
 		this.steps.push( {
 			expectedCurrentVersion: 73, operatorFunction: async () => {
 				const queryResult = await this.db.query<any[]>( 'SELECT * FROM settings WHERE name = \'systemadminemailaddress\'' );
-				if ( queryResult.result.length === 0 ) {
+				if ( queryResult.tuples.length === 0 ) {
 					await this.db.query( 'INSERT INTO settings (name, value) VALUES (\'systemadminemailaddress\', \'\')' );
 				}
 			}
@@ -196,7 +196,7 @@ export class Initiator {
 				const newSetting: ATSetting = <ATSetting>{ host: '', port: 25 };
 				const rowsToDelete: number[] = [];
 
-				settingResult.result.forEach( row => {
+				settingResult.tuples.forEach( row => {
 					if ( row.name === 'emailserverhost' ) {
 						newSetting.host = row.value;
 						if ( !newSetting.host ) { newSetting.host = ''; }
@@ -217,7 +217,7 @@ export class Initiator {
 				const newSetting: ATSetting = <ATSetting>{ emailaddress: '' };
 				const rowsToDelete: number[] = [];
 
-				settingResult.result.forEach( row => {
+				settingResult.tuples.forEach( row => {
 					if ( row.name === 'systemadminemailaddress' ) {
 						newSetting.emailaddress = row.value;
 						rowsToDelete.push( row.id );
@@ -233,7 +233,7 @@ export class Initiator {
 		this.steps.push( {
 			expectedCurrentVersion: 79, operatorFunction: async () => {
 				const streamTypeResult = await this.db.query<any>( 'SELECT * FROM streamtypes' );
-				const types = _.keyBy( streamTypeResult.result, 'value' );
+				const types = _.keyBy( streamTypeResult.tuples, 'value' );
 				await this.db.query( 'UPDATE streams SET newtype = ? WHERE type = ?', [ATStreamType.HPDB, types.HPDB.id] );
 				await this.db.query( 'UPDATE streams SET newtype = ? WHERE type = ?', [ATStreamType.RDBT, types.RDBT.id] );
 				await this.db.query( 'UPDATE streams SET type = newtype' );
@@ -245,7 +245,7 @@ export class Initiator {
 		this.steps.push( {
 			expectedCurrentVersion: 83, operatorFunction: async () => {
 				const stepList = await this.db.query<any>( 'SELECT * FROM processsteps WHERE type = ?', ATProcessStepType.TargetProcedure );
-				for ( const row of stepList.result ) {
+				for ( const row of stepList.tuples ) {
 					if ( row.details ) {
 						row.details = JSON.parse( row.details.toString() );
 						if ( row.details.type === 'Rules' ) {
@@ -265,9 +265,9 @@ export class Initiator {
 		this.steps.push( {
 			expectedCurrentVersion: 88, operatorFunction: async () => {
 				const usersResult = await this.db.query<any>( 'SELECT * FROM users' );
-				const users = usersResult.result;
+				const users = usersResult.tuples;
 				const assignmentsResult = await this.db.query<any>( 'SELECT * FROM userdimeprocesses' );
-				const assignments = assignmentsResult.result;
+				const assignments = assignmentsResult.tuples;
 				for ( const user of users ) {
 					if ( !user.clearance ) user.clearance = {};
 					user.clearance.processes = assignments.filter( a => a.user === user.id ).map( a => ( { id: a.process } ) );
@@ -312,7 +312,7 @@ export class Initiator {
 	public findCurrentVersion = async () => {
 		let currentVersion = -1;
 		const resultSet = await this.db.query<{ version: number }>( 'SELECT version FROM currentversion' );
-		resultSet.result.map( tuple => currentVersion = tuple.version );
+		resultSet.tuples.map( tuple => currentVersion = tuple.version );
 		return currentVersion;
 	}
 }

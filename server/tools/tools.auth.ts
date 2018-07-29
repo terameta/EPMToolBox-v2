@@ -46,13 +46,13 @@ export class AuthTool {
 
 	private authenticate = async ( payload: { username: string, password: string } ) => {
 		const fixedUserName = escape( payload.username.toString().toLowerCase() );
-		const { result } = await this.db.query<ATUser>( 'SELECT * FROM users WHERE username = ?', fixedUserName );
-		if ( result.length === 0 ) {
+		const { tuples } = await this.db.query<ATUser>( 'SELECT * FROM users WHERE username = ?', fixedUserName );
+		if ( tuples.length === 0 ) {
 			return new Error( 'Authentication failed.' );
-		} else if ( result.length > 1 ) {
+		} else if ( tuples.length > 1 ) {
 			return new Error( 'Multiple users are defined with the same username. Please consult with system admin.' );
 		} else {
-			const dbUser = result[0];
+			const dbUser = tuples[0];
 			if ( dbUser.type === 'local' ) {
 				return this.authenticateWithLocal( payload.password, dbUser );
 			} else if ( dbUser.type === 'directory' ) {

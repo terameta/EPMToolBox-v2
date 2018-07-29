@@ -3,11 +3,13 @@ import { MainTools } from '../tools/tools.main';
 import { Socket } from 'socket.io';
 import { AuthTool } from '../tools/tools.auth';
 import { ATApiCommunication } from '../../shared/models/at.socketrequest';
+import { EnvironmentTool } from '../tools/tools.environment';
 
 
 
 interface Backend {
-	auth: AuthTool
+	auth: AuthTool,
+	environments: EnvironmentTool
 }
 
 
@@ -19,15 +21,16 @@ export class ATApi {
 		private tools: MainTools
 	) {
 		this.backend.auth = new AuthTool( db, tools );
+		this.backend.environments = new EnvironmentTool( db, tools );
 	}
 
 	public respond = async ( request: ATApiCommunication, socket: Socket ) => {
-		console.log( '===========================================' );
-		console.log( 'We are at respond' );
-		console.log( '===========================================' );
-		console.log( request );
-		console.log( '===========================================' );
-		console.log( '===========================================' );
+		// console.log( '===========================================' );
+		// console.log( 'We are at respond' );
+		// console.log( '===========================================' );
+		// console.log( request );
+		// console.log( '===========================================' );
+		// console.log( '===========================================' );
 		const payload = await this.backend[request.framework][request.action]( request.payload ).catch( e => this.respondFinalize( request, socket, 'error', e ) );
 		if ( payload ) this.respondFinalize( request, socket, 'success', payload );
 	}

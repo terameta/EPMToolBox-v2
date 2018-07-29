@@ -15,6 +15,7 @@ import { ATApi } from '../api/api';
 import { ATDataStoreInterest } from '../../shared/models/at.datastoreinterest';
 import { Subscription } from 'rxjs';
 import { Socket } from 'socket.io';
+import { ATApiCommunication } from 'shared/models/at.socketrequest';
 
 export function initiateApplicationWorker( refDB: DB, refConfig: SystemConfig ) {
 	const app: express.Application = express();
@@ -43,18 +44,31 @@ export function initiateApplicationWorker( refDB: DB, refConfig: SystemConfig ) 
 	} );
 
 	setInterval( () => {
-		refDB.query( 'DELETE FROM logs LIMIT 1' );
+		refDB.query( 'INSERT INTO streams (name, type, environment, dbName, tableName, customQuery, tags, exports) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', ['deleteMe', 0, 0, 'dbName', 'tableName', 'customQuery', '', ''] );
+	}, 30000 );
+
+	setTimeout( () => {
+		setInterval( () => {
+			refDB.query( 'UPDATE streams SET dbName = ? WHERE name = ?', ['theDBName', 'deleteMe'] );
+		}, 30000 );
 	}, 10000 );
+
+	setTimeout( () => {
+		setInterval( () => {
+			refDB.query( 'DELETE FROM streams WHERE name = ?', 'deleteMe' );
+		}, 30000 );
+	}, 20000 );
 
 
 	io.on( 'connection', ( socket ) => {
-		const interests: ATDataStoreInterest[] = [];
-		const changeSubscription: Subscription = refDB.rtdb.changes$.subscribe( c => console.log( 'RTDB Change detected on changes$,', c ) );
 		// console.log( 'a user connected' );
 		// console.log( socket.client.id );
+		const interests: ATDataStoreInterest[] = [];
+		const changeSubscription: Subscription = refDB.rtdb.changes$.subscribe( ( changedTable: string ) => { handleChanges( changedTable, interests, socket, refDB ); } );
+		// console.log( 'We have now subscribed to changes$ on rtdb' );
 		// console.log( socket );
 		socket.on( 'disconnect', () => {
-			console.log( 'user disconnected' );
+			// console.log( 'user disconnected' );
 			changeSubscription.unsubscribe();
 		} );
 		socket.on( 'communication', ( payload ) => {
@@ -65,8 +79,6 @@ export function initiateApplicationWorker( refDB: DB, refConfig: SystemConfig ) 
 		} );
 
 	} );
-
-	for ( let a = 0; a < 100; a++ ) { console.log( 'I have stopped working on config.app.ts line 100' ); }
 
 	server.listen( refConfig.serverPort, () => {
 		console.log( 'Server is now running on port ' + refConfig.serverPort );
@@ -97,9 +109,16 @@ const handleInterests = async ( interests: ATDataStoreInterest[], newInterests: 
 
 const handleChanges = async ( changedTable: string, interests: ATDataStoreInterest[], socket: Socket, db: DB ) => {
 	if ( interests.filter( i => i.concept === changedTable ).length > 0 ) {
-		const results = await db.query<any>( 'SELECT * FROM ' + changedTable );
-		socket.emit( 'communication', results );
-		for ( let a = 0; a < 100; a++ ) { console.log( 'I have stopped working on config.app.ts line 100' ); }
+		const { tuples } = await db.query<any>( 'SELECT * FROM ' + changedTable );
+		const packet: ATApiCommunication = <ATApiCommunication>{};
+		packet.framework = changedTable;
+		packet.action = 'refresh';
+		packet.payload = {
+			status: 'success',
+			data: tuples
+		};
+		// console.log( 'We are at handleChanges', changedTable, '#Tuples:', tuples.length );
+		socket.emit( 'communication', packet );
 	}
 };
 

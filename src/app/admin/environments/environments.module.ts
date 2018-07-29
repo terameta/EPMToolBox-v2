@@ -1,18 +1,32 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { EnvironmentsComponent } from './environments/environments.component';
+import { FormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
 
+import { EnvironmentsComponent } from './environments/environments.component';
+import { EnvironmentsToolbarComponent } from './environments-toolbar/environments-toolbar.component';
+import { EnvironmentDetailComponent } from './environment-detail/environment-detail.component';
+
 const routes: Routes = [
-	{ path: '', component: EnvironmentsComponent }
+	{
+		path: '', component: EnvironmentsComponent, children: [
+			{ path: ':id', component: EnvironmentDetailComponent }
+		]
+	},
+
 ];
 
 
 @NgModule( {
 	imports: [
 		CommonModule,
+		FormsModule,
 		RouterModule.forChild( routes )
 	],
-	declarations: [EnvironmentsComponent]
+	declarations: [
+		EnvironmentsComponent,
+		EnvironmentsToolbarComponent,
+		EnvironmentDetailComponent
+	]
 } )
 export class EnvironmentsModule { }

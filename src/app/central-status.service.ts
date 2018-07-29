@@ -15,6 +15,9 @@ export class CentralStatusService {
 
 	public notifications$ = new BehaviorSubject<ATNotification[]>( [] );
 
+	public currentComponent = '';
+	public currentID = 0;
+
 	private urlsToHideHeader = [
 		'/signin',
 		'/signup'
@@ -57,6 +60,18 @@ export class CentralStatusService {
 				}
 			}
 		}
+		const urlSegments = url.split( '/' );
+		if ( urlSegments.length < 3 ) {
+			this.currentComponent = '';
+		} else {
+			this.currentComponent = urlSegments[2];
+			if ( urlSegments.length < 4 ) {
+				this.currentID = 0;
+			} else {
+				this.currentID = parseInt( urlSegments[3], 10 );
+			}
+		}
+		console.log( url );
 	}
 
 	public notificationAdd = ( payload: ATNotification ) => this.notifications$.next( this.notifications$.getValue().concat( [{ ...newATNotification(), ...payload }] ) );

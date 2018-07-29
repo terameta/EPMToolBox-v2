@@ -4,8 +4,8 @@ import { PlatformLocation } from '@angular/common';
 import { configuration } from '../../../server/system.conf';
 import { AuthService } from '../auth/auth.service';
 import { DataStoreService } from '../data-store/data-store.service';
-import { withLatestFrom, map, filter } from 'rxjs/operators';
-import { BehaviorSubject, Subscription } from '../../../node_modules/rxjs';
+import { withLatestFrom, map, filter, debounce } from 'rxjs/operators';
+import { BehaviorSubject, Subscription, timer } from 'rxjs';
 import { ATUser } from 'shared/models/at.user';
 import { ATApiCommunication } from 'shared/models/at.socketrequest';
 import { CentralStatusService } from '../central-status.service';
@@ -35,7 +35,7 @@ export class CommunicationService {
 		this.socket.on( 'connect', () => {
 			// console.log( 'Client side socket is connected', this.socket.id );
 			this.isConnected$.next( true );
-			this.interestSubscription = this.ds.interests$.subscribe( this.showInterest );
+			this.interestSubscription = this.ds.interests$.pipe( debounce( () => timer( 500 ) ) ).subscribe( this.showInterest );
 		} );
 		this.socket.on( 'disconnect', () => {
 			// console.log( 'Client side socket is disconnected', this.socket.id );
@@ -51,7 +51,7 @@ export class CommunicationService {
 				if ( response.framework === 'auth' ) {
 					this.as[response.action]( response.payload );
 				} else {
-					// this.ds.react( response );
+					this.ds.react( response );
 				}
 			} else if ( response.payload.status === 'error' ) {
 				console.log( 'Here we should handle with central status service.' );
@@ -71,7 +71,7 @@ export class CommunicationService {
 		} );
 	}
 
-	private communicate = ( payload: ATApiCommunication ) => {
+	public communicate = ( payload: ATApiCommunication ) => {
 		this.socket.emit( 'communication', { token: this.as.encodedToken, ...payload } );
 	}
 

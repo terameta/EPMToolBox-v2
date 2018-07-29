@@ -1,4 +1,4 @@
 export interface ATDataStoreInterest {
-	concept: 'environments' | 'streams',
+	concept: 'environments' | 'streams' | 'maps' | 'tags' | 'taggroups',
 	id?: number
 }

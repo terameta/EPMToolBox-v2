@@ -27,10 +27,10 @@ export class RealtimeDB {
 
 		this.backendDB.on( 'binlog', ( event ) => {
 			if ( event.getEventName() !== 'tablemap' ) {
-				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-				console.log( process.pid, 'isCroner:', process.env.isCroner, 'Event Name:', event.getEventName() );
-				console.log( process.pid, 'isCroner:', process.env.isCroner, 'Table ID:', event.tableId );
-				console.log( process.pid, 'isCroner:', process.env.isCroner, 'Table Name:', event.tableMap[event.tableId].tableName );
+				// console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+				// console.log( process.pid, 'isCroner:', process.env.isCroner, 'Event Name:', event.getEventName() );
+				// console.log( process.pid, 'isCroner:', process.env.isCroner, 'Table ID:', event.tableId );
+				// console.log( process.pid, 'isCroner:', process.env.isCroner, 'Table Name:', event.tableMap[event.tableId].tableName );
 				this.changes$.next( event.tableMap[event.tableId].tableName );
 			}
 		} );

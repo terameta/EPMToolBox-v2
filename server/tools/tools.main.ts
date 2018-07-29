@@ -58,6 +58,21 @@ export class MainTools {
 		} );
 	}
 
+	public jsonParseIf( payload: string ) {
+		if ( payload ) {
+			return JSON.parse( payload );
+		} else {
+			return {};
+		}
+	}
+	public jsonStringifyIf( payload: any ) {
+		if ( payload ) {
+			return JSON.stringify( payload );
+		} else {
+			return '{}';
+		}
+	}
+
 	public isEmptyObject = ( refObj: any ) => {
 		return Object.keys( refObj ).length === 0;
 	}
