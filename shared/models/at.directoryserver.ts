@@ -1,3 +1,7 @@
+import { ATStoreClass } from './at.storeconcept';
+
+export class ATTagGroupClass extends ATStoreClass<ATDirectoryServer> { }
+
 export interface ATDirectoryServer {
 	id: number,
 	name: string,

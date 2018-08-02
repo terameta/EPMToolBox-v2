@@ -5,6 +5,7 @@ import { AdminFrontPageComponent } from './admin-front-page/admin-front-page.com
 import { RouterModule, Routes } from '@angular/router';
 import { CollapseModule } from '../../../node_modules/ngx-bootstrap/collapse';
 import { AdminComponent } from './admin/admin.component';
+import { AdminSharedModule } from './admin-shared/admin-shared.module';
 
 const routes: Routes = [
 	{ path: '', component: AdminFrontPageComponent },
@@ -15,7 +16,8 @@ const routes: Routes = [
 	imports: [
 		CommonModule,
 		RouterModule.forChild( routes ),
-		CollapseModule
+		CollapseModule,
+		AdminSharedModule
 	],
 	declarations: [
 		AdminNavbarComponent,

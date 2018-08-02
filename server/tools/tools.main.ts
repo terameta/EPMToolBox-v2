@@ -3,6 +3,7 @@ import * as jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
 import * as crypto from 'crypto';
 import { SystemConfig } from 'shared/models/systemconfig';
+import { ATTuple } from 'shared/models/at.tuple';
 
 export class MainTools {
 	// config: any;
@@ -46,6 +47,9 @@ export class MainTools {
 		toReturn += ( '0' + curDate.getSeconds().toString() ).substr( -2 );
 		return toReturn;
 	}
+
+	public prepareTupleToRead = <T>( payload: ATTuple ): T => <T>( Object.assign( { id: payload.id }, this.jsonParseIf( payload.details ) ) );
+	public prepareTupleToWrite = ( payload ): ATTuple => Object.assign( <ATTuple>{}, { id: payload.id, details: this.jsonStringifyIf( payload ) } );
 
 	public parseJsonString( toParse: string ) {
 		return new Promise( ( resolve, reject ) => {

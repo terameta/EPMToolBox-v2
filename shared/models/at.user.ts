@@ -1,3 +1,7 @@
+import { ATStoreClass } from './at.storeconcept';
+
+export class ATUserClass extends ATStoreClass<ATUser> { }
+
 export interface ATUser {
 	id: number,
 	name: string,

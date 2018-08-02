@@ -38,7 +38,6 @@ export class RealtimeDB {
 		this.backendDB.on( 'error', ( error, a, b, c ) => {
 			console.error( 'There is a ZongJi error' );
 			console.error( error );
-			console.error( a, b, c );
 		} );
 
 		this.backendDB.start( {

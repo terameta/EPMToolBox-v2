@@ -4,7 +4,7 @@ import { cpus } from 'os';
 import { DB } from './tools/tools.db';
 import { Initiator } from './config/config.initiator';
 import { InitiateCronWorker } from './config/config.croner';
-import { initiateApplicationWorker } from './config/config.app';
+import { ApplicationWorker } from './config/config.app';
 
 const numCPUs = configuration.numberofCPUs ? configuration.numberofCPUs : cpus().length;
 
@@ -63,7 +63,7 @@ if ( cluster.isMaster ) {
 	if ( process.env.isCroner === 'true' ) {
 		const cronWorker = new InitiateCronWorker( db, configuration );
 	} else {
-		initiateApplicationWorker( db, configuration );
+		const appWorker = new ApplicationWorker( db, configuration );
 	}
 }
 

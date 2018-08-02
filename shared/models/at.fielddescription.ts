@@ -1,6 +1,7 @@
 export interface ATFieldDescription {
 	RefField: string,
-	Description: string
+	Description: string,
+	parent: string
 }
 
 export interface ATFieldDescriptionsMap {

@@ -1,3 +1,9 @@
+// This is a generator function for sorting
+export function SortByProperty( property: string ) {
+	return function sorter( e1: any, e2: any ) {
+		if ( e1[property] > e2[property] ) { return 1; } else if ( e1[property] < e2[property] ) { return -1; } else { return 0; }
+	};
+}
 export function SortByName( e1: any, e2: any ) { if ( e1.name > e2.name ) { return 1; } else if ( e1.name < e2.name ) { return -1; } else { return 0; } }
 export function SortByDate( e1: any, e2: any ) { if ( e1.date > e2.date ) { return 1; } else if ( e1.date < e2.date ) { return -1; } else { return 0; } }
 export function SortByDateDesc( e1: any, e2: any ) { if ( e1.date > e2.date ) { return -1; } else if ( e1.date < e2.date ) { return 1; } else { return 0; } }

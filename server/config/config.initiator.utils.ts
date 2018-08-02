@@ -111,8 +111,8 @@ export class InitiatorUtils {
 				if ( err ) {
 					reject( err );
 				} else {
-					const versionToLog = ( '0000' + newVersion ).substr( -4 );
-					console.log( '=== Database is upgraded to version ' + versionToLog + '    ===' );
+					const versionToLog = ( '00000' + newVersion ).substr( -5 );
+					console.log( '=== Database is upgraded to version ' + versionToLog + '   ===' );
 					resolve( newVersion );
 				}
 			} );

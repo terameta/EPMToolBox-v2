@@ -1,17 +1,55 @@
 import { MainTools } from './tools.main';
 import { DB } from './tools.db';
-import { ATEnvironment, ATEnvironmentOnDB } from 'shared/models/at.environment';
+import { ATEnvironment, ATEnvironmentDetail } from 'shared/models/at.environment';
+import { ATTuple } from 'shared/models/at.tuple';
+import { CredentialTool } from './tools.credential';
 
 export class EnvironmentTool {
-	constructor( private db: DB, private tools: MainTools ) { }
+	private credentialTool: CredentialTool;
 
-	public getAll = async () => {
-		const { tuples } = await this.db.query<ATEnvironmentOnDB>( 'SELECT * FROM environments' );
-		return tuples.map( this.prepareTupleToRead );
+	constructor( private db: DB, private tools: MainTools ) {
+		this.credentialTool = new CredentialTool( db, tools );
 	}
 
-	private prepareTupleToRead = ( payload: ATEnvironmentOnDB ): ATEnvironment => Object.assign( <ATEnvironment>{}, payload, { tags: this.tools.jsonParseIf( payload.tags ) } );
-	private prepareTupleToWrite = ( payload: ATEnvironment ): ATEnvironmentOnDB => Object.assign( <ATEnvironmentOnDB>{}, payload, { tags: this.tools.jsonStringifyIf( payload.tags ) } );
+	public getAll = async (): Promise<ATEnvironment[]> => {
+		const { tuples } = await this.db.query<ATTuple>( 'SELECT * FROM environments' );
+		return tuples.map( t => this.tools.prepareTupleToRead<ATEnvironment>( t ) );
+	}
+
+	public getOne = ( id: number ) => this.getEnvironmentDetails( id );
+
+	public create = async (): Promise<ATEnvironment> => {
+		const newEnvironment = <ATEnvironment>{ name: 'New Environment' };
+		const result = await this.db.queryOne<any>( 'INSERT INTO environments SET ?', this.tools.prepareTupleToWrite( newEnvironment ) );
+		newEnvironment.id = result.tuple.insertId;
+		return newEnvironment;
+	}
+
+	public update = async ( payload: ATEnvironmentDetail ) => {
+		delete payload.database;
+		delete payload.table;
+		delete payload.connection;
+		delete payload.query;
+		delete payload.procedure;
+		delete payload.username;
+		delete payload.password;
+		await this.db.queryOne( 'UPDATE environments SET ? WHERE id = ?', [this.tools.prepareTupleToWrite( payload ), payload.id] );
+	}
+
+	public delete = async ( id: number ) => {
+		await this.db.query( 'DELETE FROM environments WHERE id = ?', id );
+	}
+
+	public getEnvironmentDetails = async ( id: number, reveal = false ): Promise<ATEnvironmentDetail> => {
+		const { tuple } = await this.db.queryOne<ATTuple>( 'SELECT * FROM environments WHERE id = ?', id );
+		const toReturn = this.tools.prepareTupleToRead<ATEnvironmentDetail>( tuple );
+		if ( reveal ) {
+			const { username, password } = await this.credentialTool.getCredentialDetails( toReturn.credential, true );
+			toReturn.username = username;
+			toReturn.password = password;
+		}
+		return toReturn;
+	}
 }
 // import { DB } from './tools.db';
 
@@ -32,79 +70,6 @@ export class EnvironmentTool {
 // 		this.sourceTools[DimeEnvironmentType.MSSQL] = new MSSQLTools( this.tools );
 
 // 		this.credentialTool = new CredentialTools( this.db, this.tools );
-// 	}
-
-
-// 	public getOne = ( id: number ) => {
-// 		return this.getEnvironmentDetails( <DimeEnvironmentDetail>{ id: id } );
-// 	}
-
-// 	public getEnvironmentDetails = ( refObj: DimeEnvironmentDetail, shouldShowPassword?: boolean ): Promise<DimeEnvironmentDetail | DimeEnvironmentDetailWithCredentials> => {
-// 		return new Promise( ( resolve, reject ) => {
-// 			this.db.query( 'SELECT * FROM environments WHERE id = ?', refObj.id, ( err, rows: DimeEnvironmentDetail[], fields ) => {
-// 				if ( err ) {
-// 					reject( err.code );
-// 				} else if ( rows.length !== 1 ) {
-// 					reject( 'Wrong number of records' );
-// 				} else {
-// 					if ( rows[0].tags ) {
-// 						rows[0].tags = JSON.parse( rows[0].tags );
-// 					} else {
-// 						rows[0].tags = {};
-// 					}
-// 					if ( shouldShowPassword ) {
-// 						this.credentialTool.getCredentialDetails( <DimeCredential>{ id: rows[0].credential }, true )
-// 							.then( ( curCredential ) => {
-// 								const environmentToReturn: DimeEnvironmentDetailWithCredentials = Object.assign( <DimeEnvironmentDetailWithCredentials>{}, rows[0] );
-// 								environmentToReturn.username = curCredential.username;
-// 								environmentToReturn.password = curCredential.password;
-// 								resolve( environmentToReturn );
-// 							} )
-// 							.catch( reject );
-// 					} else {
-// 						resolve( rows[0] );
-// 					}
-// 				}
-// 			} );
-// 		} );
-// 	}
-
-// 	public create = () => {
-// 		const newEnv = { name: 'New Environment', type: 0, server: '', port: '' };
-// 		return new Promise( ( resolve, reject ) => {
-// 			this.db.query( 'INSERT INTO environments SET ?', newEnv, function ( err, result, fields ) {
-// 				if ( err ) {
-// 					reject( { error: err, message: 'Failed to create a new environment.' } );
-// 				} else {
-// 					resolve( { id: result.insertId } );
-// 				}
-// 			} );
-// 		} );
-// 	}
-
-// 	public update = ( refItem: DimeEnvironment ) => {
-// 		return new Promise( ( resolve, reject ) => {
-// 			refItem.tags = JSON.stringify( refItem.tags );
-// 			this.db.query( 'UPDATE environments SET ? WHERE id = ?', [refItem, refItem.id], function ( err, result, fields ) {
-// 				if ( err ) {
-// 					reject( { error: err, message: 'Failed to update the environment' } );
-// 				} else {
-// 					resolve( refItem );
-// 				}
-// 			} );
-// 		} );
-// 	}
-
-// 	public delete = ( id: number ) => {
-// 		return new Promise( ( resolve, reject ) => {
-// 			this.db.query( 'DELETE FROM environments WHERE id = ?', id, ( err, result, fields ) => {
-// 				if ( err ) {
-// 					reject( { error: err, message: 'Failed to delete the environment' } );
-// 				} else {
-// 					resolve( { id: id } );
-// 				}
-// 			} );
-// 		} );
 // 	}
 
 // 	public verify = ( envID: number ) => {

@@ -3,7 +3,7 @@ import { InitiatorUtils } from './config.initiator.utils';
 import { MainTools } from '../tools/tools.main';
 import { DB } from '../tools/tools.db';
 import * as tableDefinitions from './config.initiator.tabledefinitions';
-import { EnumToArray } from '../../shared/utilities/utilityFunctions';
+import { EnumToArray, SortByName } from '../../shared/utilities/utilityFunctions';
 import { DimeEnvironmentType } from '../../shared/enums/environmenttypes';
 import * as _ from 'lodash';
 import { ATEnvironment } from '../../shared/models/at.environment';
@@ -11,6 +11,9 @@ import { ATCredential } from '../../shared/models/at.credential';
 import { ATSetting } from '../../shared/models/at.setting';
 import { ATStreamType } from '../../shared/models/at.streamtypes';
 import { ATProcessStepType } from '../../shared/models/at.process';
+import { ATStream, ATStreamField, ATStreamFieldDetailOLD } from '../../shared/models/at.stream';
+import { ATTuple } from 'shared/models/at.tuple';
+import { FieldInfo } from '../../node_modules/@types/mysql';
 
 interface InitiatorStep { expectedCurrentVersion: number, operatorFunction: any, shouldSetVersion?: boolean }
 
@@ -193,7 +196,7 @@ export class Initiator {
 		this.steps.push( {
 			expectedCurrentVersion: 74, operatorFunction: async () => {
 				const settingResult = await this.db.query<any>( 'SELECT * FROM settings' );
-				const newSetting: ATSetting = <ATSetting>{ host: '', port: 25 };
+				const newSetting: any = { host: '', port: 25 };
 				const rowsToDelete: number[] = [];
 
 				settingResult.tuples.forEach( row => {
@@ -214,7 +217,7 @@ export class Initiator {
 		this.steps.push( {
 			expectedCurrentVersion: 75, operatorFunction: async () => {
 				const settingResult = await this.db.query<any>( 'SELECT * FROM settings' );
-				const newSetting: ATSetting = <ATSetting>{ emailaddress: '' };
+				const newSetting: any = { emailaddress: '' };
 				const rowsToDelete: number[] = [];
 
 				settingResult.tuples.forEach( row => {
@@ -278,6 +281,269 @@ export class Initiator {
 		this.steps.push( { expectedCurrentVersion: 89, operatorFunction: () => this.db.query( 'DROP TABLE userdimeprocesses' ) } );
 		this.steps.push( { expectedCurrentVersion: 90, operatorFunction: () => this.db.query( 'ALTER TABLE secrets DROP secret, DROP description, DROP allowedips' ) } );
 		this.steps.push( { expectedCurrentVersion: 91, operatorFunction: () => this.utils.tableAddColumn( 'secrets', 'details LONGTEXT NULL AFTER id' ) } );
+		this.steps.push( { expectedCurrentVersion: 92, operatorFunction: () => this.utils.tableAddColumn( 'environments', 'details JSON AFTER tags' ) } );
+		this.steps.push( {
+			expectedCurrentVersion: 93, operatorFunction: async () => {
+				let { tuples } = await this.db.query<any>( 'SELECT * FROM environments' );
+				tuples = tuples.
+					map( t => { delete t.details; return t; } ).
+					map( t => ( { id: t.id, details: JSON.stringify( t ) } ) );
+				for ( const tuple of tuples ) {
+					await this.db.query( 'UPDATE environments SET details = ? WHERE id = ?', [tuple.details, tuple.id] );
+				}
+			}
+		} );
+		this.steps.push( { expectedCurrentVersion: 94, operatorFunction: () => this.db.query( 'ALTER TABLE environments DROP name' ) } );
+		this.steps.push( { expectedCurrentVersion: 95, operatorFunction: () => this.db.query( 'ALTER TABLE environments DROP type, DROP server, DROP port, DROP verified' ) } );
+		this.steps.push( { expectedCurrentVersion: 96, operatorFunction: () => this.db.query( 'ALTER TABLE environments DROP identitydomain, DROP credential, DROP tags' ) } );
+		this.steps.push( { expectedCurrentVersion: 97, operatorFunction: () => this.utils.tableAddColumn( 'streams', 'details JSON AFTER tags' ) } );
+		this.steps.push( {
+			expectedCurrentVersion: 98, operatorFunction: async () => {
+				let { tuples } = await this.db.query<any>( 'SELECT * FROM streams' );
+				tuples = tuples.
+					map( t => { delete t.details; return t; } ).
+					map( t => ( { id: t.id, details: JSON.stringify( t ) } ) );
+				for ( const tuple of tuples ) {
+					await this.db.query( 'UPDATE streams SET details = ? WHERE id = ?', [tuple.details, tuple.id] );
+				}
+			}
+		} );
+		this.steps.push( { expectedCurrentVersion: 99, operatorFunction: () => this.db.query( 'ALTER TABLE streams DROP name, DROP type, DROP environment, DROP dbName, DROP tableName, DROP customQuery, DROP tags, DROP exports' ) } );
+		this.steps.push( { expectedCurrentVersion: 100, operatorFunction: () => this.db.query( 'ALTER TABLE streams CHANGE details details LONGTEXT NULL DEFAULT NULL' ) } );
+		this.steps.push( { expectedCurrentVersion: 101, operatorFunction: () => this.db.query( 'ALTER TABLE environments CHANGE details details LONGTEXT NULL DEFAULT NULL' ) } );
+		this.steps.push( {
+			expectedCurrentVersion: 102, operatorFunction: async () => {
+				const { tuples } = await this.db.query<ATTuple>( 'SELECT * FROM environments' );
+				const atEnvironments = tuples.map( t => this.tools.prepareTupleToRead<ATEnvironment>( t ) );
+				for ( const atEnvironment of atEnvironments ) {
+					const tags = <any>atEnvironment.tags;
+					atEnvironment.tags = JSON.parse( tags );
+					await this.db.query( 'UPDATE environments SET details = ? WHERE id = ?', [this.tools.prepareTupleToWrite( atEnvironment ), atEnvironment.id] );
+				}
+			}
+		} );
+		this.steps.push( {
+			expectedCurrentVersion: 103, operatorFunction: async () => {
+				const { tuples } = await this.db.query<ATTuple>( 'SELECT * FROM streams' );
+				const atStreams = tuples.map( t => this.tools.prepareTupleToRead<ATStream>( t ) );
+				for ( const atStream of atStreams ) {
+					const tags = <any>atStream.tags;
+					atStream.tags = JSON.parse( tags );
+					await this.db.query( 'UPDATE streams SET details = ? WHERE id = ?', [this.tools.prepareTupleToWrite( atStream ), atStream.id] );
+				}
+			}
+		} );
+		this.steps.push( {
+			expectedCurrentVersion: 104, operatorFunction: async () => {
+				const { tuples } = await this.db.query<ATTuple>( 'SELECT * FROM streams' );
+				const atStreams = tuples.map( t => this.tools.prepareTupleToRead<ATStream>( t ) );
+
+				for ( const atStream of atStreams ) {
+					if ( !atStream.exports ) {
+						atStream.exports = [];
+					} else {
+						atStream.exports = JSON.parse( <any>atStream.exports );
+					}
+					atStream.exports.sort( SortByName );
+					if ( !atStream.tags ) atStream.tags = {};
+					if ( atStream.dbName && !atStream.databaseList ) atStream.databaseList = [{ name: atStream.dbName }];
+					if ( atStream.tableName && !atStream.tableList ) atStream.tableList = [{ name: atStream.tableName }];
+					const { tuples: atFields } = await this.db.query<ATStreamFieldDetailOLD>( 'SELECT * FROM streamfields WHERE stream = ? ORDER BY position', atStream.id );
+					const streamFields: ATStreamField[] = atFields.map( sF => { 	// Source Field
+						const cF: ATStreamField = {											// Converted Field
+							name: sF.name,
+							type: sF.type,
+							position: sF.position,
+							isDescribed: !!sF.isDescribed,
+							fCharacters: sF.fCharacters,
+							fPrecision: sF.fPrecision,
+							fDecimals: sF.fDecimals,
+							fDateFormat: sF.fDateFormat,
+							shouldIgnoreCrossTab: !!sF.shouldIgnoreCrossTab,
+							isFilter: !!sF.isFilter,
+							isCrossTabFilter: !!sF.isCrossTabFilter,
+							isCrossTab: !!sF.isCrossTab,
+							isMonth: !!sF.isMonth,
+							isData: !!sF.isData,
+							aggregateFunction: sF.aggregateFunction,
+							description: {
+								database: sF.descriptiveDB,
+								table: sF.descriptiveTable,
+								query: sF.descriptiveQuery,
+								tableList: sF.descriptiveTableList || [],
+								fieldList: sF.descriptiveFieldList || [],
+								referenceField: {
+									name: sF.drfName,
+									type: sF.drfType,
+									characters: sF.drfCharacters,
+									precision: sF.drfPrecision,
+									decimals: sF.drfDecimals,
+									dateformat: sF.drfDateFormat
+								},
+								descriptionField: {
+									name: sF.ddfName,
+									type: sF.ddfType,
+									characters: sF.ddfCharacters,
+									precision: sF.ddfPrecision,
+									decimals: sF.ddfDecimals,
+									dateformat: sF.ddfDateFormat
+								}
+							}
+						};
+						return cF;
+					} );
+					atStream.fieldList = streamFields;
+					await this.db.query( 'UPDATE streams SET details = ? WHERE id = ?', [this.tools.prepareTupleToWrite( atStream ), atStream.id] );
+				}
+			}, shouldSetVersion: true
+		} );
+		this.steps.push( { expectedCurrentVersion: 105, operatorFunction: () => this.utils.tableAddColumn( 'maps', 'details LONGTEXT NULL DEFAULT NULL AFTER tags' ) } );
+		this.steps.push( {
+			expectedCurrentVersion: 106, operatorFunction: async () => {
+				let { tuples } = await this.db.query<any>( 'SELECT * FROM maps' );
+				tuples = tuples.
+					map( t => { delete t.details; return t; } ).
+					map( t => { t.tags = this.tools.jsonParseIf( t.tags ); return t; } ).
+					map( this.tools.prepareTupleToWrite );
+				for ( const tuple of tuples ) {
+					await this.db.query( 'UPDATE maps SET details = ? WHERE id = ?', [tuple.details, tuple.id] );
+				}
+			}, shouldSetVersion: true
+		} );
+		this.steps.push( { expectedCurrentVersion: 107, operatorFunction: () => this.db.query( 'ALTER TABLE maps DROP name, DROP type, DROP source, DROP target, DROP matrix, DROP tags' ) } );
+		this.steps.push( { expectedCurrentVersion: 108, operatorFunction: () => this.utils.tableAddColumn( 'matrices', 'details LONGTEXT NULL DEFAULT NULL AFTER tags' ) } );
+		this.steps.push( {
+			expectedCurrentVersion: 109, operatorFunction: async () => {
+				let { tuples } = await this.db.query<any>( 'SELECT * FROM matrices' );
+				tuples = tuples.
+					map( t => { delete t.details; return t; } ).
+					map( t => { t.tags = this.tools.jsonParseIf( t.tags ); return t; } ).
+					map( t => { t.fields = this.tools.jsonParseIf( t.fields ); return t; } ).
+					map( this.tools.prepareTupleToWrite );
+				for ( const tuple of tuples ) {
+					await this.db.query( 'UPDATE matrices SET details = ? WHERE id = ?', [tuple.details, tuple.id] );
+				}
+			}, shouldSetVersion: true
+		} );
+		this.steps.push( { expectedCurrentVersion: 110, operatorFunction: () => this.db.query( 'ALTER TABLE matrices DROP name, DROP stream, DROP fields, DROP tags' ) } );
+		this.steps.push( { expectedCurrentVersion: 111, operatorFunction: () => this.utils.tableAddColumn( 'schedules', 'details LONGTEXT NULL DEFAULT NULL AFTER tags' ) } );
+		this.steps.push( {
+			expectedCurrentVersion: 112, operatorFunction: async () => {
+				let { tuples } = await this.db.query<any>( 'SELECT * FROM schedules' );
+				tuples = tuples.
+					map( t => { delete t.details; return t; } ).
+					map( t => { t.schedule = this.tools.jsonParseIf( t.schedule ); return t; } ).
+					map( t => { t.steps = this.tools.jsonParseIf( t.steps ); return t; } ).
+					map( t => { t.tags = this.tools.jsonParseIf( t.tags ); return t; } ).
+					map( this.tools.prepareTupleToWrite );
+				for ( const tuple of tuples ) {
+					await this.db.query( 'UPDATE schedules SET details = ? WHERE id = ?', [tuple.details, tuple.id] );
+				}
+			}, shouldSetVersion: true
+		} );
+		this.steps.push( { expectedCurrentVersion: 113, operatorFunction: () => this.db.query( 'ALTER TABLE schedules DROP name, DROP schedule, DROP steps, DROP status, DROP tags' ) } );
+		this.steps.push( { expectedCurrentVersion: 114, operatorFunction: () => this.utils.tableAddColumn( 'processes', 'details LONGTEXT NULL DEFAULT NULL AFTER tags' ) } );
+		this.steps.push( {
+			expectedCurrentVersion: 115, operatorFunction: async () => {
+				let { tuples } = await this.db.query<any>( 'SELECT * FROM processes' );
+				tuples = tuples.
+					map( t => { delete t.details; return t; } ).
+					map( t => { t.tags = this.tools.jsonParseIf( t.tags ); return t; } ).
+					map( this.tools.prepareTupleToWrite );
+				for ( const tuple of tuples ) {
+					await this.db.query( 'UPDATE processes SET details = ? WHERE id = ?', [tuple.details, tuple.id] );
+				}
+			}, shouldSetVersion: true
+		} );
+		this.steps.push( { expectedCurrentVersion: 116, operatorFunction: () => this.db.query( 'ALTER TABLE processes DROP name, DROP source, DROP target, DROP status, DROP erroremail, DROP tags, DROP currentlog' ) } );
+		this.steps.push( { expectedCurrentVersion: 117, operatorFunction: () => this.utils.tableAddColumn( 'asyncprocesses', 'details LONGTEXT NULL DEFAULT NULL AFTER id' ) } );
+		this.steps.push( { expectedCurrentVersion: 118, operatorFunction: () => this.db.query( 'ALTER TABLE asyncprocesses DROP name, DROP sourceenvironment, DROP sourceapplication, DROP sourceplantype' ) } );
+		this.steps.push( { expectedCurrentVersion: 119, operatorFunction: () => this.db.query( 'ALTER TABLE asyncprocesses DROP sourcefixes, DROP targettype, DROP targetenvironment, DROP targetapplication' ) } );
+		this.steps.push( { expectedCurrentVersion: 120, operatorFunction: () => this.db.query( 'ALTER TABLE asyncprocesses DROP targetplantype, DROP processmap' ) } );
+		this.steps.push( { expectedCurrentVersion: 121, operatorFunction: () => this.utils.tableAddColumn( 'settings', 'details LONGTEXT NULL DEFAULT NULL AFTER id' ) } );
+		this.steps.push( {
+			expectedCurrentVersion: 122, operatorFunction: async () => {
+				const targetSettings: any = {};
+				const { tuples } = await this.db.query<any>( 'SELECT * FROM settings' );
+				tuples.
+					map( t => { delete t.details; return t; } ).
+					map( t => { t.value = this.tools.jsonParseIf( t.value ); return t; } ).
+					forEach( t => { if ( t.name ) targetSettings[t.name] = t.value; } );
+				const { tuples: tuple } = await this.db.query<any>( 'INSERT INTO settings (details) VALUES (?)', JSON.stringify( targetSettings ) );
+				const insertId = ( <any>tuple ).insertId;
+				await this.db.query( 'DELETE FROM settings WHERE id <> ?', insertId );
+			}, shouldSetVersion: true
+		} );
+		this.steps.push( { expectedCurrentVersion: 123, operatorFunction: () => this.db.query( 'ALTER TABLE settings DROP name, DROP value' ) } );
+		this.steps.push( { expectedCurrentVersion: 124, operatorFunction: () => this.utils.tableAddColumn( 'credentials', 'details LONGTEXT NULL DEFAULT NULL AFTER id' ) } );
+		this.steps.push( {
+			expectedCurrentVersion: 125, operatorFunction: async () => {
+				let { tuples } = await this.db.query<any>( 'SELECT * FROM credentials' );
+				tuples = tuples.
+					map( t => { delete t.details; return t; } ).
+					map( t => { t.tags = this.tools.jsonParseIf( t.tags ); return t; } ).
+					map( this.tools.prepareTupleToWrite );
+				for ( const tuple of tuples ) {
+					await this.db.query( 'UPDATE credentials SET details = ? WHERE id = ?', [tuple.details, tuple.id] );
+				}
+			}, shouldSetVersion: true
+		} );
+		this.steps.push( { expectedCurrentVersion: 126, operatorFunction: () => this.db.query( 'ALTER TABLE credentials DROP name, DROP username, DROP password, DROP tags' ) } );
+		this.steps.push( { expectedCurrentVersion: 127, operatorFunction: () => this.utils.tableAddColumn( 'tags', 'details LONGTEXT NULL DEFAULT NULL AFTER id' ) } );
+		this.steps.push( {
+			expectedCurrentVersion: 128, operatorFunction: async () => {
+				let { tuples } = await this.db.query<any>( 'SELECT * FROM tags' );
+				tuples = tuples.
+					map( t => { delete t.details; return t; } ).
+					map( this.tools.prepareTupleToWrite );
+				for ( const tuple of tuples ) {
+					await this.db.query( 'UPDATE tags SET details = ? WHERE id = ?', [tuple.details, tuple.id] );
+				}
+			}, shouldSetVersion: true
+		} );
+		this.steps.push( { expectedCurrentVersion: 129, operatorFunction: () => this.db.query( 'ALTER TABLE tags DROP name, DROP description, DROP taggroup' ) } );
+		this.steps.push( { expectedCurrentVersion: 130, operatorFunction: () => this.utils.tableAddColumn( 'taggroups', 'details LONGTEXT NULL DEFAULT NULL AFTER id' ) } );
+		this.steps.push( {
+			expectedCurrentVersion: 131, operatorFunction: async () => {
+				let { tuples } = await this.db.query<any>( 'SELECT * FROM taggroups' );
+				tuples = tuples.
+					map( t => { delete t.details; return t; } ).
+					map( this.tools.prepareTupleToWrite );
+				for ( const tuple of tuples ) {
+					await this.db.query( 'UPDATE taggroups SET details = ? WHERE id = ?', [tuple.details, tuple.id] );
+				}
+			}, shouldSetVersion: true
+		} );
+		this.steps.push( { expectedCurrentVersion: 132, operatorFunction: () => this.db.query( 'ALTER TABLE taggroups DROP name, DROP position' ) } );
+		this.steps.push( { expectedCurrentVersion: 133, operatorFunction: () => this.utils.tableAddColumn( 'users', 'details LONGTEXT NULL DEFAULT NULL AFTER id' ) } );
+		this.steps.push( {
+			expectedCurrentVersion: 134, operatorFunction: async () => {
+				let { tuples } = await this.db.query<any>( 'SELECT * FROM users' );
+				tuples = tuples.
+					map( t => { delete t.details; return t; } ).
+					map( t => { t.clearance = this.tools.jsonParseIf( t.clearance ); return t; } ).
+					map( this.tools.prepareTupleToWrite );
+				for ( const tuple of tuples ) {
+					await this.db.query( 'UPDATE users SET details = ? WHERE id = ?', [tuple.details, tuple.id] );
+				}
+			}, shouldSetVersion: true
+		} );
+		this.steps.push( { expectedCurrentVersion: 135, operatorFunction: () => this.db.query( 'ALTER TABLE users DROP username, DROP password, DROP role, DROP type' ) } );
+		this.steps.push( { expectedCurrentVersion: 136, operatorFunction: () => this.db.query( 'ALTER TABLE users DROP ldapserver, DROP email, DROP name, DROP surname, DROP clearance' ) } );
+		this.steps.push( { expectedCurrentVersion: 137, operatorFunction: () => this.utils.tableAddColumn( 'acmservers', 'details LONGTEXT NULL DEFAULT NULL AFTER id' ) } );
+		this.steps.push( {
+			expectedCurrentVersion: 138, operatorFunction: async () => {
+				let { tuples } = await this.db.query<any>( 'SELECT * FROM acmservers' );
+				tuples = tuples.
+					map( t => { delete t.details; return t; } ).
+					map( this.tools.prepareTupleToWrite );
+				for ( const tuple of tuples ) {
+					await this.db.query( 'UPDATE acmservers SET details = ? WHERE id = ?', [tuple.details, tuple.id] );
+				}
+			}, shouldSetVersion: true
+		} );
+		this.steps.push( { expectedCurrentVersion: 139, operatorFunction: () => this.db.query( 'ALTER TABLE acmservers DROP name, DROP description, DROP prefix, DROP hostname, DROP port' ) } );
+		this.steps.push( { expectedCurrentVersion: 140, operatorFunction: () => this.db.query( 'ALTER TABLE acmservers DROP sslenabled, DROP istrusted, DROP basedn, DROP userdn, DROP password' ) } );
 	}
 
 	public initiate = async () => {
@@ -303,9 +569,9 @@ export class Initiator {
 				}
 			}
 		}
-
+		const versionToLog = ( '00000' + currentVersion ).substr( -5 );
 		console.log( '===============================================' );
-		console.log( '=== Database is now at version ' + currentVersion + '         ===' );
+		console.log( '=== Database is now at version ' + versionToLog + '        ===' );
 		console.log( '===============================================' );
 	}
 

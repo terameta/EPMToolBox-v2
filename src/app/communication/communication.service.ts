@@ -35,7 +35,10 @@ export class CommunicationService {
 		this.socket.on( 'connect', () => {
 			// console.log( 'Client side socket is connected', this.socket.id );
 			this.isConnected$.next( true );
-			this.interestSubscription = this.ds.interests$.pipe( debounce( () => timer( 500 ) ) ).subscribe( this.showInterest );
+			this.interestSubscription = this.ds.interests$.pipe( debounce( () => timer( 500 ) ) ).subscribe( ( interests ) => {
+				// console.log( 'Interests changed', JSON.stringify( interests ) );
+				this.showInterest( interests );
+			} );
 		} );
 		this.socket.on( 'disconnect', () => {
 			// console.log( 'Client side socket is disconnected', this.socket.id );

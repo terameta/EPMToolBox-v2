@@ -1,15 +1,7 @@
 // After RTDB implementation
+import { ATStoreClass } from './at.storeconcept';
 
-export interface ATMapSubject {
-	[key: number]: ATMap
-}
-
-export interface ATMapConcept {
-	subject: ATMapSubject,
-	ids: number[]
-}
-
-export const ATMapConceptDefault = (): ATMapConcept => ( { subject: {}, ids: [] } );
+export class ATMapClass extends ATStoreClass<ATMap> { }
 
 // Before new changes
 

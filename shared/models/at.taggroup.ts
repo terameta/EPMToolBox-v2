@@ -1,3 +1,7 @@
+import { ATStoreClass } from './at.storeconcept';
+
+export class ATTagGroupClass extends ATStoreClass<ATTagGroup> { }
+
 export interface ATTagGroup {
 	id: number,
 	name: string,
@@ -5,13 +9,3 @@ export interface ATTagGroup {
 	isReordered: boolean
 }
 
-export interface ATTagGroupSubject {
-	[key: number]: ATTagGroup
-}
-
-export interface ATTagGroupConcept {
-	subject: ATTagGroupSubject,
-	ids: number[]
-}
-
-export const ATTagGroupConceptDefault = (): ATTagGroupConcept => ( { subject: {}, ids: [] } );

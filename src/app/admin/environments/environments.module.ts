@@ -6,6 +6,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { EnvironmentsComponent } from './environments/environments.component';
 import { EnvironmentsToolbarComponent } from './environments-toolbar/environments-toolbar.component';
 import { EnvironmentDetailComponent } from './environment-detail/environment-detail.component';
+import { AdminSharedModule } from '../admin-shared/admin-shared.module';
 
 const routes: Routes = [
 	{
@@ -21,7 +22,8 @@ const routes: Routes = [
 	imports: [
 		CommonModule,
 		FormsModule,
-		RouterModule.forChild( routes )
+		RouterModule.forChild( routes ),
+		AdminSharedModule
 	],
 	declarations: [
 		EnvironmentsComponent,

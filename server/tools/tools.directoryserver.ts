@@ -11,12 +11,12 @@ export class ATDirectoryServerTool {
 	) { }
 
 	public getAll = async () => {
-		const { result: servers } = await this.db.query<ATDirectoryServer>( 'SELECT * FROM acmservers' );
+		const { tuples: servers } = await this.db.query<ATDirectoryServer>( 'SELECT * FROM acmservers' );
 		servers.forEach( server => server.password = this.protectedPassword );
 		return servers;
 	}
 	public getServerDetails = async ( id: number, shouldShowPassword = false ) => {
-		const { result: servers } = await this.db.query<ATDirectoryServer>( 'SELECT * FROM acmservers WHERE id = ?', id );
+		const { tuples: servers } = await this.db.query<ATDirectoryServer>( 'SELECT * FROM acmservers WHERE id = ?', id );
 		const server = servers[0];
 		if ( servers.length !== 1 ) throw new Error( 'Wrong number of records' );
 		if ( shouldShowPassword ) {

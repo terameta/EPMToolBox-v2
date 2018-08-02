@@ -1,7 +1,10 @@
 import { ATReadyStatus } from './generic.readiness';
 import { ATEnvironmentDetail } from './at.environment';
-import { ATStream, ATStreamFieldDetail } from './at.stream';
+import { ATStream, ATStreamField } from './at.stream';
 import { ATLog } from './at.log';
+import { ATStoreClass } from './at.storeconcept';
+
+export class ATProcessClass extends ATStoreClass<ATProcess> { }
 
 export interface ATProcess {
 	id: number,
@@ -20,18 +23,14 @@ export interface ATProcess {
 	tags: any
 }
 
-export interface ATProcessObject {
-	[key: number]: ATProcess
-}
-
 export interface ATProcessRunning extends ATProcess {
 	steps: ATProcessStepRunning[],
 	sourceEnvironment: ATEnvironmentDetail,
 	sourceStream: ATStream,
-	sourceStreamFields: ATStreamFieldDetail[],
+	sourceStreamFields: ATStreamField[],
 	targetEnvironment: ATEnvironmentDetail,
 	targetStream: ATStream,
-	targetStreamFields: ATStreamFieldDetail[],
+	targetStreamFields: ATStreamField[],
 	isReady: { tableName: string, process: number, type: string, status: boolean }[],
 	curStep: number,
 	filters: any[],

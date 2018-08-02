@@ -1,13 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { ATEnvironmentConcept } from '../../../../../shared/models/at.environment';
 import { DataStoreService } from '../../../data-store/data-store.service';
-import { ATTagConcept } from 'shared/models/at.tag';
-import { ATTagGroupConcept } from 'shared/models/at.taggroup';
-import { Subscription } from 'rxjs';
 import { CentralStatusService } from '../../../central-status.service';
-import { CommunicationService } from '../../../communication/communication.service';
+import { ATDataStoreInterest } from 'shared/models/at.datastoreinterest';
+import { ATEnvironment } from 'shared/models/at.environment';
+import { ATTag } from 'shared/models/at.tag';
+import { ATTagGroup } from 'shared/models/at.taggroup';
+import { Subscription } from 'rxjs';
 
 @Component( {
 	selector: 'app-environments-toolbar',
@@ -15,30 +15,34 @@ import { CommunicationService } from '../../../communication/communication.servi
 	styleUrls: ['./environments-toolbar.component.scss']
 } )
 export class EnvironmentsToolbarComponent implements OnInit, OnDestroy {
-	public environments: ATEnvironmentConcept;
-	public tags: ATTagConcept;
-	public taggroups: ATTagGroupConcept;
+	public environments: ATEnvironment[] = [];
+	public tags: ATTag[] = [];
+	public tagGroups: ATTagGroup[] = [];
 
 	private subscriptions: Subscription[] = [];
+
+	private interests: ATDataStoreInterest[] = [
+		{ concept: 'environments' },
+		{ concept: 'tags' },
+		{ concept: 'taggroups' }
+	];
 
 	constructor(
 		public ss: CentralStatusService,
 		public ds: DataStoreService,
-		private cs: CommunicationService,
 		private router: Router
-	) {
-		this.subscriptions.push( this.ds.showInterest<ATEnvironmentConcept>( { concept: 'environments' } ).subscribe( result => this.environments = result ) );
-		this.subscriptions.push( this.ds.showInterest<ATTagConcept>( { concept: 'tags' } ).subscribe( result => this.tags = result ) );
-		this.subscriptions.push( this.ds.showInterest<ATTagGroupConcept>( { concept: 'taggroups' } ).subscribe( result => this.taggroups = result ) );
+	) { }
+
+	ngOnInit() {
+		this.interests.forEach( this.ds.showInterest );
+		this.subscriptions.push( this.ds.store.environments.items.subscribe( ( i ) => { this.environments = i; } ) );
+		this.subscriptions.push( this.ds.store.tags.items.subscribe( ( i ) => { this.tags = i; } ) );
+		this.subscriptions.push( this.ds.store.taggroups.items.subscribe( ( i ) => { this.tagGroups = i; } ) );
 	}
 
-	ngOnInit() { }
-
 	ngOnDestroy() {
+		this.interests.forEach( this.ds.looseInterest );
 		this.subscriptions.forEach( s => s.unsubscribe() );
-		this.ds.looseInterest( { concept: 'environments' } );
-		this.ds.looseInterest( { concept: 'tags' } );
-		this.ds.looseInterest( { concept: 'taggroups' } );
 	}
 
 	public navigateTo = ( id: number ) => {
@@ -46,14 +50,15 @@ export class EnvironmentsToolbarComponent implements OnInit, OnDestroy {
 	}
 
 	public create = () => {
-		this.cs.communicate( {
-			framework: 'environments',
-			action: 'create',
-			payload: {
-				status: 'request',
-				data: {}
-			}
-		} );
+		// this.cs.communicate( {
+		// 	framework: 'environments',
+		// 	action: 'create',
+		// 	payload: {
+		// 		status: 'request',
+		// 		data: {}
+		// 	}
+		// } );
+		alert( 'We will work on this one' );
 	}
 
 }

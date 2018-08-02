@@ -1,4 +1,4 @@
-<form class="form-inline bg-dark text-light">
+<form class="form-inline bg-accent text-dark border-evwarning border-bottom border-top" style="border-top-width: 3px; border-top-style: solid; position: fixed; left: 0; right: 0;">
 	<div class="form-group form-group-sm">
 		<div class="input-group">
 			<a class="input-group-addon btn" title="Environment List" routerLink="/admin/environments">
@@ -12,36 +12,36 @@
 			</a> -->
 		</div>
 	</div>
-	<div class="form-group form-group-sm bg-dark">
+	<div class="form-group form-group-sm">
 		<div class="input-group">
-			<a class="input-group-addon btn" title="Tag List" routerLink="/admin/environments">
-				<i class="fas fa-list fa-fw"></i> List
-			</a>
-			<select class="form-control bg-dark text-light" name="selecteditem" (change)="navigateTo($event.target.value)" [ngModel]="ss.currentID">
+			<select class="form-control bg-accent border-top-0 border-bottom-0 border-dark rounded-0" name="selecteditem" (change)="navigateTo($event.target.value)" [ngModel]="ss.currentID">
 				<option value="0">Go To</option>
-				<option *ngFor="let id of environments.ids" value="{{id}}">{{environments.subject[id].name}}</option>
+				<option *ngFor="let environment of environments" value="{{environment.id}}">{{environment.name}}</option>
 			</select>
 			<div class="input-group-addon btn" title="New Item" (click)="create()">
 				<i class="fa fa-plus fa-fw"></i> New
 			</div>
 		</div>
 	</div>
-	<button type="button" class="btn btn-default btn-sm ml-auto mr-3 btn-success">Help</button>
-</form>
-<!--
-
-
-
-
-	<div class="form-group form-group-sm pull-right">
-		<div class="input-group" *ngFor="let tagGroup of tagService.groupList">
-			<div class="input-group-addon" title="Please select an {{tagGroup.name}} tag">{{tagGroup.name}}:</div>
-			<select name="TagSelector{{tagGroup.id}}" id="TagSelector{{tagGroup.id}}" class="form-control" (change)="uiService.tagChanged(tagGroup.id, $event.target.value)" [ngModel]="uiService.uiState.selectedTags[tagGroup.id]">
+	<div class="form-group form-group-sm ml-auto mr-3">
+		<div class="input-group" *ngFor="let tagGroup of tagGroups">
+			<!-- <div class="input-group-addon btn" title="Please select an {{tagGroup.name}} tag">{{tagGroup.name}}:</div> -->
+			<div class="input-group-prepend">
+				<div class="input-group-text border-0 bg-transparent">{{ tagGroup.name }}:</div>
+			</div>
+			<!-- <select name="TagSelector{{tagGroup.id}}" id="TagSelector{{tagGroup.id}}" class="form-control" (change)="uiService.tagChanged(tagGroup.id, $event.target.value)" [ngModel]="uiService.uiState.selectedTags[tagGroup.id]">
 				<option value="0">All</option>
 				<ng-container *ngFor="let tagItem of tagService.itemList">
 					<option *ngIf="tagItem.taggroup == tagGroup.id" value="{{tagItem.id}}">{{tagItem.name}}</option>
 				</ng-container>
+			</select>  -->
+			<select name="TagSelector{{tagGroup.id}}" id="TagSelector{{tagGroup.id}}" class="form-control bg-accent border-top-0 border-bottom-0 border-dark rounded-0">
+				<option value="0">All</option>
+				<!-- <ng-container *ngFor="let tagItem of tagService.itemList">
+					<option *ngIf="tagItem.taggroup == tagGroup.id" value="{{tagItem.id}}">{{tagItem.name}}</option>
+				</ng-container> -->
 			</select>
 		</div>
 	</div>
--->
+	<!-- <button type="button" class="btn btn-default btn-sm ml-auto mr-3 btn-dark">Help</button> -->
+</form>

@@ -1,5 +1,8 @@
 import { ATCronStructure } from './at.cronstructure';
 import { ATStatusType } from '../enums/statustypes';
+import { ATStoreClass } from './at.storeconcept';
+
+export class ATScheduleClass extends ATStoreClass<ATSchedule> { }
 
 export interface ATSchedule {
 	id: number,
@@ -8,10 +11,6 @@ export interface ATSchedule {
 	schedule: ATCronStructure[],
 	status: ATStatusType,
 	tags: any
-}
-
-export interface ATScheduleObject {
-	[key: number]: ATSchedule
 }
 
 export interface ATScheduleStep {
