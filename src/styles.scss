@@ -15,7 +15,7 @@ html, body {
 }
 
 section.content {
-	padding-top: 6.4rem;
+	padding-top: 7.4rem;
 	// padding-top: 53px;
 	// padding-top: 3.571428571428571rem;
 }
@@ -28,4 +28,8 @@ a {
 a:hover {
 	text-decoration: none;
 	color: inherit;
+}
+
+.pointer {
+	cursor: pointer;
 }

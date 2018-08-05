@@ -1,0 +1,44 @@
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-12">
+			<div class="table-responsive">
+				<table class="table table-sm table-hover table-bordered">
+					<thead class="bg-dark text-light">
+						<tr>
+							<th class="text-center" width="80">Actions</th>
+							<th class="text-center">Name</th>
+							<th class="text-center">Type</th>
+							<th class="text-center">Server</th>
+							<th class="text-center">Port</th>
+							<th class="text-center">isVerified</th>
+						</tr>
+					</thead>
+					<tbody>
+						<ng-container *ngFor="let item of environments; let i = index;">
+							<tr *ngIf="ss.shouldListItem(item.tags)">
+								<td>
+									<div class="d-flex w-100 h-100 px-1 m-0 py-0">
+										<a routerLink="{{item.id}}">
+											<i class="far fa-edit fa-fw my-auto"></i>
+										</a>
+										<i class="fa fa-trash fa-fw text-danger my-auto ml-auto pointer" aria-hidden="true" title="Delete" (click)="delete(item.id, item.name)"></i>
+									</div>
+								</td>
+								<td>
+									<a routerLink="{{item.id}}">{{ item.name }}</a>
+								</td>
+								<td title="{{ getEnvironmentTypeDescripton(item.type) }}">{{ environmentTypes[item.type] }}</td>
+								<td>{{ item.server }}</td>
+								<td>{{ item.port }}</td>
+								<td class="text-center">
+									<i class="far fa-check-square" *ngIf="item.verified" title="Item is verified"></i>
+									<i class="far fa-square" *ngIf="!item.verified" title="Item is not verified"></i>
+								</td>
+							</tr>
+						</ng-container>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>

@@ -1,6 +1,7 @@
 import * as _ from 'lodash';
 import { SortByName, SortByProperty } from '../utilities/utilityFunctions';
-import { BehaviorSubject } from '../../node_modules/rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { share, publish } from 'rxjs/operators';
 
 export interface ATStoreSubject<T> {
 	[key: number]: T

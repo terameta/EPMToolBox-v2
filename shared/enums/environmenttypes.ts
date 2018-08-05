@@ -1,11 +1,11 @@
-export enum DimeEnvironmentType {
+export enum ATEnvironmentType {
 	'HP' = 1,
 	'MSSQL' = 2,
 	'PBCS' = 3,
 	'ORADB' = 4
 }
 
-export function dimeGetEnvironmentTypeDescription( typecode: number | string ) {
+export function atGetEnvironmentTypeDescription( typecode: number | string ) {
 	switch ( typecode ) {
 		case 1:
 		case '1':

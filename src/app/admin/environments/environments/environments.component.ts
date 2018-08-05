@@ -24,7 +24,8 @@ export class EnvironmentsComponent implements OnInit, OnDestroy {
 	}
 
 	ngOnDestroy() {
-		this.ds.looseInterest( { concept: 'environments' } );
+		// this.ds.looseInterest( { concept: 'environments' } );
+		this.subscriptions.forEach( s => s.unsubscribe() );
 	}
 
 }

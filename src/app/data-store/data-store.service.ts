@@ -43,6 +43,7 @@ export class DataStoreService {
 
 
 	constructor() {
+		console.log( 'Constructed data-store.service' );
 		this.interests$ = new BehaviorSubject( [] );
 		// setInterval( () => {
 		// 	console.log( 'Interest observer count:', this.interests$.observers.length, this.interests$.getValue() );

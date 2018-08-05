@@ -1,10 +1,12 @@
 import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 import { ATNamedBaseType } from 'shared/models/at.storeconcept';
 import { DataStoreService } from '../../../data-store/data-store.service';
+import { CentralStatusService } from '../../../central-status.service';
 import { Subscription } from 'rxjs';
 import { ATTag } from 'shared/models/at.tag';
 import { ATTagGroup } from 'shared/models/at.taggroup';
 import { Router } from '@angular/router';
+import { CommunicationService } from '../../../communication/communication.service';
 
 @Component( {
 	selector: 'app-admin-toolbar',
@@ -23,6 +25,8 @@ export class AdminToolbarComponent implements OnInit, OnDestroy {
 
 	constructor(
 		private ds: DataStoreService,
+		public ss: CentralStatusService,
+		private cs: CommunicationService,
 		private router: Router,
 	) { }
 
@@ -38,8 +42,15 @@ export class AdminToolbarComponent implements OnInit, OnDestroy {
 	}
 
 	public navigateTo = ( id: number ) => {
-		console.log( 'We need to navigate to', id );
-		// this.router.navigateByUrl( '/admin/environments/' + id );
+		this.router.navigateByUrl( '/admin/' + this.concept + '/' + id );
+	}
+
+	public create = () => {
+		this.cs.communicate( { framework: this.concept, action: 'create', payload: { status: 'request' } }, true ).subscribe( ( response ) => {
+			if ( response.data && response.data.id ) {
+				this.navigateTo( response.data.id );
+			}
+		} );
 	}
 
 }

@@ -18,6 +18,8 @@ export class CentralStatusService {
 	public currentComponent = '';
 	public currentID = 0;
 
+	public selectedTags: any = {};
+
 	private urlsToHideHeader = [
 		'/signin',
 		'/signup'
@@ -36,6 +38,7 @@ export class CentralStatusService {
 		this.currentURL.subscribe( this.urlHandler );
 		console.log( 'Constructed central-status.service' );
 		setInterval( this.notificationClear, 10000 );
+		if ( localStorage.getItem( 'selectedTags' ) ) this.selectedTags = JSON.parse( localStorage.getItem( 'selectedTags' ) );
 	}
 
 	private routeHandler = ( event: Event ) => {
@@ -71,7 +74,6 @@ export class CentralStatusService {
 				this.currentID = parseInt( urlSegments[3], 10 );
 			}
 		}
-		console.log( url );
 	}
 
 	public notificationAdd = ( payload: ATNotification ) => this.notifications$.next( this.notifications$.getValue().concat( [{ ...newATNotification(), ...payload }] ) );
@@ -82,5 +84,19 @@ export class CentralStatusService {
 		if ( allNotificationCount > unExpiredNotificationCount ) {
 			this.notifications$.next( currentNotificationList.filter( n => ( n.expires.getTime() > ( new Date() ).getTime() ) ) );
 		}
+	}
+
+	public tagChanged = ( groupid: number, tagid: number ) => {
+		this.selectedTags[groupid.toString()] = tagid;
+		localStorage.setItem( 'selectedTags', JSON.stringify( this.selectedTags ) );
+	}
+
+	public shouldListItem = ( tags: any ) => {
+		let shouldShow = true;
+		const filterers = Object.values( this.selectedTags ).filter( t => ( t !== undefined && t !== null && t !== 0 && t !== '0' ) );
+		filterers.forEach( currentFilter => {
+			if ( tags[currentFilter.toString()] !== true ) shouldShow = false;
+		} );
+		return shouldShow;
 	}
 }

@@ -4,13 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
 
 import { EnvironmentsComponent } from './environments/environments.component';
-import { EnvironmentsToolbarComponent } from './environments-toolbar/environments-toolbar.component';
 import { EnvironmentDetailComponent } from './environment-detail/environment-detail.component';
 import { AdminSharedModule } from '../admin-shared/admin-shared.module';
+import { EnvironmentListComponent } from './environment-list/environment-list.component';
 
 const routes: Routes = [
 	{
 		path: '', component: EnvironmentsComponent, children: [
+			{ path: '', component: EnvironmentListComponent },
 			{ path: ':id', component: EnvironmentDetailComponent }
 		]
 	},
@@ -27,8 +28,8 @@ const routes: Routes = [
 	],
 	declarations: [
 		EnvironmentsComponent,
-		EnvironmentsToolbarComponent,
-		EnvironmentDetailComponent
+		EnvironmentDetailComponent,
+		EnvironmentListComponent
 	]
 } )
 export class EnvironmentsModule { }

@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { AdminNavbarComponent } from './admin-navbar/admin-navbar.component';
 import { AdminFrontPageComponent } from './admin-front-page/admin-front-page.component';
 import { RouterModule, Routes } from '@angular/router';
@@ -15,6 +16,7 @@ const routes: Routes = [
 @NgModule( {
 	imports: [
 		CommonModule,
+		FormsModule,
 		RouterModule.forChild( routes ),
 		CollapseModule,
 		AdminSharedModule

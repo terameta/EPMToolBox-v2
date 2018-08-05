@@ -10,6 +10,7 @@ import { ATUser } from 'shared/models/at.user';
 import { ATApiCommunication } from 'shared/models/at.socketrequest';
 import { CentralStatusService } from '../central-status.service';
 import { ATDataStoreInterest } from '../../../shared/models/at.datastoreinterest';
+import { v4 as uuid } from 'uuid';
 
 @Injectable( {
 	providedIn: 'root'
@@ -19,6 +20,7 @@ export class CommunicationService {
 	public socket;
 	public isConnected$ = new BehaviorSubject<boolean>( false );
 	private interestSubscription: Subscription;
+	private followUps: any = {};
 
 	constructor(
 		platformLocation: PlatformLocation,
@@ -51,13 +53,23 @@ export class CommunicationService {
 		this.socket.on( 'communication', ( response: ATApiCommunication ) => {
 			// this.displayResponseDetails( response );
 			if ( response.payload.status === 'success' ) {
-				if ( response.framework === 'auth' ) {
-					this.as[response.action]( response.payload );
+				// If communication has a uuid attached to it, the response should be handled by the requester.
+				// To enable so, we are sending the data to behaviorsubject in the followups.
+				// If there is no uuid, data store should accept and work on it.
+				if ( response.uuid ) {
+					this.followUps[response.uuid].next( response.payload );
+					this.followUps[response.uuid].complete();
+					delete this.followUps[response.uuid];
 				} else {
-					this.ds.react( response );
+					if ( response.framework === 'auth' ) {
+						this.as[response.action]( response.payload );
+					} else {
+						this.ds.react( response );
+					}
 				}
 			} else if ( response.payload.status === 'error' ) {
 				console.log( 'Here we should handle with central status service.' );
+				this.displayResponseDetails( response );
 			}
 		} );
 
@@ -74,8 +86,17 @@ export class CommunicationService {
 		} );
 	}
 
-	public communicate = ( payload: ATApiCommunication ) => {
-		this.socket.emit( 'communication', { token: this.as.encodedToken, ...payload } );
+	public communicate = ( payload: ATApiCommunication, followup = false ) => {
+		const uniqueid = uuid();
+		payload = { token: this.as.encodedToken, ...payload };
+		if ( followup ) {
+			payload = { uuid: uniqueid, ...payload };
+			this.followUps[uniqueid] = new BehaviorSubject( <any>{} );
+		}
+		this.socket.emit( 'communication', payload );
+		if ( followup ) {
+			return this.followUps[uniqueid];
+		}
 	}
 
 	private processSignIn = ( user: ATUser ) => {

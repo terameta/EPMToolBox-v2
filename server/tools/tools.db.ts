@@ -44,7 +44,7 @@ export class DB {
 	}
 	public queryOne = async <T>( queryToExecute: string, queryArguments?: any ): Promise<{ tuple: T, fields: FieldInfo[] }> => {
 		const { tuples, fields } = await this.query<T>( queryToExecute, queryArguments );
-		if ( tuples.length !== 1 ) throw new Error( 'Wrong number of records. 1 expected' );
-		return { tuple: tuples[0], fields };
+		if ( tuples.length !== 1 && Array.isArray( tuples ) ) throw new Error( 'Wrong number of records. 1 expected' );
+		return { tuple: Array.isArray( tuples ) ? tuples[0] : tuples, fields };
 	}
 }
