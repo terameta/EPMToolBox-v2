@@ -8,7 +8,7 @@ import { withLatestFrom, map, filter, debounce } from 'rxjs/operators';
 import { BehaviorSubject, Subscription, timer } from 'rxjs';
 import { ATUser } from 'shared/models/at.user';
 import { ATApiCommunication } from 'shared/models/at.socketrequest';
-import { CentralStatusService } from '../central-status.service';
+import { CentralStatusService } from '../central-status/central-status.service';
 import { ATDataStoreInterest } from '../../../shared/models/at.datastoreinterest';
 import { v4 as uuid } from 'uuid';
 
@@ -33,6 +33,7 @@ export class CommunicationService {
 		this.baseURL = protocol + '//' + hostname + ':' + configuration.serverPort;
 		this.socket = socketio( this.baseURL );
 		// console.log( 'Communication service is initiated on URL:', this.baseURL );
+		console.log( 'We should throughly test the authentication mechanism once again' );
 
 		this.socket.on( 'connect', () => {
 			// console.log( 'Client side socket is connected', this.socket.id );
@@ -52,6 +53,7 @@ export class CommunicationService {
 		} );
 		this.socket.on( 'communication', ( response: ATApiCommunication ) => {
 			// this.displayResponseDetails( response );
+			// console.log( response.framework, response.action, response.uuid );
 			if ( response.payload.status === 'success' ) {
 				// If communication has a uuid attached to it, the response should be handled by the requester.
 				// To enable so, we are sending the data to behaviorsubject in the followups.
@@ -60,6 +62,7 @@ export class CommunicationService {
 					this.followUps[response.uuid].next( response.payload );
 					this.followUps[response.uuid].complete();
 					delete this.followUps[response.uuid];
+					if ( response.action === 'getAll' ) this.ds.react( response );
 				} else {
 					if ( response.framework === 'auth' ) {
 						this.as[response.action]( response.payload );

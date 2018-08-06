@@ -29,7 +29,6 @@ export class AuthService {
 	private initiateService = () => {
 		this.isAuthenticating$.next( false );
 		this.isReAuthenticating$.next( false );
-
 		this.encodedToken = localStorage.getItem( 'token' );
 		if ( this.encodedToken ) {
 			if ( this.jwtHelper.isTokenExpired() ) {

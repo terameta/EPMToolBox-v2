@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 import { ATNamedBaseType } from 'shared/models/at.storeconcept';
 import { DataStoreService } from '../../../data-store/data-store.service';
-import { CentralStatusService } from '../../../central-status.service';
+import { CentralStatusService } from '../../../central-status/central-status.service';
 import { Subscription } from 'rxjs';
 import { ATTag } from 'shared/models/at.tag';
 import { ATTagGroup } from 'shared/models/at.taggroup';
@@ -45,8 +45,10 @@ export class AdminToolbarComponent implements OnInit, OnDestroy {
 		this.router.navigateByUrl( '/admin/' + this.concept + '/' + id );
 	}
 
-	public create = () => {
-		this.cs.communicate( { framework: this.concept, action: 'create', payload: { status: 'request' } }, true ).subscribe( ( response ) => {
+	public create = async () => {
+		const result = await this.ss.prompt( 'Please enter the name of the new item' );
+		if ( !result ) return;
+		this.cs.communicate( { framework: this.concept, action: 'create', payload: { status: 'request', data: { name: result } } }, true ).subscribe( ( response ) => {
 			if ( response.data && response.data.id ) {
 				this.navigateTo( response.data.id );
 			}

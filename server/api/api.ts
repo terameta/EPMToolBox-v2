@@ -64,11 +64,12 @@ export class ATApi {
 		// console.log( request );
 		// console.log( '===========================================' );
 		// console.log( '===========================================' );
-		const payload = await this.backend[request.framework][request.action]( request.payload ).catch( e => this.respondFinalize( request, socket, 'error', e ) );
+		const payload = await this.backend[request.framework][request.action]( request.payload.data ).catch( e => this.respondFinalize( request, socket, 'error', e ) );
 		if ( payload ) this.respondFinalize( request, socket, 'success', payload );
 	}
 
 	private respondFinalize = ( request: ATApiCommunication, socket: Socket, status: 'success' | 'error', data: any ) => {
+		if ( status === 'error' ) { data = { message: data.message }; }
 		// console.log( '===========================================' );
 		// console.log( 'We are at respond finalize' );
 		// console.log( '===========================================' );

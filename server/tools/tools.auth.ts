@@ -8,6 +8,7 @@ import { ATDirectoryServer } from '../../shared/models/at.directoryserver';
 import { ATDirectoryServerTool } from './tools.directoryserver';
 import * as jwt from 'jsonwebtoken';
 import { ATApiPayload } from 'shared/models/at.socketrequest';
+import { ATTuple } from 'shared/models/at.tuple';
 
 interface AuthObjectDirectory {
 	username: string,
@@ -27,11 +28,9 @@ export class AuthTool {
 		this.directoryServerTool = new ATDirectoryServerTool( this.db, this.tools );
 	}
 
-	public signin = async ( payload: ATApiPayload ) => {
-		if ( !payload ) { return new Error( 'No credentials presented' ); }
-		if ( !payload.data ) { return new Error( 'No credentials presented' ); }
-		if ( !payload.data.username || !payload.data.password ) { return new Error( 'Either username or password missing' ); }
-		return this.authenticate( payload.data );
+	public signin = async ( payload: { username: string, password: string } ) => {
+		if ( !payload.username || !payload.password ) { throw new Error( 'Either username or password missing' ); }
+		return this.authenticate( payload );
 	}
 	public reauthenticate = async ( payload: ATApiPayload ) => {
 		const oldToken: any = await this.tools.verifyToken( payload.data.token ).catch();
@@ -40,25 +39,26 @@ export class AuthTool {
 			delete oldToken.exp;
 			return this.authenticateAction( oldToken );
 		} else {
-			return new Error( 'Token has expired' );
+			throw new Error( 'Token has expired' );
 		}
 	}
 
 	private authenticate = async ( payload: { username: string, password: string } ) => {
 		const fixedUserName = escape( payload.username.toString().toLowerCase() );
-		const { tuples } = await this.db.query<ATUser>( 'SELECT * FROM users WHERE username = ?', fixedUserName );
-		if ( tuples.length === 0 ) {
-			return new Error( 'Authentication failed.' );
-		} else if ( tuples.length > 1 ) {
-			return new Error( 'Multiple users are defined with the same username. Please consult with system admin.' );
+		const { tuples } = await this.db.query<ATTuple>( 'SELECT * FROM users' );
+		const users = tuples.map( t => this.tools.prepareTupleToRead<ATUser>( t ) ).filter( u => u.username === fixedUserName );
+		if ( users.length === 0 ) {
+			throw new Error( 'Authentication failed.' );
+		} else if ( users.length > 1 ) {
+			throw new Error( 'Multiple users are defined with the same username. Please consult with system admin.' );
 		} else {
-			const dbUser = tuples[0];
+			const dbUser = users[0];
 			if ( dbUser.type === 'local' ) {
 				return this.authenticateWithLocal( payload.password, dbUser );
 			} else if ( dbUser.type === 'directory' ) {
 				return this.authenticateWithDirectory( payload.username, payload.password, dbUser );
 			} else {
-				return new Error( 'Wrong user type. Please consult with system admin.' );
+				throw new Error( 'Wrong user type. Please consult with system admin.' );
 			}
 		}
 	}

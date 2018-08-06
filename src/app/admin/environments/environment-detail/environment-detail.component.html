@@ -1,3 +1,94 @@
-<p>
-  environment-detail works!
-</p>
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-12">
+			<form (ngSubmit)="ms.update()">
+				<div class="form-group row m-0">
+					<label for="eName" class="col-3 col-md-1 col-form-label font-weight-bold">Name:</label>
+					<div class="col-9 col-md-11">
+						<input type="text" name="eName" class="form-control form-control-sm" [(ngModel)]="cEnvironment.name">
+					</div>
+				</div>
+				<div class="form-group row m-0">
+					<label for="eType" class="col-3 col-md-1 col-form-label font-weight-bold">Type:</label>
+					<div class="col-9 col-md-11">
+						<select name="eType" class="form-control form-control-sm" [(ngModel)]="cEnvironment.type">
+							<option value="undefined">Please select a type</option>
+							<option *ngFor="let envType of environmentTypes" [value]="envType.value">{{getTypeDescripton(envType.label)}}</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group row m-0">
+					<label for="eServer" class="col-3 col-md-1 col-form-label font-weight-bold">Server:</label>
+					<div class="col-9 col-md-11">
+						<input type="text" name="eServer" class="form-control form-control-sm" [(ngModel)]="cEnvironment.server">
+					</div>
+				</div>
+				<div class="form-group row m-0">
+					<label for="ePort" class="col-3 col-md-1 col-form-label font-weight-bold">Port:</label>
+					<div class="col-9 col-md-11">
+						<input type="text" name="ePort" class="form-control form-control-sm" [(ngModel)]="cEnvironment.port">
+					</div>
+				</div>
+				<div class="form-group row m-0">
+					<label for="eCred" class="col-3 col-md-1 col-form-label font-weight-bold">Credentials:</label>
+					<div class="col-9 col-md-11">
+						<select name="eCred" class="form-control form-control-sm" [(ngModel)]="cEnvironment.credential">
+							<option value="undefined">Please select a credential</option>
+							<option *ngFor="let cred of credentials" [value]="cred.id">{{cred.name}}</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group row m-0" *ngIf="cEnvironment.type === environmentType['PBCS']">
+					<label for="eDom" class="col-3 col-md-1 col-form-label font-weight-bold">PBCS Domain:</label>
+					<div class="col-9 col-md-11">
+						<input type="text" name="eDom" class="form-control form-control-sm" [(ngModel)]="cEnvironment.identitydomain">
+					</div>
+				</div>
+				<div class="form-group row m-0">
+					<label class="col-3 col-md-1 col-form-label font-weight-bold">Verified?</label>
+					<div class="col-9 col-md-11 py-auto">
+						<i class="far fa-check-square" *ngIf="cEnvironment.verified"></i>
+						<i class="far fa-square" *ngIf="!cEnvironment.verified"></i>
+					</div>
+				</div>
+				<div class="form-group row m-0">
+					<label class="col-3 col-md-1 col-form-label font-weight-bold">Tags:</label>
+					<div class="col-9 col-md-11">
+						<div class="row">
+							<div class="col-{{decideColWidth(tagGroups.length)}}" *ngFor="let tagGroup of tagGroups">
+								{{tagGroup.name}}
+								<hr />
+								<ng-container *ngFor="let tagItem of tags">
+									<div class="checkbox" *ngIf="tagItem.taggroup == tagGroup.id">
+										<label>
+											<input type="checkbox" name="tagName{{tagItem.id}}" [(ngModel)]="cEnvironment?.tags[tagItem.id]"> {{tagItem.name}}
+										</label>
+									</div>
+								</ng-container>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="form-group row m-0">
+					<label class="col-3 col-md-1 col-form-label font-weight-bold">&nbsp;</label>
+					<div class="col-9 col-md-11 text-right">
+						<div class="btn-group btn-group-sm" role="group">
+							<button type="submit" class="btn btn-outline-primary">
+								<i class="fas fa-save fa-fw"></i> Save
+							</button>
+							<button class="btn btn-outline-success" type="button">
+								<i class="fas fa-check fa-fw "></i> Verify
+							</button>
+							<button class="btn btn-outline-dark" type="button" (click)="ms.clone(cEnvironment)">
+								<i class="far fa-clone fa-fw "></i> Clone
+							</button>
+							<button class="btn btn-outline-danger" type="button" (click)="ms.delete(cEnvironment.id, cEnvironment.name)">
+								<i class="fas fa-trash fa-fw "></i> Delete
+							</button>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>

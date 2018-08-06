@@ -36,7 +36,6 @@ export class ATStoreClass<T extends ATBaseType>  {
 		const items = this.subject.getValue();
 		this.ids.next( this.ids.getValue().map( id => items[id] ).sort( SortByProperty( this._sortProperty ) ).map( i => i.id ) );
 		this.items.next( this.ids.getValue().map( id => items[id] ) );
-		// console.log( this.items.getValue() );
 		// console.log( this.items.observers.length );
 	}
 

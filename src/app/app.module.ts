@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 
 // ngx-bootstrap modules
 import { CollapseModule } from 'ngx-bootstrap/collapse';
+import { ModalModule } from 'ngx-bootstrap/modal';
 
 import { AppComponent } from './app.component';
 import { Routes, RouterModule } from '@angular/router';
@@ -16,6 +17,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { DataStoreModule } from './data-store/data-store.module';
 import { AuthGuardService as AuthGuard } from './auth-guard.service';
 import { AdminComponent } from './admin/admin/admin.component';
+import { CentralStatusModule } from './central-status/central-status.module';
 
 
 const routes: Routes = [
@@ -50,7 +52,9 @@ export function tokenGetter() {
 		} ),
 		AuthModule,
 		DataStoreModule,
-		CollapseModule.forRoot()
+		CollapseModule.forRoot(),
+		ModalModule.forRoot(),
+		CentralStatusModule
 	],
 	providers: [],
 	bootstrap: [AppComponent]

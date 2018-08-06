@@ -1,4 +1,5 @@
 import { ATStoreClass } from './at.storeconcept';
+import { JSONDeepCopy } from '../utilities/utilityFunctions';
 
 export class ATEnvironmentClass extends ATStoreClass<ATEnvironment> { }
 
@@ -25,3 +26,5 @@ export interface ATEnvironmentDetail extends ATEnvironment {
 	username: string,
 	password: string
 }
+
+export const getDefaultATEnvironment = () => ( <ATEnvironment>JSONDeepCopy( { tags: {} } ) );

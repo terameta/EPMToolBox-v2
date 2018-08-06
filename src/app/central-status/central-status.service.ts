@@ -3,7 +3,10 @@ import { Router, NavigationEnd, Event } from '@angular/router';
 import { ATNotification, ATNotificationDefault, newATNotification } from 'shared/models/notification';
 import { BehaviorSubject } from 'rxjs';
 import { JSONDeepCopy } from 'shared/utilities/utilityFunctions';
-import { AuthService } from './auth/auth.service';
+import { AuthService } from '../auth/auth.service';
+import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
+import { ConfirmComponent } from './confirm/confirm.component';
+import { PromptComponent } from './prompt/prompt.component';
 
 @Injectable( {
 	providedIn: 'root'
@@ -16,7 +19,9 @@ export class CentralStatusService {
 	public notifications$ = new BehaviorSubject<ATNotification[]>( [] );
 
 	public currentComponent = '';
+	public currentComponentO = new BehaviorSubject( '' );
 	public currentID = 0;
+	public currentIDO = new BehaviorSubject( 0 );
 
 	public selectedTags: any = {};
 
@@ -32,11 +37,12 @@ export class CentralStatusService {
 
 	constructor(
 		private router: Router,
-		private authService: AuthService
+		private authService: AuthService,
+		private modalService: BsModalService
 	) {
 		this.router.events.subscribe( this.routeHandler );
 		this.currentURL.subscribe( this.urlHandler );
-		console.log( 'Constructed central-status.service' );
+		// console.log( 'Constructed central-status.service' );
 		setInterval( this.notificationClear, 10000 );
 		if ( localStorage.getItem( 'selectedTags' ) ) this.selectedTags = JSON.parse( localStorage.getItem( 'selectedTags' ) );
 	}
@@ -74,6 +80,9 @@ export class CentralStatusService {
 				this.currentID = parseInt( urlSegments[3], 10 );
 			}
 		}
+		this.currentComponentO.next( this.currentComponent );
+		this.currentIDO.next( this.currentID );
+		// console.log( 'Current id changed to', this.currentID );
 	}
 
 	public notificationAdd = ( payload: ATNotification ) => this.notifications$.next( this.notifications$.getValue().concat( [{ ...newATNotification(), ...payload }] ) );
@@ -98,5 +107,19 @@ export class CentralStatusService {
 			if ( tags[currentFilter.toString()] !== true ) shouldShow = false;
 		} );
 		return shouldShow;
+	}
+
+	public confirm = ( question: string ) => {
+		const modalRef: BsModalRef = this.modalService.show( ConfirmComponent, { initialState: { question } } );
+		return new Promise( ( resolve, reject ) => {
+			modalRef.content.onClose.subscribe( resolve, reject );
+		} );
+	}
+
+	public prompt = ( question: string ) => {
+		const modalRef: BsModalRef = this.modalService.show( PromptComponent, { initialState: { question } } );
+		return new Promise( ( resolve, reject ) => {
+			modalRef.content.onClose.subscribe( resolve, reject );
+		} );
 	}
 }

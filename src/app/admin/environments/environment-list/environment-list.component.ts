@@ -1,10 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ATEnvironment } from 'shared/models/at.environment';
 import { DataStoreService } from '../../../data-store/data-store.service';
-import { Subscription, BehaviorSubject } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { ATEnvironmentType, atGetEnvironmentTypeDescription } from 'shared/enums/environmenttypes';
 import { CommunicationService } from '../../../communication/communication.service';
-import { CentralStatusService } from '../../../central-status.service';
+import { CentralStatusService } from '../../../central-status/central-status.service';
+import { EnvironmentsService } from '../environments.service';
 
 @Component( {
 	selector: 'app-environment-list',
@@ -21,7 +22,8 @@ export class EnvironmentListComponent implements OnInit, OnDestroy {
 	constructor(
 		private ds: DataStoreService,
 		private cs: CommunicationService,
-		public ss: CentralStatusService
+		public ss: CentralStatusService,
+		public ms: EnvironmentsService
 	) {
 		this.ds.showInterest( { concept: 'environments' } );
 		this.subscriptions.push( this.ds.store.environments.items.subscribe( i => this.environments = i ) );
@@ -31,14 +33,7 @@ export class EnvironmentListComponent implements OnInit, OnDestroy {
 
 	ngOnDestroy() {
 		this.subscriptions.forEach( s => s.unsubscribe() );
-	}
-
-	public shoulListItem = ( id: number ) => {
-		return true;
-	}
-
-	public delete = ( id: number, name: string ) => {
-
+		this.subscriptions = [];
 	}
 
 }

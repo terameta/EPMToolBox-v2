@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AuthService } from './auth/auth.service';
 import { CanActivate, Router, ActivatedRouteSnapshot } from '@angular/router';
 import { JwtHelperService as JwtHelper } from '@auth0/angular-jwt';
-import { CentralStatusService } from './central-status.service';
+import { CentralStatusService } from './central-status/central-status.service';
 
 @Injectable( {
 	providedIn: 'root'

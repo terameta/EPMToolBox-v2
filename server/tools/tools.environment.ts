@@ -8,6 +8,8 @@ export class EnvironmentTool {
 	private credentialTool: CredentialTool;
 
 	constructor( private db: DB, private tools: MainTools ) {
+		console.log( '\n\n\n>>>tools.environment.ts implement the rest of the functions' );
+		console.log( '>>>tools.environment.ts implement verify' );
 		this.credentialTool = new CredentialTool( db, tools );
 	}
 
@@ -18,8 +20,9 @@ export class EnvironmentTool {
 
 	public getOne = ( id: number ) => this.getEnvironmentDetails( id );
 
-	public create = async (): Promise<ATEnvironment> => {
-		const newEnvironment = <ATEnvironment>{ name: 'New Environment' };
+	public create = async ( payload: ATEnvironment ): Promise<ATEnvironment> => {
+		delete payload.id;
+		const newEnvironment = Object.assign( <ATEnvironment>{ name: 'New Environment' }, payload );
 		const result = await this.db.queryOne<any>( 'INSERT INTO environments SET ?', this.tools.prepareTupleToWrite( newEnvironment ) );
 		newEnvironment.id = result.tuple.insertId;
 		return newEnvironment;
