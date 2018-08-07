@@ -59,9 +59,10 @@ export class ATApi {
 
 	public respond = async ( request: ATApiCommunication, socket: Socket ) => {
 		// console.log( '===========================================' );
-		// console.log( 'We are at respond' );
+		// console.log( 'We are at respond', request.framework, request.action, request.payload.status );
+		console.log( '>>>Remember to verify token with each request@api.ts' );
 		// console.log( '===========================================' );
-		// console.log( request );
+		// console.log( JSON.stringify( request ) );
 		// console.log( '===========================================' );
 		// console.log( '===========================================' );
 		const payload = await this.backend[request.framework][request.action]( request.payload.data ).catch( e => this.respondFinalize( request, socket, 'error', e ) );
@@ -70,12 +71,13 @@ export class ATApi {
 
 	private respondFinalize = ( request: ATApiCommunication, socket: Socket, status: 'success' | 'error', data: any ) => {
 		if ( status === 'error' ) { data = { message: data.message }; }
+		request = { ...request, payload: { status, data } };
 		// console.log( '===========================================' );
-		// console.log( 'We are at respond finalize' );
+		// console.log( 'We are at respond finalize', request.framework, request.action, request.payload.status );
 		// console.log( '===========================================' );
-		// console.log( { ...request, payload: { status, data } } );
+		// console.log( JSON.stringify( { ...request, payload: { status, data } } ) );
 		// console.log( '===========================================' );
 		// console.log( '===========================================' );
-		socket.emit( 'communication', { ...request, payload: { status, data } } );
+		socket.emit( 'communication', request );
 	}
 }

@@ -1,0 +1,5 @@
+<req_GetAvailableServices>
+	<sID>{{SID}}</sID>
+	<app>{{database}}</app>
+	<CubeView/>
+</req_GetAvailableServices>

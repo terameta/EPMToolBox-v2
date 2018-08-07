@@ -1,0 +1,5 @@
+<req_ConnectToProvider>
+	<ClientXMLVersion>4.2.5.6.0</ClientXMLVersion>
+	<lngs enc="0">en_US</lngs>
+	<sso>{{ssotoken}}</sso>
+</req_ConnectToProvider>

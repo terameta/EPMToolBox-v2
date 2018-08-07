@@ -4,7 +4,7 @@ import { MainTools } from '../tools/tools.main';
 import { DB } from '../tools/tools.db';
 import * as tableDefinitions from './config.initiator.tabledefinitions';
 import { EnumToArray, SortByName } from '../../shared/utilities/utilityFunctions';
-import { DimeEnvironmentType } from '../../shared/enums/environmenttypes';
+import { ATEnvironmentType } from '../../shared/models/at.environment';
 import * as _ from 'lodash';
 import { ATEnvironment } from '../../shared/models/at.environment';
 import { ATCredential } from '../../shared/models/at.credential';
@@ -112,7 +112,7 @@ export class Initiator {
 		this.steps.push( { expectedCurrentVersion: 40, operatorFunction: () => this.utils.tableAddColumn( 'environments', 'isconverted TINYINT NOT NULL DEFAULT 0 AFTER password' ) } );
 		this.steps.push( {
 			expectedCurrentVersion: 41, operatorFunction: async () => {
-				const environmentTypeObject = _.keyBy( EnumToArray( DimeEnvironmentType ), 'label' );
+				const environmentTypeObject = _.keyBy( EnumToArray( ATEnvironmentType ), 'label' );
 				const environmentResult = await this.db.query<any>( 'SELECT * FROM environments WHERE isconverted = 0' );
 				const environmentList = environmentResult.tuples;
 				const typeResult = await this.db.query<any>( 'SELECT * FROM environmenttypes' );

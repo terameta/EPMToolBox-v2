@@ -1,7 +1,7 @@
 <div class="container-fluid">
 	<div class="row">
 		<div class="col-12">
-			<form (ngSubmit)="ms.update()">
+			<form (ngSubmit)="ms.update(cEnvironment)">
 				<div class="form-group row m-0">
 					<label for="eName" class="col-3 col-md-1 col-form-label font-weight-bold">Name:</label>
 					<div class="col-9 col-md-11">
@@ -76,7 +76,7 @@
 							<button type="submit" class="btn btn-outline-primary">
 								<i class="fas fa-save fa-fw"></i> Save
 							</button>
-							<button class="btn btn-outline-success" type="button">
+							<button class="btn btn-outline-success" type="button" (click)="ms.verify(cEnvironment.id)">
 								<i class="fas fa-check fa-fw "></i> Verify
 							</button>
 							<button class="btn btn-outline-dark" type="button" (click)="ms.clone(cEnvironment)">

@@ -1,0 +1,23 @@
+<req_ExecuteQuery>
+	<sID>{{SID}}</sID>
+	<preferences>
+		<row_suppression zero="0" invalid="0" missing="0" underscore="0" noaccess="0"/>
+		<celltext val="1"/>
+		<zoomin ancestor="bottom" mode="children"/>
+		<navigate withData="1"/>
+		<includeSelection val="1"/>
+		<repeatMemberLabels val="1"/>
+		<withinSelectedGroup val="0"/>
+		<removeUnSelectedGroup val="0"/>
+		<col_suppression zero="0" invalid="0" missing="0" underscore="0" noaccess="0"/>
+		<block_suppression missing="0"/>
+		<includeDescriptionInLabel val="2"/>
+		<missingLabelText val=""/>
+		<noAccessText val="#No Access"/>
+		<aliasTableName val="Default"/>
+		<essIndent val="2"/>
+		<formulaRetention retrieve="1" zoomin_out="1" keep_removeonly="1" fill="1" comments="1"/>
+		<sliceLimitation rows="1048576" cols="16384"/>
+	</preferences>
+	<mdx>{{query}}</mdx>
+</req_ExecuteQuery>

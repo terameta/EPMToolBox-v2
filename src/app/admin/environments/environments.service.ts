@@ -23,11 +23,11 @@ export class EnvironmentsService {
 	}
 
 	public verify = ( id: number ) => {
-		console.log( 'Apply verify logic here' );
+		this.cs.communicate( { framework: 'environments', action: 'verify', payload: { status: 'request', data: id } } );
 	}
 
-	public update = () => {
-		console.log( 'Update is requested' );
+	public update = ( payload: ATEnvironment ) => {
+		this.cs.communicate( { framework: 'environments', action: 'update', payload: { status: 'request', data: payload } } );
 	}
 
 	public clone = async ( source: ATEnvironment ) => {
@@ -37,7 +37,7 @@ export class EnvironmentsService {
 		payload.name = result;
 		delete payload.id;
 		this.cs.communicate( { framework: 'environments', action: 'create', payload: { status: 'request', data: payload } }, true ).subscribe( ( response ) => {
-			console.log( response.data );
+			// console.log( response.data );
 			if ( response.data && response.data.id ) {
 				this.router.navigateByUrl( '/admin/environments/' + response.data.id );
 			}

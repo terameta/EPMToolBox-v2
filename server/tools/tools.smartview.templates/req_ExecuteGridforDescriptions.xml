@@ -1,0 +1,42 @@
+<req_ExecuteGrid>
+	<sID>{{SID}}</sID>
+	<action>zoomin</action>
+	<ords>{{numberofColumns}}</ords>
+	<preferences>
+		<row_suppression zero="0" invalid="0" missing="0" underscore="0" noaccess="0"/>
+		<celltext val="1"/>
+		<zoomin ancestor="top" mode="descendents"/>
+		<navigate withData="1"/>
+		<includeSelection val="1"/>
+		<repeatMemberLabels val="1"/>
+		<withinSelectedGroup val="0"/>
+		<removeUnSelectedGroup val="0"/>
+		<col_suppression zero="0" invalid="0" missing="0" underscore="0" noaccess="0"/>
+		<block_suppression missing="0"/>
+		<includeDescriptionInLabel val="0"/>
+		<missingLabelText val=""/>
+		<noAccessText val="#No Access"/>
+		<essIndent val="2"/>
+		<sliceLimitation rows="1048576" cols="16384"/>
+	</preferences>
+	<grid>
+		<cube>{{table}}</cube>
+		<dims>
+			<dim id="0" name="{{name}}" row="0" hidden="0" expand="0"/>
+			<dim id="1" name="Member Properties" col="0" hidden="0" expand="0"/>
+		</dims>
+		<perspective type="Reality"/>
+		<slices>
+			<slice rows="2" cols="{{numberofColumns}}">
+				<data>
+					<range start="0" end="{{rangeend}}">
+						<vals>|Description|{{descriptiveTable}} Alias Table' + '|{{name}}||</vals>
+						<types>7|0|0|0|13|13</types>
+					</range>
+				</data>
+				<metadata/>
+				<conditionalFormats/>
+			</slice>
+		</slices>
+	</grid>
+</req_ExecuteGrid>

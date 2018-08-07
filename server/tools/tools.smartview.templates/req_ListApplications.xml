@@ -1,0 +1,6 @@
+<req_ListApplications>
+	<sID>{{SID}}</sID>
+	<srv>{{server}}</srv>
+	<type></type>
+	<url></url>
+</req_ListApplications>

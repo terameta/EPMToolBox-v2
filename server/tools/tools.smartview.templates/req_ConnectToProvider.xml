@@ -1,0 +1,12 @@
+<req_ConnectToProvider>
+	<ClientXMLVersion>4.2.5.7.3</ClientXMLVersion>
+	<ClientInfo>
+		<ExternalVersion>11.1.2.5.710</ExternalVersion>
+		<OfficeVersion>16.0</OfficeVersion>
+		<OSVersion>Windows MajorVersion.MinorVersion.BuildNumber 10.0.15063</OSVersion>
+	</ClientInfo>
+	<lngs enc="0">en_US</lngs>
+	<usr></usr>
+	<pwd></pwd>
+	<sharedServices>1</sharedServices>
+</req_ConnectToProvider >

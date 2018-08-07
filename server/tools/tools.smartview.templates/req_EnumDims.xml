@@ -1,0 +1,8 @@
+<req_EnumDims>
+	<sID>{{SID}}</sID>
+	<srv>{{server}}</srv>
+	<app>{{database}}</app>
+	<cube>{{table}}</cube>
+	<alsTbl>Default</alsTbl>
+	<ODL_ECID>0000</ODL_ECID>
+</req_EnumDims>

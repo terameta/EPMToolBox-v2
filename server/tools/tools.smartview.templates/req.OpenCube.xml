@@ -1,0 +1,9 @@
+<req_OpenCube>
+	<sID>{{SID}}</sID>
+	<srv>{{server}}</srv>
+	<app>{{database}}</app>
+	<cube>{{table}}</cube>
+	<type></type>
+	<url></url>
+	<form></form>
+</req_OpenCube>

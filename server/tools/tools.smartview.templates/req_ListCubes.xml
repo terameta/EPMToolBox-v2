@@ -1,0 +1,7 @@
+<req_ListCubes>
+	<sID>{{SID}}</sID>
+	<srv>{{planningserver}}</srv>
+	<app>{{database}}</app>
+	<type></type>
+	<url></url>
+</req_ListCubes>

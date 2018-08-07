@@ -31,7 +31,8 @@ export class EnvironmentTool {
 	public update = async ( payload: ATEnvironmentDetail ) => {
 		delete payload.database;
 		delete payload.table;
-		delete payload.connection;
+		delete payload.mssql;
+		delete payload.smartview;
 		delete payload.query;
 		delete payload.procedure;
 		delete payload.username;
@@ -52,6 +53,10 @@ export class EnvironmentTool {
 			toReturn.password = password;
 		}
 		return toReturn;
+	}
+
+	public verify = async ( id: number ) => {
+		console.log( 'We will now verify', id );
 	}
 }
 // import { DB } from './tools.db';

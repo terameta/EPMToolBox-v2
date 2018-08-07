@@ -1,10 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ATEnvironmentType, atGetEnvironmentTypeDescription } from 'shared/enums/environmenttypes';
 import { EnumToArray, SortByName, SortByPosition } from 'shared/utilities/utilityFunctions';
-import { ATEnvironment, getDefaultATEnvironment } from 'shared/models/at.environment';
+import { ATEnvironment, getDefaultATEnvironment, ATEnvironmentType, atGetEnvironmentTypeDescription } from 'shared/models/at.environment';
 import { Subscription } from 'rxjs';
 import { DataStoreService } from '../../../data-store/data-store.service';
-import { CommunicationService } from '../../../communication/communication.service';
 import { CentralStatusService } from '../../../central-status/central-status.service';
 import { EnvironmentsService } from '../environments.service';
 import { ATCredential } from 'shared/models/at.credential';
@@ -45,6 +43,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
 				filter( ( [s, id] ) => ( !!s[id] ) )
 			).
 			subscribe( ( [s, id] ) => {
+				// console.log( id, s );
 				this.cEnvironment = Object.assign( getDefaultATEnvironment(), s[id] );
 			} ) );
 		this.subscriptions.push( this.ds.store.credentials.items.subscribe( c => this.credentials = c ) );

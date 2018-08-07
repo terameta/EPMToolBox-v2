@@ -1,0 +1,49 @@
+<req_Refresh>
+	<sID>{{SID}}</sID>
+	<preferences>
+		<row_suppression zero="1" invalid="0" missing="1" underscore="0" noaccess="0"/>
+		<celltext val="1"/>
+		<zoomin ancestor="bottom" mode="children"/>
+		<navigate withData="1"/>
+		<includeSelection val="1"/>
+		<repeatMemberLabels val="1"/>
+		<withinSelectedGroup val="0"/>
+		<removeUnSelectedGroup val="0"/>
+		<col_suppression zero="0" invalid="0" missing="0" underscore="0" noaccess="0"/>
+		<block_suppression missing="1"/>
+		<includeDescriptionInLabel val="2"/>
+		<missingLabelText val=""/>
+		<noAccessText val="#No Access"/>
+		<aliasTableName val="none"/>
+		<essIndent val="2"/>
+		<FormatSetting val="2"/>
+		<sliceLimitation rows="1048576" cols="16384"/>
+	</preferences>
+	<grid>
+		<cube>{{cube}}</cube>
+		<dims>
+		{{#each povDims}}
+			<dim id="{{refreshid}}" name="{{name}}" pov="{{memberName}}" display="{{memberName}}" hidden="0" expand="0"/>
+		{{/each}}
+		{{#each rowDims}}
+			<dim id="{{refreshid}}" name="{{name}}" row="{{roworder}}" hidden="0" expand="0"/>
+		{{/each}}
+		{{#each colDims}}
+			<dim id="{{refreshid}}" name="{{name}}" col="{{colorder}}" hidden="0" expand="0"/>
+		{{/each}}
+		</dims>
+		<perspective type="Reality"/>
+		<slices>
+			<slice rows="{{rows}}" cols="{{cols}}">
+				<data>
+					<range start="{{range.start}}" end="{{range.end}}">
+						<vals>{{vals}}</vals>
+						<types>{{types}}</types>
+					</range>
+				</data>
+				<metadata/>
+				<conditionalFormats/>
+			</slice>
+		</slices>
+	</grid>
+</req_Refresh>

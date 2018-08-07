@@ -1,8 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ATEnvironment } from 'shared/models/at.environment';
+import { ATEnvironment, ATEnvironmentType, atGetEnvironmentTypeDescription } from 'shared/models/at.environment';
 import { DataStoreService } from '../../../data-store/data-store.service';
 import { Subscription } from 'rxjs';
-import { ATEnvironmentType, atGetEnvironmentTypeDescription } from 'shared/enums/environmenttypes';
 import { CommunicationService } from '../../../communication/communication.service';
 import { CentralStatusService } from '../../../central-status/central-status.service';
 import { EnvironmentsService } from '../environments.service';

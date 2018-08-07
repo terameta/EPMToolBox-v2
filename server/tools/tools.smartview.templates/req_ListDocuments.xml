@@ -1,0 +1,6 @@
+<req_ListDocuments>
+	<sID>{{SID}}</sID>
+	<type>all</type>
+	<folder>/</folder>
+	<ODL_ECID>0000</ODL_ECID>
+</req_ListDocuments>
