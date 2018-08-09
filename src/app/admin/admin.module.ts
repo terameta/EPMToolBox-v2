@@ -10,7 +10,8 @@ import { AdminSharedModule } from './admin-shared/admin-shared.module';
 
 const routes: Routes = [
 	{ path: '', component: AdminFrontPageComponent },
-	{ path: 'environments', loadChildren: './environments/environments.module#EnvironmentsModule' }
+	{ path: 'environments', loadChildren: './environments/environments.module#EnvironmentsModule' },
+	{ path: 'credentials', loadChildren: './credentials/credentials.module#CredentialsModule' }
 ];
 
 @NgModule( {

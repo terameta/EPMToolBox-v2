@@ -15,6 +15,8 @@ import { CredentialTool } from '../tools/tools.credential';
 import { TagTool } from '../tools/tools.tag';
 import { TagGroupTool } from '../tools/tools.taggroup';
 import { UserTool } from '../tools/tools.user';
+import { LogTool } from '../tools/tools.log';
+import { ATLog } from '../../shared/models/at.log';
 
 
 
@@ -31,7 +33,8 @@ interface Backend {
 	credentials: CredentialTool,
 	tags: TagTool,
 	taggroups: TagGroupTool,
-	users: UserTool
+	users: UserTool,
+	logs: LogTool
 }
 
 
@@ -55,11 +58,12 @@ export class ATApi {
 		this.backend.tags = new TagTool( db, tools );
 		this.backend.taggroups = new TagGroupTool( db, tools );
 		this.backend.users = new UserTool( db, tools );
+		this.backend.logs = new LogTool( db, tools );
 	}
 
 	public respond = async ( request: ATApiCommunication, socket: Socket ) => {
 		// console.log( '===========================================' );
-		// console.log( 'We are at respond', request.framework, request.action, request.payload.status );
+		// console.log( 'We are at respond', request.framework, request.action, request.payload.status, request.payload.data );
 		console.log( '>>>Remember to verify token with each request@api.ts' );
 		// console.log( '===========================================' );
 		// console.log( JSON.stringify( request ) );
@@ -70,7 +74,10 @@ export class ATApi {
 	}
 
 	private respondFinalize = ( request: ATApiCommunication, socket: Socket, status: 'success' | 'error', data: any ) => {
-		if ( status === 'error' ) { data = { message: data.message }; }
+		if ( status === 'error' ) {
+			this.backend.logs.create( <ATLog>{ details: ( <Error>( data ) ).stack.toString() }, true ).catch( console.log );
+			data = { message: data.message };
+		}
 		request = { ...request, payload: { status, data } };
 		// console.log( '===========================================' );
 		// console.log( 'We are at respond finalize', request.framework, request.action, request.payload.status );

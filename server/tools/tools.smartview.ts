@@ -1,16 +1,19 @@
-BURADA KALDIMA GİT
 import { DB } from './tools.db';
 import { MainTools } from './tools.main';
-import { ATEnvironmentDetail, ATEnvironmentType } from 'shared/models/at.environment';
-import * as Promisers from 'shared/utilities/promisers';
+import { ATEnvironmentDetail, ATEnvironmentType } from '../../shared/models/at.environment';
+import * as Promisers from '../../shared/utilities/promisers';
 import { join } from 'path';
 import { compile as hbCompile } from 'handlebars';
-import { ATSmartViewRequestOptions } from 'shared/models/at.smartview';
+import { ATSmartViewRequestOptions } from '../../shared/models/at.smartview';
 import { CheerioStatic } from 'cheerio';
 import * as cheerio from 'cheerio';
 import * as request from 'request';
 import * as url from 'url';
-import { ATStreamField } from 'shared/models/at.stream';
+import { ATStreamField } from '../../shared/models/at.stream';
+import { SortByName, encodeXML, SortByPosition, arrayCartesian } from '../../shared/utilities/utilityFunctions';
+import { findMembers } from '../../shared/utilities/hpUtilities';
+import * as puppeteer from 'puppeteer';
+import { HttpMethod } from 'puppeteer';
 
 export class SmartViewTool {
 	constructor( private db: DB, private tools: MainTools ) { }
@@ -31,11 +34,8 @@ export class SmartViewTool {
 		const body = await this.smartviewGetXMLTemplate( 'req_OpenCube.xml', payload );
 		const { $ } = await this.smartviewPoster( { url: payload.smartview.planningurl, body, cookie: payload.smartview.cookies } );
 
-		let isSuccessful = false;
-		$( 'body' ).children().toArray().forEach( curElem => {
-			if ( curElem.name === 'res_opencube' ) { isSuccessful = true; }
-		} );
-		if ( !isSuccessful ) throw ( new Error( 'Failure to open cube ' + payload.name + '@smartviewOpenCube' ) );
+		const hasFailed = $( 'body' ).children().toArray().filter( e => e.name === 'res_opencube' ).length === 0;
+		if ( hasFailed ) throw ( new Error( 'Failure to open cube ' + payload.name + '@smartviewOpenCube' ) );
 		return payload;
 	}
 	private smartviewListCubes = async ( payload: ATEnvironmentDetail ): Promise<ATEnvironmentDetail> => {
@@ -45,33 +45,19 @@ export class SmartViewTool {
 		const body = await this.smartviewGetXMLTemplate( 'req_ListCubes.xml', payload );
 		const { $ } = await this.smartviewPoster( { url: payload.smartview.planningurl, body, cookie: payload.smartview.cookies } );
 
-		let isSuccessful = false;
-		$( 'body' ).children().toArray().forEach( curElem => {
-			if ( curElem.name === 'res_listcubes' ) { isSuccessful = true; }
-		} );
-		if ( isSuccessful ) throw ( new Error( 'Failure to list cubes ' + payload.name + '@smartviewListCubes@issuccessful' ) );
+		const hasFailed = $( 'body' ).children().toArray().filter( e => e.name === 'res_listcubes' ).length === 0;
+		if ( hasFailed ) throw ( new Error( 'Failure to list cubes ' + payload.name + '@smartviewListCubes' ) );
 		payload.smartview.cubes = $( 'cubes' ).text().split( '|' );
 		return payload;
 	}
-	private smartviewOpenApplication = ( refObj: ATEnvironmentDetail ): Promise<ATEnvironmentDetail> => {
-		let body: string;
-		return this.smartviewListApplications( refObj )
-			.then( resEnv => {
-				refObj = resEnv;
-				body = '<req_OpenApplication><sID>' + refObj.SID + '</sID><srv>' + refObj.planningserver + '</srv><app>' + refObj.database + '</app><type></type><url></url></req_OpenApplication>';
-				return this.smartviewPoster( { url: refObj.planningurl, body, cookie: refObj.cookies } );
-			} )
-			.then( response => {
-				let isSuccessful = false;
-				response.$( 'body' ).children().toArray().forEach( curElem => {
-					if ( curElem.name === 'res_openapplication' ) { isSuccessful = true; }
-				} );
-				if ( isSuccessful ) {
-					return Promise.resolve( refObj );
-				} else {
-					return Promise.reject( new Error( 'Failure to open application ' + refObj.name + '@smartviewOpenApplication' ) );
-				}
-			} );
+	private smartviewOpenApplication = async ( payload: ATEnvironmentDetail ): Promise<ATEnvironmentDetail> => {
+		await this.listApplications( payload );
+		const body = await this.smartviewGetXMLTemplate( 'req_OpenApplication.xml', payload );
+		const { $ } = await this.smartviewPoster( { url: payload.smartview.planningurl, body, cookie: payload.smartview.cookies } );
+
+		const hasFailed = $( 'body' ).children().toArray().filter( e => e.name === 'res_openapplication' ).length === 0;
+		if ( hasFailed ) throw ( new Error( 'Failure to open application ' + payload.name + '@smartviewOpenApplication' ) );
+		return payload;
 	}
 	public smartviewListApplications = ( payload: ATEnvironmentDetail ): Promise<ATEnvironmentDetail> => {
 		// Validate SID function tries the smartviewListApplicationsValidator
@@ -79,34 +65,29 @@ export class SmartViewTool {
 		// We made this so that we can avoid the circular reference
 		return this.validateSID( payload );
 	}
-	public validateSID = ( refObj: ATEnvironmentDetail ): Promise<ATEnvironmentDetail> => {
-		return new Promise( ( resolve, reject ) => {
-			if ( refObj.SID ) {
-				delete refObj.SID;
-				delete refObj.cookies;
-				resolve( this.validateSID( refObj ) );
-			} else {
-				switch ( refObj.type ) {
-					case ATEnvironmentType.PBCS: {
-						// resolve( this.pbcsObtainSID( refObj ).then( this.smartviewListApplicationsValidator ) );
-						this.pbcsObtainSID( refObj ).then( this.smartviewListApplicationsValidator ).then( resolve ).catch( reject );
-						break;
-					}
-					case ATEnvironmentType.HP: {
-						this.hpObtainSID( refObj ).then( this.smartviewListApplicationsValidator ).then( resolve ).catch( reject );
-						break;
-					}
-					default: {
-						reject( new Error( 'Not a valid environment type' ) );
-					}
+	public validateSID = async ( payload: ATEnvironmentDetail ): Promise<ATEnvironmentDetail> => {
+		if ( payload.SID ) {
+			delete payload.SID;
+			delete payload.smartview.cookies;
+			return this.validateSID( payload );
+		} else {
+			switch ( payload.type ) {
+				case ATEnvironmentType.PBCS: {
+					return this.pbcsObtainSID( payload ).then( this.smartviewListApplicationsValidator );
+				}
+				case ATEnvironmentType.HP: {
+					return this.hpObtainSID( payload ).then( this.smartviewListApplicationsValidator );
+				}
+				default: {
+					throw ( new Error( 'Not a valid environment type' ) );
 				}
 			}
-		} );
+		}
 	}
 	public smartviewReadDataPrepare = async ( payload ) => {
 		await this.smartviewOpenCube( payload );
 
-		payload.query.hierarchies = await this.smartviewGetAllDescriptionsWithHierarchy( payload, Object.values( <DimeStreamFieldDetail[]>payload.query.dimensions ).sort( SortByPosition ) );
+		payload.query.hierarchies = await this.smartviewGetAllDescriptionsWithHierarchy( payload, Object.values( <ATStreamField[]>payload.query.dimensions ).sort( SortByPosition ) );
 		payload.query.povMembers = payload.query.povs.map( ( pov, pindex ) => findMembers( payload.query.hierarchies[payload.query.povDims[pindex]], pov.selectionType, pov.selectedMember ) );
 
 		const colCartesian = payload.query.cols.map( col => {
@@ -272,7 +253,7 @@ export class SmartViewTool {
 		valueArray = [];
 		typeArray = [];
 
-		const bodyXML = await Promisers.readFile( path.join( __dirname, './tools.smartview.assets/req_Refresh.xml' ) );
+		const bodyXML = await Promisers.readFile( join( __dirname, './tools.smartview.assets/req_Refresh.xml' ) );
 		const bodyTemplate = Handlebars.compile( bodyXML );
 		const body = bodyTemplate( params );
 
@@ -327,20 +308,6 @@ export class SmartViewTool {
 					}
 				}, 2000 );
 			}
-		} );
-	}
-	private smartviewReadDataOLD = ( payload ) => {
-		return new Promise( ( resolve, reject ) => {
-			payload.dims = _.keyBy( payload.query.dims, 'id' );
-			payload.pullLimit = 10000000;
-			payload.data = [];
-			payload.startTime = new Date();
-			payload.numberofRowsPerChunck = Math.floor( payload.pullLimit / payload.query.colMembers.length );
-			if ( payload.numberofRowsPerChunck < 1 ) {
-				payload.numberofRowsPerChunck = 1;
-			}
-			payload.numberOfChuncks = Math.ceil( payload.query.rowMembers.length / payload.numberofRowsPerChunck );
-			this.smartviewReadDataPullChuncks( payload ).then( resolve ).catch( reject );
 		} );
 	}
 	private smartviewReadDataPullChuncks = ( payload ) => {
@@ -458,7 +425,7 @@ export class SmartViewTool {
 				body += '</grid>';
 				body += '</req_Refresh>';
 				console.log( '>>> Pulling chunck', ( payload.consumedChuncks + 1 ), '/', payload.numberOfChuncks, 'posted.' );
-				return this.smartviewPoster( { url: resEnv.planningurl, body, cookie: resEnv.cookies, timeout: 120000000 } );
+				return this.smartviewPoster( { url: resEnv.smartview.planningurl, body, cookie: resEnv.smartview.cookies, timeout: 120000000 } );
 				// return Promise.reject( 'Trying something' );
 			} )
 			.then( response => {
@@ -506,68 +473,37 @@ export class SmartViewTool {
 			} );
 		} );
 	}
-	private smartviewRunBusinessRuleAction = ( payload ): Promise<any> => {
-		let body = '';
-		return this.smartviewOpenCube( payload ).then( resEnv => {
-			body += '<req_LaunchBusinessRule>';
-			body += '<sID>' + resEnv.SID + '</sID>';
-			body += '<cube>' + resEnv.table + '</cube>';
-			body += '<rule type="' + resEnv.procedure.type + '">' + resEnv.procedure.name + '</rule>';
-			body += '<prompts>';
-			resEnv.procedure.variables.forEach( ( curRTP: any ) => {
-				body += '<rtp>';
-				body += '<name>' + curRTP.name + '</name>';
-				body += '<val>' + curRTP.value + '</val>';
-				body += '</rtp>';
-			} );
-			body += '</prompts>';
-			body += '<ODL_ECID>0000</ODL_ECID>';
-			body += '</req_LaunchBusinessRule>';
-			return this.smartviewPoster( { url: resEnv.planningurl, body, cookie: resEnv.cookies } );
-		} ).then( response => {
-			const isSuccessful = response.$( 'body' ).children().toArray().filter( elem => ( elem.name === 'res_launchbusinessrule' ) ).length > 0;
-			if ( isSuccessful ) {
-				return Promise.resolve();
-			} else {
-				return Promise.reject( new Error( 'There is an issue with running business rule ' + response.body ) );
-			}
-		} );
+	private smartviewRunBusinessRuleAction = async ( payload ): Promise<any> => {
+		await this.smartviewOpenCube( payload );
+		const body = await this.smartviewGetXMLTemplate( 'req_LaunchBusinessRule.xml', payload );
+		const { $, body: rBody } = await this.smartviewPoster( { url: payload.smartview.planningurl, body, cookie: payload.smartview.cookies } );
+		const hasFailed = $( 'body' ).children().toArray().filter( elem => ( elem.name === 'res_launchbusinessrule' ) ).length === 0;
+		if ( hasFailed ) throw ( new Error( 'There is an issue with running business rule ' + rBody ) );
 	}
-	public writeData = ( payload ) => {
-		return this.smartviewWriteData( payload );
+	public writeData = ( payload ) => this.smartviewWriteData( payload );
+	private smartviewWriteData = async ( payload ): Promise<ATEnvironmentDetail> => {
+		payload.issueList = [];
+		payload.cellsTotalCount = 0;
+		payload.cellsValidCount = 0;
+		payload.cellsInvalidCount = 0;
+		const pushLimit = 5000;
+		const wholeData = payload.data;
+		let numberofRowsPerChunck = Math.floor( pushLimit / ( Object.keys( wholeData[0] ).length - payload.sparseDims.length ) );
+		if ( numberofRowsPerChunck < 1 ) {
+			numberofRowsPerChunck = 1;
+		}
+		const chunkedData: any[] = [];
+		while ( wholeData.length > 0 ) {
+			chunkedData.push( wholeData.splice( 0, numberofRowsPerChunck ) );
+		}
+		await this.smartviewWriteDataSendChuncks( payload, chunkedData );
+		return <ATEnvironmentDetail>payload;
 	}
-	private smartviewWriteData = ( payload ) => {
-		return new Promise( ( resolve, reject ) => {
-			payload.issueList = [];
-			payload.cellsTotalCount = 0;
-			payload.cellsValidCount = 0;
-			payload.cellsInvalidCount = 0;
-			const pushLimit = 5000;
-			const wholeData = payload.data;
-			let numberofRowsPerChunck = Math.floor( pushLimit / ( Object.keys( wholeData[0] ).length - payload.sparseDims.length ) );
-			if ( numberofRowsPerChunck < 1 ) {
-				numberofRowsPerChunck = 1;
-			}
-			const chunkedData: any[] = [];
-			while ( wholeData.length > 0 ) {
-				chunkedData.push( wholeData.splice( 0, numberofRowsPerChunck ) );
-			}
-			this.smartviewWriteDataSendChuncks( payload, chunkedData ).then( () => { resolve( payload ); } ).catch( reject );
-		} );
-	}
-	private smartviewWriteDataSendChuncks = ( payload, chunks: any[] ) => {
-		return new Promise( ( resolve, reject ) => {
-			asynclib.eachOfSeries( chunks, ( chunk, key, callback ) => {
-				payload.data = chunk;
-				this.smartviewWriteDataTry( payload, 0 ).then( result => { callback(); } ).catch( callback );
-			}, ( err ) => {
-				if ( err ) {
-					reject( err );
-				} else {
-					resolve();
-				}
-			} );
-		} );
+	private smartviewWriteDataSendChuncks = async ( payload, chunks: any[] ) => {
+		for ( const chunck of chunks ) {
+			payload.data = chunck;
+			await this.smartviewWriteDataTry( payload, 0 );
+		}
 	}
 	private smartviewWriteDataTry = ( payload, retrycount = 0 ) => {
 		const maxRetry = 10;
@@ -664,7 +600,7 @@ export class SmartViewTool {
 			body += '</slices>';
 			body += '</grid>';
 			body += '</req_WriteBack>';
-			return this.smartviewPoster( { url: resEnv.planningurl, body, cookie: resEnv.cookies } );
+			return this.smartviewPoster( { url: resEnv.smartview.planningurl, body, cookie: resEnv.smartview.cookies } );
 		} ).then( response => {
 			const rangeStart = parseInt( response.$( 'range' ).attr( 'start' ), 10 );
 			const rangeEnd = parseInt( response.$( 'range' ).attr( 'end' ), 10 );
@@ -707,64 +643,60 @@ export class SmartViewTool {
 					payload.cellsValidCount++;
 				}
 			} );
-			const isSuccessful = response.$( 'body' ).children().toArray().filter( elem => ( elem.name === 'res_writeback' ) ).length > 0;
-			if ( isSuccessful ) {
-				return Promise.resolve( 'Data is pushed to Hyperion Planning' );
-			} else {
+			const hasFailed = response.$( 'body' ).children().toArray().filter( elem => ( elem.name === 'res_writeback' ) ).length === 0;
+			if ( hasFailed ) {
 				return Promise.reject( new Error( 'Failed to write data:' + response.body ) );
+			} else {
+				return Promise.resolve( 'Data is pushed to Hyperion Planning' );
 			}
 		} );
 	}
-	public listBusinessRuleDetails = ( environment: ATEnvironmentDetail ) => {
-		return this.smartviewListBusinessRuleDetails( environment );
+	public listBusinessRuleDetails = async ( payload: ATEnvironmentDetail ) => {
+		await this.smartviewListBusinessRuleDetails( payload );
+		return payload.smartview.procedure.variables;
 	}
-	private smartviewListBusinessRuleDetails = ( environment: ATEnvironmentDetail ) => {
-		return this.smartviewOpenCube( environment )
-			.then( resEnv => {
-				// tslint:disable-next-line:max-line-length
-				const body = '<req_EnumRunTimePrompts><sID>' + resEnv.SID + '</sID><cube>' + resEnv.table + '</cube ><rule type="' + resEnv.procedure.type + '">' + resEnv.procedure.name + '</rule><ODL_ECID>0000</ODL_ECID></req_EnumRunTimePrompts>';
-				return this.smartviewPoster( { url: resEnv.planningurl, body, cookie: resEnv.cookies } );
-			} )
-			.then( response => {
-				const rtps: any[] = [];
-				response.$( 'rtp' ).toArray().forEach( rtp => {
-					const toPush: any = {};
-					toPush.name = response.$( rtp ).find( 'name' ).text();
-					toPush.description = response.$( rtp ).find( 'description' ).text();
-					toPush.dimension = response.$( rtp ).find( 'member' ).toArray()[0].attribs.dim;
-					toPush.memberselect = response.$( rtp ).find( 'member' ).toArray()[0].attribs.mbrselect;
-					if ( toPush.memberselect === '0' ) {
-						toPush.memberselect = false;
-					} else {
-						toPush.memberselect = true;
-					}
-					toPush.choice = response.$( rtp ).find( 'member' ).toArray()[0].attribs.choice;
-					toPush.defaultmember = response.$( rtp ).find( 'member' ).find( 'default' ).text();
-					toPush.allowmissing = response.$( rtp ).find( 'allowMissing' ).text();
-					rtps.push( toPush );
-				} );
-				return Promise.resolve( rtps );
-			} );
+	private smartviewListBusinessRuleDetails = async ( payload: ATEnvironmentDetail ): Promise<ATEnvironmentDetail> => {
+		await this.smartviewOpenCube( payload );
+		const body = await this.smartviewGetXMLTemplate( 'req_EnumRunTimePrompts.xml', {
+			SID: payload.SID,
+			table: payload.table,
+			ruleType: payload.smartview.procedure.type,
+			ruleName: payload.smartview.procedure.name
+		} );
+		const { $ } = await this.smartviewPoster( { url: payload.smartview.planningurl, body, cookie: payload.smartview.cookies } );
+		const rtps: any[] = [];
+		$( 'rtp' ).toArray().forEach( rtp => {
+			const toPush: any = {};
+			toPush.name = $( rtp ).find( 'name' ).text();
+			toPush.description = $( rtp ).find( 'description' ).text();
+			toPush.dimension = $( rtp ).find( 'member' ).toArray()[0].attribs.dim;
+			toPush.memberselect = $( rtp ).find( 'member' ).toArray()[0].attribs.mbrselect;
+			if ( toPush.memberselect === '0' ) {
+				toPush.memberselect = false;
+			} else {
+				toPush.memberselect = true;
+			}
+			toPush.choice = $( rtp ).find( 'member' ).toArray()[0].attribs.choice;
+			toPush.defaultmember = $( rtp ).find( 'member' ).find( 'default' ).text();
+			toPush.allowmissing = $( rtp ).find( 'allowMissing' ).text();
+			rtps.push( toPush );
+		} );
+		payload.smartview.procedure.variables = rtps;
+		return payload;
 	}
-	public listBusinessRules = ( environment: ATEnvironmentDetail ) => {
-		return this.smartviewListBusinessRules( environment );
+	public listBusinessRules = async ( payload: ATEnvironmentDetail ) => {
+		await this.smartviewListBusinessRules( payload );
+		return payload.smartview.ruleList;
 	}
-	private smartviewListBusinessRules = ( payload: ATEnvironmentDetail ) => {
-		burada kaldım
-		return this.smartviewOpenCube( payload )
-			.then( resEnv => {
-				const body = '<req_EnumBusinessRules><sID>' + resEnv.SID + '</sID><cube>' + resEnv.table + '</cube><runOnSave>0</runOnSave><ODL_ECID>0000</ODL_ECID></req_EnumBusinessRules>';
-				return this.smartviewPoster( { url: resEnv.smartview.planningurl, body, cookie: resEnv.smartview.cookies } );
-			} )
-			.then( response => {
-				const isSuccessful = response.$( 'body' ).children().toArray().filter( elem => ( elem.name === 'res_enumbusinessrules' ) ).length > 0;
-				if ( isSuccessful ) {
-					const ruleList: any[] = response.$( 'rule' ).toArray().map( rule => ( { name: response.$( rule ).text(), hasRTP: rule.attribs.rtp, type: rule.attribs.type } ) );
-					return Promise.resolve( ruleList );
-				} else {
-					return Promise.reject( new Error( 'Failure to list business rules ' + payload.name + '@smartviewListBusinessRules' ) );
-				}
-			} );
+	private smartviewListBusinessRules = async ( payload: ATEnvironmentDetail ): Promise<ATEnvironmentDetail> => {
+		await this.smartviewOpenCube( payload );
+		const body = await this.smartviewGetXMLTemplate( 'req_EnumBusinessRules.xml', payload );
+		const { $ } = await this.smartviewPoster( { url: payload.smartview.planningurl, body, cookie: payload.smartview.cookies } );
+
+		const hasFailed = $( 'body' ).children().toArray().filter( elem => ( elem.name === 'res_enumbusinessrules' ) ).length === 0;
+		if ( hasFailed ) throw ( new Error( 'Failure to list business rules ' + payload.name + '@smartviewListBusinessRules' ) );
+		payload.smartview.ruleList = $( 'rule' ).toArray().map( rule => ( { name: $( rule ).text(), hasRTP: rule.attribs.rtp, type: rule.attribs.type } ) );
+		return payload;
 	}
 	public getDescriptionsWithHierarchy = ( refObj: ATEnvironmentDetail, refField: ATStreamField ) => {
 		return this.smartviewGetDescriptionsWithHierarchy( refObj, refField ).then( result => result.smartview.memberList );
@@ -800,14 +732,11 @@ export class SmartViewTool {
 		} );
 		const { $ } = await this.smartviewPoster( { url: payload.smartview.planningurl, body, cookie: payload.smartview.cookies } );
 
-		let isSuccessful = false;
-		$( 'body' ).children().toArray().forEach( curElem => {
-			if ( curElem.name === 'res_executegrid' ) { isSuccessful = true; }
-		} );
+		const hasFailed = $( 'body' ).children().toArray().filter( e => e.name === 'res_executegrid' ).length === 0;
 
 		const rangeStart = parseInt( $( 'range' ).attr( 'start' ), 10 );
 
-		if ( !isSuccessful ) {
+		if ( hasFailed ) {
 			throw ( new Error( 'Failure to get descriptions ' + payload.name + '@smartviewGetDescriptionsAction' ) );
 		} else if ( rangeStart > 1 ) {
 			throw ( new Error( 'Failure to get descriptions, wrong number returned for rangeStart ' + payload.name + '@smartviewGetDescriptionsAction' ) );
@@ -840,11 +769,8 @@ export class SmartViewTool {
 		const body = await this.smartviewGetXMLTemplate( 'req_OpenCube.xml', { SID: payload.SID, server: payload.smartview.planningserver, database: payload.database, table: 'HSP_DIM_' + field.name } );
 		const { $ } = await this.smartviewPoster( { url: payload.smartview.planningurl, body, cookie: payload.smartview.cookies } );
 
-		let isSuccessful = false;
-		$( 'body' ).children().toArray().forEach( curElem => {
-			if ( curElem.name === 'res_opencube' ) { isSuccessful = true; }
-		} );
-		if ( isSuccessful ) throw ( new Error( 'Failure to open dimension ' + payload.name + '@smartviewOpenDimension' ) );
+		const hasFailed = $( 'body' ).children().toArray().filter( e => e.name === 'res_opencube' ).length === 0;
+		if ( hasFailed ) throw ( new Error( 'Failure to open dimension ' + payload.name + '@smartviewOpenDimension' ) );
 		return payload;
 	}
 	private smartviewGetDescriptionsAction = async ( payload: ATEnvironmentDetail, field: ATStreamField ): Promise<ATEnvironmentDetail> => {
@@ -859,14 +785,10 @@ export class SmartViewTool {
 		} );
 		const { $ } = await this.smartviewPoster( { url: payload.smartview.planningurl, body, cookie: payload.smartview.cookies } );
 
-		let isSuccessful = false;
-		$( 'body' ).children().toArray().forEach( curElem => {
-			if ( curElem.name === 'res_executegrid' ) { isSuccessful = true; }
-		} );
-
+		const hasFailed = $( 'body' ).children().toArray().filter( e => e.name === 'res_executegrid' ).length === 0;
 		const rangeStart = parseInt( $( 'range' ).attr( 'start' ), 10 );
 
-		if ( !isSuccessful ) {
+		if ( hasFailed ) {
 			throw ( new Error( 'Failure to get descriptions ' + payload.name + '@smartviewGetDescriptionsAction' ) );
 		} else if ( rangeStart > 1 ) {
 			throw ( new Error( 'Failure to get descriptions, wrong number returned for rangeStart ' + payload.name + '@smartviewGetDescriptionsAction' ) );
@@ -893,11 +815,8 @@ export class SmartViewTool {
 		const body = await this.smartviewGetXMLTemplate( 'req_EnumAliasTables.xml', payload );
 		const { $ } = await this.smartviewPoster( { url: payload.smartview.planningurl, body, cookie: payload.smartview.cookies } );
 
-		let isSuccessful = false;
-		$( 'body' ).children().toArray().forEach( curElem => {
-			if ( curElem.name === 'res_enumaliastables' ) { isSuccessful = true; }
-		} );
-		if ( isSuccessful ) throw ( new Error( 'Failure to list alias tables ' + payload.name + '@smartviewListAliasTables' ) );
+		const hasFailed = $( 'body' ).children().toArray().filter( e => e.name === 'res_enumaliastables' ).length === 0;
+		if ( hasFailed ) throw ( new Error( 'Failure to list alias tables ' + payload.name + '@smartviewListAliasTables' ) );
 		payload.smartview.aliastables = $( 'alstbls' ).text().split( '|' );
 		return payload;
 	}
@@ -910,11 +829,8 @@ export class SmartViewTool {
 		const body = await this.smartviewGetXMLTemplate( 'req_EnumDims.xml', payload );
 		const { $ } = await this.smartviewPoster( { url: payload.smartview.planningurl, body, cookie: payload.smartview.cookies } );
 
-		let isSuccessful = false;
-		$( 'body' ).children().toArray().forEach( curElem => {
-			if ( curElem.name === 'res_enumdims' ) { isSuccessful = true; }
-		} );
-		if ( !isSuccessful ) throw ( new Error( 'Failure to list dimensions ' + payload.name + '@smartviewListDimensions' ) );
+		const hasFailed = $( 'body' ).children().toArray().filter( e => e.name === 'res_enumdims' ).length === 0;
+		if ( hasFailed ) throw ( new Error( 'Failure to list dimensions ' + payload.name + '@smartviewListDimensions' ) );
 
 		payload.smartview.dimensions = [];
 		$( 'dim' ).toArray().forEach( curDim => {
@@ -930,22 +846,16 @@ export class SmartViewTool {
 		const body = await this.smartviewGetXMLTemplate( 'req_ListDocuments.xml', payload );
 		const { $ } = await this.smartviewPoster( { url: payload.smartview.planningurl, body, cookie: payload.smartview.cookies } );
 
-		let isSuccessful = false;
-		$( 'body' ).children().toArray().forEach( curElem => {
-			if ( curElem.name === 'res_listdocuments' ) { isSuccessful = true; }
-		} );
-		if ( isSuccessful ) throw ( new Error( 'Failure to list documents ' + payload.name + '@smartviewListDocuments' ) );
+		const hasFailed = $( 'body' ).children().toArray().filter( e => e.name === 'res_listdocuments' ).length === 0;
+		if ( hasFailed ) throw ( new Error( 'Failure to list documents ' + payload.name + '@smartviewListDocuments' ) );
 		return payload;
 	}
 	private smartviewGetAvailableServices = async ( payload: ATEnvironmentDetail ): Promise<ATEnvironmentDetail> => {
 		const body = await this.smartviewGetXMLTemplate( 'req_GetAvailableServices.xml', payload );
 		const { $ } = await this.smartviewPoster( { url: payload.smartview.planningurl, body, cookie: payload.smartview.cookies } );
 
-		let isSuccessful = false;
-		$( 'body' ).children().toArray().forEach( curElem => {
-			if ( curElem.name === 'res_getavailableservices' ) { isSuccessful = true; }
-		} );
-		if ( !isSuccessful ) throw ( new Error( 'Failure to get available services ' + payload.name + '@smartviewGetAvailableServices' ) );
+		const hasFailed = $( 'body' ).children().toArray().filter( e => e.name === 'res_getavailableservices' ).length === 0;
+		if ( hasFailed ) throw ( new Error( 'Failure to get available services ' + payload.name + '@smartviewGetAvailableServices' ) );
 		return payload;
 	}
 	public listApplications = async ( payload: ATEnvironmentDetail ) => {
@@ -1022,8 +932,10 @@ export class SmartViewTool {
 		} );
 	}
 	private smartviewPrepareEnvironment = async ( payload: ATEnvironmentDetail ): Promise<ATEnvironmentDetail> => {
+		if ( !payload.smartview ) payload.smartview = <any>{};
 		payload.smartview.url = payload.server + ':' + payload.port + '/workspace/SmartViewProviders';
 		payload.smartview.planningurl = payload.server + ':' + payload.port + '/HyperionPlanning/SmartView';
+		payload.smartview.jar = request.jar();
 		if ( !payload.smartview.cookies ) { payload.smartview.cookies = ''; }
 		return payload;
 	}
@@ -1058,7 +970,291 @@ export class SmartViewTool {
 			throw new Error( 'No SID found ' + payload.name + '@hpObtainSID02' );
 		}
 	}
-	private pbcsObtainSID = ( payload: ATEnvironmentDetail ): Promise<ATEnvironmentDetail> => {
+	private pbcsObtainSID = async ( payload: ATEnvironmentDetail ): Promise<ATEnvironmentDetail> => {
+		for ( let x = 0; x < 100; x++ ) console.log( '===========================================' );
+		await this.smartviewWaiter( payload, 5000 );
+		for ( let x = 0; x < 100; x++ ) console.log( '!==========================================' );
+		console.clear(); console.clear(); console.clear();
+		await this.smartviewPrepareEnvironment( payload );
+		const browser = await puppeteer.launch( { headless: false } );
+		const page = await browser.newPage();
+		await page.setViewport( { width: 1024, height: 768 } );
+		await page.screenshot( { path: 'screenshots/puppet-0001.png' } );
+		await page.goto( payload.smartview.url );
+		await page.screenshot( { path: 'screenshots/puppet-0002.png' } );
+		await page.type( '#username', payload.username );
+		await page.type( '#password', payload.password );
+		await page.screenshot( { path: 'screenshots/puppet-0003.png' } );
+		await page.click( 'button#signin' );
+		await page.waitForNavigation().catch( console.log );
+		await page.screenshot( { path: 'screenshots/puppet-0004.png' } );
+		await page.setRequestInterception( true );
+		page.on( 'request', async ( interceptedRequest ) => {
+			// const body = await this.smartviewGetXMLTemplate( 'req_ConnectToProvider.xml', {} );
+			const body = await this.smartviewGetXMLTemplate( 'req_GetProvisionedDataSources.xml', {} );
+			const data: any = { 'method': <HttpMethod>'POST', 'postData': body };
+			interceptedRequest.continue( data );
+		} );
+		const response = await page.goto( payload.smartview.url );
+		const responseBody = await response.text();
+		console.log( responseBody );
+
+
+		console.log( '>>> Finished' );
+
+		// await this.smartviewPrepareEnvironment( payload );
+		// const browser = await puppeteer.launch( { headless: false } );
+		// const page = await browser.newPage();
+		// await page.setViewport( { width: 1024, height: 768 } );
+		// await page.screenshot( { path: 'screenshots/puppet-0001.png' } );
+		// await page.goto( payload.smartview.url );
+		// await page.screenshot( { path: 'screenshots/puppet-0002.png' } );
+		// await page.type( '#username', payload.username );
+		// await page.type( '#password', payload.password );
+		// await page.screenshot( { path: 'screenshots/puppet-0003.png' } );
+		// await page.setRequestInterception( true );
+		// page.on( 'request', async ( r ) => {
+		// 	console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+		// 	console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+		// 	console.log( r.postData() );
+		// 	console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+		// 	console.log( r.url() );
+		// 	console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+		// 	console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+		// 	const data: any = { 'method': <HttpMethod>'POST', 'postData': r.postData() };
+		// 	if ( r.url().indexOf( 'SmartViewProviders' ) < 0 ) {
+		// 		r.continue( data );
+		// 	} else {
+		// 		const body = await this.smartviewGetXMLTemplate( 'req_ConnectToProvider.xml', {} );
+		// 		data.postData = body;
+		// 		data.headers = { 'Content-Type': 'application/xml' };
+		// 		r.continue( data );
+		// 	}
+		// } );
+		// await page.click( 'button#signin' );
+		// await page.screenshot( { path: 'screenshots/puppet-0004.png' } );
+		// const response = await page.waitForNavigation();
+		// const responseBody = await response.text();
+		// console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+		// console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+		// // console.log( await page.cookies() );
+		// console.log( responseBody );
+		// console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+		// console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+		// await page.screenshot( { path: 'screenshots/puppet-0005.png' } ).catch( console.log );
+		// // cookies = await page.cookies();
+		// // console.log( '>>> #Cookies:', cookies.length, 'We are at the form now' );
+		// // console.log( '>>> #Cookies:', cookies.length );
+		// // await page.type( '#username', payload.username );
+		// // await page.type( '#password', payload.password );
+		// // console.log( '>>> #Cookies:', cookies.length, 'Form is filled' );
+		// // await page.screenshot( { path: 'screenshots/puppet-0002.png' } );
+		// // await page.click( '#signin' );
+		// // console.log( '>>> #Cookies:', ( await page.cookies() ).length, 'We are at the form now' );
+		// // await page.waitForNavigation();
+		// // console.log( '>>> #Cookies:', ( await page.cookies() ).length, 'Waited for navigation' );
+		// // await page.screenshot( { path: 'screenshots/puppet-0003.png' } );
+		// // await browser.close();
+		// // console.log( ( new Date() ).toString() );
+		await browser.close();
+		await this.smartviewWaiter( payload, 450000 );
+		throw new Error( 'Not yet' );
+		return payload;
+	}
+
+	private pbcsObtainSIDnewtry = async ( payload: ATEnvironmentDetail ): Promise<ATEnvironmentDetail> => {
+		await this.smartviewPrepareEnvironment( payload );
+		await this.smartviewWaiter( payload, 10000 );
+		console.clear();
+
+		const cookieArray: { name: string, value: string }[] = [];
+
+		let referer = '';
+		let url = '';
+		let cookie = '';
+
+
+		// STEP 1
+		this.cookieArrayPusher( cookieArray, ['EPM_Remote_User=;', 'ORA_EPMWS_User=' + encodeURIComponent( payload.username ) + ';', 'ORA_EPMWS_Locale=en_US;', 'ORA_EPMWS_AccessibilityMode=false;', 'ORA_EPMWS_ThemeSelection=Skyros'] );
+		cookie = this.getCookies( cookieArray );
+		referer = '';
+		url = payload.smartview.url;
+		const { response: rStep1, $: $Step1, body: bStep1 } = await this.smartviewGetter( { url, cookie, followRedirect: false } );
+
+		// STEP 2
+		this.cookieArrayPusher( cookieArray, rStep1.headers['set-cookie'] );
+		cookie = this.getCookies( cookieArray );
+		referer = url;
+		url = rStep1.headers.location;
+		const { response: rStep2, $: $Step2, body: bStep2 } = await this.smartviewGetter( { url, cookie, followRedirect: false, referer } );
+
+		// STEP 3
+		this.cookieArrayPusher( cookieArray, rStep2.headers['set-cookie'] );
+		cookie = this.getCookies( cookieArray );
+		referer = url;
+		const form = this.pbcsObtainSIDFillForm( payload, $Step2, rStep2 );
+		url = payload.smartview.nexturl;
+
+		const { response: rStep3, $: $Step3, body: bStep3 } = await this.smartviewPoster( { url, cookie, followRedirect: false, referer, form } );
+
+
+
+		console.log( '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!' );
+		cookieArray.forEach( c => console.log( c.value ) );
+		console.log( '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!' );
+		console.log( rStep3.headers );
+		console.log( '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!' );
+		console.log( bStep3.trim() );
+		console.log( '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!' );
+		await this.smartviewWaiter( payload, 5000000 );
+		return payload;
+	}
+
+	private cookieArrayPusher = ( cookieArray: { name: string, value: string }[], toPush: string[] ) => {
+		toPush.forEach( source => {
+			const newCookieName = source.split( '=' )[0];
+			if ( cookieArray.filter( c => c.name === newCookieName ).length === 0 ) cookieArray.push( { name: newCookieName, value: source } );
+			cookieArray.forEach( c => {
+				if ( c.name === newCookieName ) c.value = source;
+			} );
+		} );
+	}
+	private getCookies = ( cookieArray: { name: string, value: string }[] ) => {
+		return cookieArray.map( c => c.value ).join( '; ' );
+	}
+
+	private pbcsObtainSIDFillForm = ( payload: ATEnvironmentDetail, $, response: request.Response ) => {
+		const formData: any = {};
+
+		$( 'form[name=signin_form]' ).each( ( i: any, elem: any ) => {
+			payload.smartview.nexturl = response.request.uri.protocol + '//' + response.request.uri.hostname + $( elem ).attr( 'action' );
+			$( elem ).find( 'input' ).each( ( a: any, input: any ) => {
+				// console.log( $( input ).attr( 'name' ), ':', $( input ).val() );
+				formData[$( input ).attr( 'name' )] = $( input ).val();
+			} );
+		} );
+		formData.username = payload.username;
+		formData.password = payload.password;
+		formData.userid = payload.username;
+		formData.tenantDisplayName = payload.identitydomain;
+		formData.tenantName = payload.identitydomain;
+		return formData;
+	}
+
+	private pbcsObtainSIDjar = async ( payload: ATEnvironmentDetail ): Promise<ATEnvironmentDetail> => {
+		console.clear();
+		await this.smartviewPrepareEnvironment( payload );
+		const formData: any = {};
+
+		const { response, $ } = await this.smartviewGetter( { url: payload.smartview.url, jar: payload.smartview.jar } );
+		$( 'form[name=signin_form]' ).each( ( i: any, elem: any ) => {
+			payload.smartview.nexturl = response.request.uri.protocol + '//' + response.request.uri.hostname + $( elem ).attr( 'action' );
+			$( elem ).find( 'input' ).each( ( a: any, input: any ) => {
+				// console.log( $( input ).attr( 'name' ), ':', $( input ).val() );
+				formData[$( input ).attr( 'name' )] = $( input ).val();
+			} );
+		} );
+		formData.username = payload.username;
+		formData.password = payload.password;
+		formData.userid = payload.username;
+		formData.tenantDisplayName = payload.identitydomain;
+		formData.tenantName = payload.identitydomain;
+
+		const referer = response.request.uri.href.replace( response.request.uri.host, response.request.uri.hostname );
+
+		console.log( '===========================================' );
+		console.log( '===========================================' );
+		console.log( formData );
+		console.log( '===========================================' );
+		console.log( payload.smartview.nexturl );
+		console.log( payload.smartview.url );
+		console.log( payload.smartview.planningurl );
+		console.log( response.request.uri.href );
+		console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+		console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+		console.log( response.request.uri.href );
+		console.log( response.request.uri.href.replace( response.request.uri.host, response.request.uri.hostname ) );
+		console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+		// tslint:disable-next-line:max-line-length
+		// https://login.em2.oraclecloud.com/oam/server/obrareq.cgi?encquery%3DAgqPyBAfFvulPpurbKZYV1zf%2Fl55rpQadrfCpkKH%2F0Fz26rvnsgvPjdttnxoycSgNDVDLrDSB8%2FQrSKVb7qB4jiCHPmslbO2dJgB0KNWutKSa6RYVR296nPYue1jaTwcGTfY4fPjQtNqq4Cg9p3YagyouThmlvTh2xtOsO8tB1XMdGXxwfz1mHJmvXP5kJ9qpBoQ016GVzYhXxoS5TgAHfRWNeQjd8EUk95YCI72Ojb4yES%2BMkZ8sOPoWOObnQArE6P%2F6s5ERhtfw5ftspu1C3Gz4CTFV0FW6ykOpa4IcurdAVhSc37584p7Eh%2BVjH43FfkwzDmG6xhre6CL5WHnZhvh0FXC4jGefr6qSG09DFeXUTyJHepEniNn%2BBFZ4Gz8%20agentid%3DPlanning_WG%20ver%3D1%20crmethod%3D2
+		console.log( '===========================================' );
+
+		const { response: r } = await this.smartviewPoster( { url: payload.smartview.nexturl, form: formData, jar: payload.smartview.jar, referer } );
+		await this.smartviewWaiter( payload );
+		console.clear();
+		console.log( '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!' );
+		// console.log( payload.smartview.jar.getCookies( 'planning7-kerzner.pbcs.em2.oraclecloud.com' ) );
+		console.log( payload.smartview.jar.getCookies( payload.smartview.nexturl ) );
+		// console.log( payload.smartview.jar );
+		console.log( '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!' );
+
+		// const body = await this.smartviewGetXMLTemplate( 'req_ConnectToProvider.xml', {} );
+		// const { body: rBody } = await this.smartviewPoster( { url: payload.smartview.url, jar: payload.smartview.jar, body, followRedirect: false } );
+
+		// console.log( '===========================================' );
+		// console.log( rBody );
+		// console.log( '===========================================' );
+		// console.log( r.statusCode );
+		// console.log( '===========================================' );
+		// console.log( payload.smartview.url );
+		// console.log( '===========================================' );
+		/*
+		const { response, $ } = await this.smartviewGetter( { url: refInfo.refDetails.redirectTarget, cookie: refInfo.refDetails.oamPrefsCookie, followRedirect: false } );
+		refInfo.refDetails.formFields = {};
+		$( 'input' ).each( ( i: any, elem: any ) => {
+			if ( $( elem.parent ).attr( 'name' ) === 'signin_form' ) {
+				refInfo.refDetails.formFields[$( elem ).attr( 'name' )] = $( elem ).val();
+			}
+		} );
+		$( 'form' ).each( ( i: any, elem: any ) => {
+			if ( $( elem ).attr( 'name' ) === 'signin_form' ) {
+				refInfo.refDetails.formAction = response.request.uri.protocol + '//' + response.request.uri.hostname + $( elem ).attr( 'action' );
+			}
+		} );
+
+		refInfo.refDetails.formFields.username = refInfo.payload.username;
+		refInfo.refDetails.formFields.password = refInfo.payload.password;
+		refInfo.refDetails.formFields.userid = refInfo.payload.username;
+		refInfo.refDetails.formFields.tenantDisplayName = refInfo.payload.identitydomain;
+		refInfo.refDetails.formFields.tenantName = refInfo.payload.identitydomain;
+
+		refInfo.refDetails.formCookie = this.pbcsGetCookieString( response.headers['set-cookie'] );
+		if ( refInfo.refDetails.formAction ) {
+			return refInfo;
+		} else {
+			throw new Error( 'Form action is not set ' + refInfo.payload.name + '@pbcsObtainSID04' );
+		}
+		*/
+
+		await this.smartviewWaiter( payload, 450000 );
+		// console.log( ( new Date() ).toString() );
+		// const browser = await puppeteer.launch( { headless: false } );
+		// console.log( '>>> #Cookies:', 0, 'Browser initialized' );
+		// const page = await browser.newPage();
+		// let cookies = await page.cookies();
+		// console.log( '>>> #Cookies:', cookies.length, 'Page created' );
+		// await page.setViewport( { width: 1024, height: 768 } );
+		// console.log( '>>> #Cookies:', cookies.length, 'Viewport is 1024x768 now' );
+		// await page.goto( payload.smartview.url );
+		// cookies = await page.cookies();
+		// console.log( '>>> #Cookies:', cookies.length, 'We are at the form now' );
+		// console.log( '>>> #Cookies:', cookies.length );
+		// await page.screenshot( { path: 'screenshots/puppet-0001.png' } );
+		// await page.type( '#username', payload.username );
+		// await page.type( '#password', payload.password );
+		// console.log( '>>> #Cookies:', cookies.length, 'Form is filled' );
+		// await page.screenshot( { path: 'screenshots/puppet-0002.png' } );
+		// await page.click( '#signin' );
+		// console.log( '>>> #Cookies:', ( await page.cookies() ).length, 'We are at the form now' );
+		// await page.waitForNavigation();
+		// console.log( '>>> #Cookies:', ( await page.cookies() ).length, 'Waited for navigation' );
+		// await page.screenshot( { path: 'screenshots/puppet-0003.png' } );
+		// await browser.close();
+		// console.log( ( new Date() ).toString() );
+		throw new Error( 'Not yet' );
+		return payload;
+	}
+	private pbcsObtainSIDold = ( payload: ATEnvironmentDetail ): Promise<ATEnvironmentDetail> => {
 		return this.smartviewPrepareEnvironment( payload )
 			.then( this.pbcsObtainSID01 )
 			.then( this.pbcsObtainSID02 )
@@ -1096,10 +1292,12 @@ export class SmartViewTool {
 		}
 		return toReturn;
 	}
+
 	private pbcsObtainSID01 = async ( payload: ATEnvironmentDetail ): Promise<{ payload: ATEnvironmentDetail, refDetails: any }> => {
 		const refDetails: any = {};
 		refDetails.originalCookie = 'EPM_Remote_User=; ORA_EPMWS_User=' + encodeURIComponent( payload.username ) + '; ORA_EPMWS_Locale=en_US; ORA_EPMWS_AccessibilityMode=false; ORA_EPMWS_ThemeSelection=Skyros';
 		const body = await this.smartviewGetXMLTemplate( 'req_ConnectToProvider.xml', {} );
+		console.log( payload.smartview.url );
 		const { response } = await this.smartviewPoster( { url: payload.smartview.url, body, followRedirect: false } );
 
 		refDetails.redirectTarget = response.headers.location;
@@ -1160,6 +1358,7 @@ export class SmartViewTool {
 		}
 	}
 	private pbcsObtainSID05 = async ( refInfo: { payload: ATEnvironmentDetail, refDetails: any } ): Promise<{ payload: ATEnvironmentDetail, refDetails: any }> => {
+		console.log( refInfo.refDetails.formFields );
 		const { response } = await this.smartviewPoster( {
 			url: refInfo.refDetails.formAction,
 			referer: refInfo.refDetails.redirectTarget,
@@ -1216,7 +1415,7 @@ export class SmartViewTool {
 			throw new Error( 'No SID found ' + refInfo.payload.name + '@pbcsObtainSID10' );
 		}
 	}
-	private smartviewRequester = ( options: ATSmartViewRequestOptions ): Promise<{ body: any, $: CheerioStatic, options: ATSmartViewRequestOptions, response: any }> => {
+	private smartviewRequester = ( options: ATSmartViewRequestOptions ): Promise<{ body: any, $: CheerioStatic, options: ATSmartViewRequestOptions, response: request.Response }> => {
 		return new Promise( ( resolve, reject ) => {
 			const requestOptions: any = {
 				url: options.url,
@@ -1226,9 +1425,13 @@ export class SmartViewTool {
 				timeout: options.timeout || 120000,
 				followRedirect: options.followRedirect === false ? false : true
 			};
-			if ( options.cookie ) requestOptions.headers.cookie = options.cookie;
+			if ( options.jar ) {
+				requestOptions.jar = options.jar;
+			} else if ( options.cookie ) {
+				requestOptions.headers.cookie = options.cookie;
+			}
 			if ( options.referer ) requestOptions.headers.referer = options.referer;
-			request( requestOptions, ( err: Error, response: any, body: any ) => {
+			request( requestOptions, ( err: Error, response: request.Response, body: any ) => {
 				if ( err ) {
 					reject( err );
 				} else {
@@ -1244,29 +1447,3 @@ export class SmartViewTool {
 	private smartviewPoster = ( options: ATSmartViewRequestOptions ) => this.smartviewRequester( Object.assign( { method: 'POST' }, options ) );
 	private smartviewGetter = ( options: ATSmartViewRequestOptions ) => this.smartviewRequester( Object.assign( { method: 'GET' }, options ) );
 }
-// import { Pool } from 'mysql';
-// import * as xml2js from 'xml2js';
-// import * as request from 'request';
-// import * as url from 'url';
-
-// import * as asynclib from 'async';
-
-// import { MainTools } from './tools.main';
-// import { ATEnvironmentDetail } from '../../shared/model/dime/environmentSmartView';
-// import { DimeEnvironmentType } from '../../shared/enums/dime/environmenttypes';
-// import { DimeStreamFieldDetail } from '../../shared/model/dime/streamfield';
-// import { SmartViewRequestOptions } from '../../shared/model/dime/smartviewrequestoptions';
-// import { SortByName, encodeXML, SortByPosition, waiter, arrayCartesian } from '../../shared/utilities/utilityFunctions';
-// import * as _ from 'lodash';
-// import * as path from 'path';
-// import * as Handlebars from 'handlebars';
-// import * as Promisers from '../../shared/utilities/promisers';
-// import { findMembers } from '../../shared/utilities/hpUtilities';
-
-// export class SmartViewTools {
-// 	xmlBuilder: xml2js.Builder;
-// 	xmlParser: xml2js.Parser;
-// 	constructor( public db: Pool, public tools: MainTools ) {		this.xmlBuilder = new xml2js.Builder();		this.xmlParser = new xml2js.Parser(); 	}
-
-
-// }

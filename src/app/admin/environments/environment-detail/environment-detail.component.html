@@ -32,10 +32,17 @@
 				<div class="form-group row m-0">
 					<label for="eCred" class="col-3 col-md-1 col-form-label font-weight-bold">Credentials:</label>
 					<div class="col-9 col-md-11">
-						<select name="eCred" class="form-control form-control-sm" [(ngModel)]="cEnvironment.credential">
-							<option value="undefined">Please select a credential</option>
-							<option *ngFor="let cred of credentials" [value]="cred.id">{{cred.name}}</option>
-						</select>
+						<div class="input-group input-group-sm">
+							<select name="eCred" class="form-control form-control-sm" [(ngModel)]="cEnvironment.credential">
+								<option value="undefined">Please select a credential</option>
+								<option *ngFor="let cred of credentials" [value]="cred.id">{{cred.name}}</option>
+							</select>
+							<div class="input-group-append">
+								<button class="btn btn-outline-secondary" type="button" routerLink="/admin/credentials/{{cEnvironment.credential}}">
+									<i class="fas fa-link fa-fw"></i>
+								</button>
+							</div>
+						</div>
 					</div>
 				</div>
 				<div class="form-group row m-0" *ngIf="cEnvironment.type === environmentType['PBCS']">

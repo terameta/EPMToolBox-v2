@@ -14,9 +14,7 @@ export class EnvironmentsComponent implements OnInit, OnDestroy {
 	private subscriptions: Subscription[] = [];
 
 
-	constructor(
-		private ds: DataStoreService
-	) { }
+	constructor( private ds: DataStoreService ) { }
 
 	ngOnInit() {
 		this.ds.showInterest( { concept: 'environments' } );

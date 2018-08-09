@@ -2,14 +2,14 @@ import { Injectable } from '@angular/core';
 import { CentralStatusService } from '../../central-status/central-status.service';
 import { CommunicationService } from '../../communication/communication.service';
 import { Router } from '@angular/router';
-import { ATEnvironment } from 'shared/models/at.environment';
-import { JSONDeepCopy } from 'shared/utilities/utilityFunctions';
+import { ATCredential } from 'shared/models/at.credential';
+import { JSONDeepCopy } from '../../../../shared/utilities/utilityFunctions';
 
 @Injectable( {
 	providedIn: 'root'
 } )
-export class EnvironmentsService {
-	private framework = 'environments';
+export class CredentialsService {
+	private framework = 'credentials';
 
 	constructor(
 		private ss: CentralStatusService,
@@ -23,18 +23,13 @@ export class EnvironmentsService {
 		this.router.navigateByUrl( '/admin/' + this.framework );
 	}
 
-	public verify = ( id: number ) => {
-		this.cs.communicate( { framework: this.framework, action: 'verify', payload: { status: 'request', data: id } } );
-	}
-
-	public update = ( payload: ATEnvironment ) => {
+	public update = ( payload: ATCredential ) => {
 		this.cs.communicate( { framework: this.framework, action: 'update', payload: { status: 'request', data: payload } } );
 	}
 
-	public clone = async ( source: ATEnvironment ) => {
+	public clone = async ( source: ATCredential ) => {
 		const result = await this.ss.prompt( 'Please enter the name of the new item' );
-		const payload: ATEnvironment = JSONDeepCopy( source );
-		payload.verified = false;
+		const payload: ATCredential = JSONDeepCopy( source );
 		if ( !result ) return;
 		payload.name = result.toString();
 		delete payload.id;
@@ -43,6 +38,15 @@ export class EnvironmentsService {
 			if ( response.data && response.data.id ) {
 				this.router.navigateByUrl( '/admin/' + this.framework + '/' + response.data.id );
 			}
+		} );
+	}
+
+	public reveal = ( id: number ): Promise<string> => {
+		return new Promise( ( resolve, reject ) => {
+			this.cs.communicate( { framework: this.framework, action: 'reveal', payload: { status: 'request', data: id } }, true ).
+				subscribe( result => {
+					if ( result.status === 'success' ) resolve( result.data.password );
+				}, reject );
 		} );
 	}
 

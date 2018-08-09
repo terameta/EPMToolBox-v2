@@ -4,7 +4,6 @@ export class ATLogClass extends ATStoreClass<ATLog> { }
 
 export interface ATLog {
 	id: number,
-	name: string,
 	parent: number,
 	start: Date,
 	end: Date,

@@ -2,7 +2,6 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ATEnvironment, ATEnvironmentType, atGetEnvironmentTypeDescription } from 'shared/models/at.environment';
 import { DataStoreService } from '../../../data-store/data-store.service';
 import { Subscription } from 'rxjs';
-import { CommunicationService } from '../../../communication/communication.service';
 import { CentralStatusService } from '../../../central-status/central-status.service';
 import { EnvironmentsService } from '../environments.service';
 
@@ -20,7 +19,6 @@ export class EnvironmentListComponent implements OnInit, OnDestroy {
 
 	constructor(
 		private ds: DataStoreService,
-		private cs: CommunicationService,
 		public ss: CentralStatusService,
 		public ms: EnvironmentsService
 	) {

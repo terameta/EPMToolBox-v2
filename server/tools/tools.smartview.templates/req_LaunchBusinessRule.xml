@@ -1,0 +1,14 @@
+<req_LaunchBusinessRule>
+	<sID>{{SID}}</sID>
+	<cube>{{table}}</cube>
+	<rule type="{{smartview.procedure.type}}">{{smartview.procedure.name}}</rule>
+	<prompts>
+	{{#each smartview.procedure.variables}}
+		<rtp>
+			<name>{{this.name}}</name>
+			<val>{{this.value}}</val>
+		</rtp>
+	{{/each}}
+	</prompts>
+	<ODL_ECID>0000</ODL_ECID>
+</req_LaunchBusinessRule>

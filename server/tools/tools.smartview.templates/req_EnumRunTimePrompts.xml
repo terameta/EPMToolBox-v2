@@ -1,0 +1,6 @@
+<req_EnumRunTimePrompts>
+	<sID>{{SID}}</sID>
+	<cube>{{table}}</cube >
+	<rule type="{{ruleType}}">{{ruleName}}</rule>
+	<ODL_ECID>0000</ODL_ECID>
+</req_EnumRunTimePrompts>

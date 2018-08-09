@@ -3,10 +3,11 @@ import { ConnectionPool, config as MSSQLConfig } from 'mssql';
 import { MainTools } from './tools.main';
 import { ATEnvironmentDetail } from 'shared/models/at.environment';
 import { ATStreamField } from 'shared/models/at.stream';
+import { DB } from './tools.db';
 
 export class MSSQLTool {
 
-	constructor( public tools: MainTools ) { }
+	constructor( private db: DB, public tools: MainTools ) { }
 
 	public verify = ( payload: ATEnvironmentDetail ) => this.connect( payload );
 

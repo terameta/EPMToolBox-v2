@@ -15,17 +15,18 @@ export class CredentialTool {
 
 	public getOne = ( id: number ) => this.getCredentialDetails( id );
 
-	public create = async (): Promise<ATCredential> => {
-		const newCredential = <ATCredential>{ name: 'New Credential' };
+	public create = async ( payload: ATCredential ): Promise<ATCredential> => {
+		delete payload.id;
+		const newCredential = Object.assign( <ATCredential>{ name: 'New Credential' }, payload );
 		const result = await this.db.queryOne<any>( 'INSERT INTO credentials SET ?', this.tools.prepareTupleToWrite( newCredential ) );
 		newCredential.id = result.tuple.insertId;
 		return newCredential;
 	}
 
 	public update = async ( payload: ATCredential ) => {
-		const passwordOnDB = await this.getCredentialDetails( payload.id, true );
+		const passwordOnDB = await this.getCredentialDetails( payload.id, false, true );
 		if ( payload.password === '|||---protected---|||' ) {
-			payload.password = this.tools.encryptText( passwordOnDB.password );
+			payload.password = passwordOnDB.password;
 		} else {
 			payload.password = this.tools.encryptText( payload.password );
 		}
@@ -41,12 +42,12 @@ export class CredentialTool {
 		return payload;
 	}
 
-	public getCredentialDetails = async ( id: number, reveal = false ): Promise<ATCredential> => {
+	public getCredentialDetails = async ( id: number, reveal = false, leaveAsItIs = false ): Promise<ATCredential> => {
 		const { tuple } = await this.db.queryOne<ATTuple>( 'SELECT * FROM credentials WHERE id = ?', id );
 		const credential = this.tools.prepareTupleToRead<ATCredential>( tuple );
 		if ( reveal ) {
 			credential.password = this.tools.decryptText( credential.password );
-		} else {
+		} else if ( !leaveAsItIs ) {
 			this.prepareCredentialToRead( credential );
 		}
 		return credential;

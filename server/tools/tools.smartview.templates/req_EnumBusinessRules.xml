@@ -1,0 +1,6 @@
+<req_EnumBusinessRules>
+	<sID>{{SID}}</sID>
+	<cube>{{table}}</cube>
+	<runOnSave>0</runOnSave>
+	<ODL_ECID>0000</ODL_ECID>
+</req_EnumBusinessRules>

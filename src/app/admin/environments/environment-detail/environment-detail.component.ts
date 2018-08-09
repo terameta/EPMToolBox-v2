@@ -6,7 +6,7 @@ import { DataStoreService } from '../../../data-store/data-store.service';
 import { CentralStatusService } from '../../../central-status/central-status.service';
 import { EnvironmentsService } from '../environments.service';
 import { ATCredential } from 'shared/models/at.credential';
-import { combineLatest, filter, tap } from 'rxjs/operators';
+import { combineLatest, filter } from 'rxjs/operators';
 import { ATTag } from 'shared/models/at.tag';
 import { ATTagGroup } from 'shared/models/at.taggroup';
 

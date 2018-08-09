@@ -33,6 +33,13 @@ ng g c admin/admin-navbar -m admin
 ng g m auth
 ng g s auth/auth -m auth
 
+## Command List for creating a new admin concept
+ng g m admin/credentials
+ng g s admin/credentials/credentials
+ng g c admin/credentials/credentials
+ng g c admin/credentials/credential-list
+ng g c admin/credentials/credential-detail
+
 Follow below steps to install:
 
 * Download from repository to a folder, and navigate to the folder

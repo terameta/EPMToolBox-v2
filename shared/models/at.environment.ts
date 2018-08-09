@@ -1,6 +1,7 @@
 import { ATStoreClass } from './at.storeconcept';
 import { JSONDeepCopy } from '../utilities/utilityFunctions';
 import { ConnectionPool } from 'mssql';
+import { CookieJar } from 'request';
 
 export class ATEnvironmentClass extends ATStoreClass<ATEnvironment> { }
 
@@ -10,7 +11,7 @@ export interface ATEnvironment {
 	type: number,
 	server: string,
 	port: string,
-	verified: number,
+	verified: boolean,
 	identitydomain: string,
 	credential: number,
 	tags: { [key: number]: boolean },
@@ -26,6 +27,7 @@ export interface ATEnvironmentDetail extends ATEnvironment {
 	},
 	smartview: {
 		url: string,
+		nexturl: string,
 		planningurl: string,
 		planningserver: string,
 		applications: { name: string }[],
@@ -33,9 +35,17 @@ export interface ATEnvironmentDetail extends ATEnvironment {
 		dimensions: any[],
 		aliastables: any[],
 		memberList: any[],
+		ruleList: any[],
 		procedure: { name: string, type: string, hasRTP: string, variables: any[] },
-		cookies: string
-	}
+		cookies: string,
+		jar: CookieJar
+	},
+	pbcs: {
+		address: string,
+		restInitiated: boolean,
+		resturl: string,
+		smartviewurl: string
+	},
 	query: string,
 	procedure: string,
 	username: string,

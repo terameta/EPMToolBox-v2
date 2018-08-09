@@ -91,24 +91,32 @@ export class MainTools {
 	}
 
 	public decryptText = ( ciphertext: string ): string => {
+		// console.log( '===========================================' );
+		// console.log( '===========================================' );
+		// console.log( 'Ciphertext           =>', ciphertext );
+		// console.log( 'Encryption Algorithm =>', this.encryptionAlgorithm );
+		// console.log( 'Encryption Key       =>', this.encryptionKey );
 		const textParts = ciphertext.split( ':' );
 		const iv = new Buffer( textParts.shift() || '', 'hex' );
 		const encryptedText = new Buffer( textParts.join( ':' ), 'hex' );
 		const decipher = crypto.createDecipheriv( this.encryptionAlgorithm, new Buffer( this.encryptionKey ), iv );
 		let decrypted = decipher.update( encryptedText );
 		decrypted = Buffer.concat( [decrypted, decipher.final()] );
+		// console.log( 'Decrypted            =>', decrypted );
+		// console.log( '===========================================' );
+		// console.log( '===========================================' );
 		return decrypted.toString( 'utf-8' );
 	}
 
 	public encryptTextOLDDONOTUSE = ( plaintext: string ) => {
-		// console.log('-------- Encrypt Start ----------------');
-		// console.log('Hash:', this.config.hash);
-		// console.log('PlTx:', plaintext);
+		// console.log( '-------- Encrypt Start ----------------' );
+		// console.log( 'Hash:', this.config.hash );
+		// console.log( 'PlTx:', plaintext );
 		const cipher = crypto.createCipher( 'aes-256-ctr', this.config.hash );
 		let crypted = cipher.update( plaintext, 'utf8', 'hex' );
 		crypted += cipher.final( 'hex' );
-		// console.log('CrTx:', crypted);
-		// console.log('-------- Encrypt End   ----------------');
+		// console.log( 'CrTx:', crypted );
+		// console.log( '-------- Encrypt End   ----------------' );
 		return crypted;
 	}
 

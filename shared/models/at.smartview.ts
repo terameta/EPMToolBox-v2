@@ -1,3 +1,5 @@
+import { CookieJar } from 'request';
+
 export interface ATSmartViewRequestOptions {
 	method?: 'POST' | 'GET',
 	url: string,
@@ -7,5 +9,6 @@ export interface ATSmartViewRequestOptions {
 	timeout?: number,
 	followRedirect?: boolean,
 	referer?: string,
-	form?: any
+	form?: any,
+	jar?: CookieJar
 }
