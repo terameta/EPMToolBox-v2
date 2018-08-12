@@ -16,7 +16,8 @@ export interface ATEnvironment {
 	credential: number,
 	tags: { [key: number]: boolean },
 	SID: string,
-	ssotoken: string
+	ssotoken: string,
+	cookie: string
 }
 
 export interface ATEnvironmentDetail extends ATEnvironment {
@@ -37,8 +38,8 @@ export interface ATEnvironmentDetail extends ATEnvironment {
 		memberList: any[],
 		ruleList: any[],
 		procedure: { name: string, type: string, hasRTP: string, variables: any[] },
-		cookies: string,
-		jar: CookieJar
+		jar: CookieJar,
+		form: any
 	},
 	pbcs: {
 		address: string,
@@ -85,3 +86,16 @@ export function atGetEnvironmentTypeDescription( typecode: number | string ) {
 		}
 	}
 }
+
+
+export const atEnvironmentPrepareToSave = ( payload: ATEnvironmentDetail ): ATEnvironmentDetail => {
+	delete payload.database;
+	delete payload.table;
+	delete payload.mssql;
+	delete payload.smartview;
+	delete payload.query;
+	delete payload.procedure;
+	delete payload.username;
+	delete payload.password;
+	return payload;
+};

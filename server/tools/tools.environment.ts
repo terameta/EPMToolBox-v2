@@ -5,7 +5,7 @@ import { CredentialTool } from './tools.credential';
 import { HPTool } from './tools.hp';
 import { PBCSTool } from './tools.pbcs';
 import { MSSQLTool } from './tools.mssql';
-import { ATEnvironmentType, ATEnvironment, ATEnvironmentDetail } from '../../shared/models/at.environment';
+import { ATEnvironmentType, ATEnvironment, ATEnvironmentDetail, atEnvironmentPrepareToSave } from '../../shared/models/at.environment';
 import { ATStream, ATStreamField } from '../../shared/models/at.stream';
 
 export class EnvironmentTool {
@@ -36,14 +36,7 @@ export class EnvironmentTool {
 	}
 
 	public update = async ( payload: ATEnvironmentDetail ) => {
-		delete payload.database;
-		delete payload.table;
-		delete payload.mssql;
-		delete payload.smartview;
-		delete payload.query;
-		delete payload.procedure;
-		delete payload.username;
-		delete payload.password;
+		atEnvironmentPrepareToSave( payload );
 		await this.db.queryOne( 'UPDATE environments SET ? WHERE id = ?', [this.tools.prepareTupleToWrite( payload ), payload.id] );
 	}
 
