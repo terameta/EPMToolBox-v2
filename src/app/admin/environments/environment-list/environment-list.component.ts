@@ -4,6 +4,7 @@ import { DataStoreService } from '../../../data-store/data-store.service';
 import { Subscription } from 'rxjs';
 import { CentralStatusService } from '../../../central-status/central-status.service';
 import { EnvironmentsService } from '../environments.service';
+import { AdminSharedService } from '../../admin-shared/admin-shared.service';
 
 @Component( {
 	selector: 'app-environment-list',
@@ -19,7 +20,8 @@ export class EnvironmentListComponent implements OnInit, OnDestroy {
 
 	constructor(
 		private ds: DataStoreService,
-		public ss: CentralStatusService,
+		public cs: CentralStatusService,
+		public ss: AdminSharedService,
 		public ms: EnvironmentsService
 	) {
 		this.ds.showInterest( { concept: 'environments' } );

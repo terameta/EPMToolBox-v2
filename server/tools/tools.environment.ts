@@ -29,6 +29,7 @@ export class EnvironmentTool {
 
 	public create = async ( payload: ATEnvironment ): Promise<ATEnvironment> => {
 		delete payload.id;
+		payload.verified = false;
 		const newEnvironment = Object.assign( <ATEnvironment>{ name: 'New Environment' }, payload );
 		const result = await this.db.queryOne<any>( 'INSERT INTO environments SET ?', this.tools.prepareTupleToWrite( newEnvironment ) );
 		newEnvironment.id = result.tuple.insertId;
@@ -56,6 +57,7 @@ export class EnvironmentTool {
 	}
 
 	public verify = async ( id: number ) => {
+		// throw new Error( 'Testing error' );
 		const payload = await this.getEnvironmentDetails( id, true );
 		await this.sourceTools[payload.type].verify( payload );
 		await this.setVerified( payload );

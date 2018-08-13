@@ -1,0 +1,56 @@
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-12">
+			<div class="table-responsive">
+				<table class="table table-sm table-hover table-bordered">
+					<thead>
+						<th class="text-center" width="160">Actions</th>
+						<th class="text-center">Name</th>
+						<th class="text-center">Type</th>
+						<th class="text-center">Environment</th>
+						<th class="text-center">Database</th>
+						<th class="text-center">Table</th>
+					</thead>
+					<tbody>
+						<ng-container *ngFor="let item of streams; let i = index;">
+							<tr *ngIf="cs.shouldListItem(item.tags)">
+								<td>
+									<div class="d-flex w-100 h-100 px-1 m-0 py-0">
+										<a routerLink="{{item.id}}" title="Edit">
+											<i class="fas fa-sliders-h fa-fw my-auto"></i>
+										</a>
+										<a routerLink="{{item.id}}/fields" title="Fields">
+											<i class="fas fa-columns fa-fw my-auto"></i>
+										</a>
+										<a routerLink="{{item.id}}/fielddescriptions" title="Field Descriptions">
+											<i class="fas fa-align-justify fa-fw my-auto"></i>
+										</a>
+										<a routerLink="{{item.id}}/exports" title="Exports">
+											<i class="fas fa-download fa-fw my-auto"></i>
+										</a>
+										<i class="far fa-clone fa-fw my-auto ml-auto pointer" title="Clone" (click)="ms.clone(item)"></i>
+										<i class="fa fa-trash fa-fw text-danger my-auto ml-auto pointer" aria-hidden="true" title="Delete" (click)="ms.delete(item.id, item.name)"></i>
+									</div>
+								</td>
+								<td>
+									<a routerLink="{{item.id}}">{{ item.name }}</a>
+								</td>
+								<td title="{{ getStreamTypeDescription(item.type) }}">{{ streamTypes[item.type] }}</td>
+								<td>
+									<a routerLink="/admin/environments/{{item.environment}}" title="Go to Environment Detail">
+										{{environments[item.environment]?.name}}
+										<sup style="font-size: 8px; line-height: 14px;">
+											<i class="fas fa-link fa-fw"></i>
+										</sup>
+									</a>
+								</td>
+								<td>{{ item.dbName }}</td>
+								<td>{{ item.tableName }}</td>
+							</tr>
+						</ng-container>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>

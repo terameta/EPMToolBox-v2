@@ -22,7 +22,7 @@ export class AuthGuardService implements CanActivate {
 			return false;
 		}
 		if ( route.data.expectedRole && route.data.expectedRole !== this.jwtHelper.decodeToken().role ) {
-			this.cs.notificationAdd( { title: 'Unauthorized access detected!', type: 'error', shouldBlockUI: true, detail: 'You have tried to access a part of the system you are not authorized.' } );
+			this.cs.notificationAdd( { id: '', title: 'Unauthorized access detected!', type: 'error', shouldBlockUI: true, detail: 'You have tried to access a part of the system you are not authorized.' } );
 			return false;
 		}
 		return true;

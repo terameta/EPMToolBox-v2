@@ -33,3 +33,12 @@ a:hover {
 .pointer {
 	cursor: pointer;
 }
+
+.status-bar {
+	width: 16px;
+	position: fixed;
+	right: 0;
+	top: 92px;
+	bottom: 0;
+	z-index: 9999;
+}

@@ -19,6 +19,23 @@ export class DB {
 		if ( process.env.isWorker === 'true' ) {
 			this.rtdb = new RealtimeDB( dbConfig, serverid );
 		}
+
+		this.pool.on( 'binlog', ( event ) => {
+			console.log( 'Pool binlog@tools.db.ts', event.getEventName() );
+		} );
+
+		this.pool.on( 'acquire', ( conn ) => {
+			console.log( 'Connection acquired@tools.db.ts', conn.threadId );
+		} );
+
+		this.pool.on( 'release', ( conn ) => {
+			console.log( 'Connection released@tools.db.ts', conn.threadId );
+		} );
+
+		this.pool.on( 'error', ( error, a, b, c ) => {
+			console.error( 'There is a db error@tools.db.ts' );
+			console.error( error, a, b, c );
+		} );
 	}
 
 	public query = <T>( queryToExecute: string, queryArguments?: any ): Promise<{ tuples: T[], fields: FieldInfo[] }> => {

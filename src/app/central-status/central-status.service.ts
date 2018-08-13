@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Router, NavigationEnd, Event } from '@angular/router';
-import { ATNotification, ATNotificationDefault, newATNotification } from 'shared/models/notification';
+import { ATNotification, newATNotification } from 'shared/models/notification';
 import { BehaviorSubject } from 'rxjs';
 import { JSONDeepCopy } from 'shared/utilities/utilityFunctions';
 import { AuthService } from '../auth/auth.service';
@@ -43,7 +43,7 @@ export class CentralStatusService {
 		this.router.events.subscribe( this.routeHandler );
 		this.currentURL.subscribe( this.urlHandler );
 		// console.log( 'Constructed central-status.service' );
-		setInterval( this.notificationClear, 10000 );
+		setInterval( this.notificationClear, 1000 );
 		if ( localStorage.getItem( 'selectedTags' ) ) this.selectedTags = JSON.parse( localStorage.getItem( 'selectedTags' ) );
 	}
 
@@ -86,6 +86,8 @@ export class CentralStatusService {
 	}
 
 	public notificationAdd = ( payload: ATNotification ) => this.notifications$.next( this.notifications$.getValue().concat( [{ ...newATNotification(), ...payload }] ) );
+	public notificationUpdate = ( id: string, payload: ATNotification ) => this.notifications$.next( this.notifications$.getValue().map( n => ( n.id === id ? payload : n ) ) );
+
 	private notificationClear = () => {
 		const currentNotificationList = this.notifications$.getValue();
 		const allNotificationCount = currentNotificationList.length;

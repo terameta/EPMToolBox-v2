@@ -11,6 +11,7 @@ import { AdminSharedModule } from './admin-shared/admin-shared.module';
 const routes: Routes = [
 	{ path: '', component: AdminFrontPageComponent },
 	{ path: 'environments', loadChildren: './environments/environments.module#EnvironmentsModule' },
+	{ path: 'streams', loadChildren: './streams/streams.module#StreamsModule' },
 	{ path: 'credentials', loadChildren: './credentials/credentials.module#CredentialsModule' }
 ];
 

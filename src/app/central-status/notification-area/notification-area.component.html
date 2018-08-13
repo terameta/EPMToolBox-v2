@@ -1,0 +1,10 @@
+<div class="w-100 text-center h-100 d-flex flex-column" *ngIf="notifications.length > 0">
+	<div class="m-0 p-0">
+		<i class="fas fa-caret-left"></i>
+	</div>
+	<div class="mr-0 ml-0 mb-0 p-0 mt-auto">
+		<ng-container *ngFor="let notification of notifications; let i = index;">
+			<app-notification-to-show [notification]="notification"></app-notification-to-show>
+		</ng-container>
+	</div>
+</div>

@@ -9,6 +9,7 @@ import { ATCredential } from 'shared/models/at.credential';
 import { combineLatest, filter } from 'rxjs/operators';
 import { ATTag } from 'shared/models/at.tag';
 import { ATTagGroup } from 'shared/models/at.taggroup';
+import { AdminSharedService } from '../../admin-shared/admin-shared.service';
 
 @Component( {
 	selector: 'app-environment-detail',
@@ -28,7 +29,8 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
 
 	constructor(
 		private ds: DataStoreService,
-		public ss: CentralStatusService,
+		public cs: CentralStatusService,
+		public ss: AdminSharedService,
 		public ms: EnvironmentsService
 	) { }
 
@@ -39,7 +41,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
 		this.ds.showInterest( { concept: 'taggroups' } );
 		this.subscriptions.push( this.ds.store.environments.subject.
 			pipe(
-				combineLatest( this.ss.currentIDO ),
+				combineLatest( this.cs.currentIDO ),
 				filter( ( [s, id] ) => ( !!s[id] ) )
 			).
 			subscribe( ( [s, id] ) => {

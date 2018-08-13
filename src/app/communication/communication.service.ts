@@ -11,6 +11,7 @@ import { ATApiCommunication } from 'shared/models/at.socketrequest';
 import { CentralStatusService } from '../central-status/central-status.service';
 import { ATDataStoreInterest } from '../../../shared/models/at.datastoreinterest';
 import { v4 as uuid } from 'uuid';
+import { newATNotification } from 'shared/models/notification';
 
 @Injectable( {
 	providedIn: 'root'
@@ -54,10 +55,14 @@ export class CommunicationService {
 		this.socket.on( 'communication', ( response: ATApiCommunication ) => {
 			// this.displayResponseDetails( response );
 			// console.log( response.framework, response.action, response.uuid );
+			const notification = newATNotification();
+			notification.title = response.framework + ' ' + response.action;
+			notification.expires = ( new Date( +new Date() + 5000 ) );
 			if ( response.payload.status === 'success' ) {
 				// If communication has a uuid attached to it, the response should be handled by the requester.
 				// To enable so, we are sending the data to behaviorsubject in the followups.
 				// If there is no uuid, data store should accept and work on it.
+				notification.type = 'success';
 				if ( response.uuid ) {
 					this.followUps[response.uuid].next( response.payload );
 					this.followUps[response.uuid].complete();
@@ -71,8 +76,15 @@ export class CommunicationService {
 					}
 				}
 			} else if ( response.payload.status === 'error' ) {
-				console.log( 'Here we should handle with central status service.' );
+				notification.type = 'error';
+				notification.detail = response.payload.data;
 				this.displayResponseDetails( response );
+			}
+			if ( response.uuid ) {
+				notification.id = response.uuid;
+				this.cs.notificationUpdate( notification.id, notification );
+			} else {
+				this.cs.notificationAdd( notification );
 			}
 		} );
 
@@ -91,11 +103,17 @@ export class CommunicationService {
 
 	public communicate = ( payload: ATApiCommunication, followup = false ) => {
 		const uniqueid = uuid();
+		const notification = newATNotification( uniqueid );
+		notification.title = payload.framework + ' ' + payload.action;
 		payload = { token: this.as.encodedToken, ...payload };
 		if ( followup ) {
 			payload = { uuid: uniqueid, ...payload };
 			this.followUps[uniqueid] = new BehaviorSubject( <any>{} );
+			notification.type = 'working';
+		} else {
+			notification.expires = ( new Date( +new Date() + 5000 ) );
 		}
+		this.cs.notificationAdd( notification );
 		this.socket.emit( 'communication', payload );
 		if ( followup ) {
 			return this.followUps[uniqueid];

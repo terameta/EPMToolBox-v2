@@ -5,7 +5,6 @@ import { DB } from './tools/tools.db';
 import { Initiator } from './config/config.initiator';
 import { InitiateCronWorker } from './config/config.croner';
 import { ApplicationWorker } from './config/config.app';
-import { EnvironmentTool } from './tools/tools.environment';
 import { MainTools } from './tools/tools.main';
 
 const numCPUs = configuration.numberofCPUs ? configuration.numberofCPUs : cpus().length;
@@ -34,10 +33,6 @@ if ( cluster.isMaster ) {
 			cluster.fork( worker_env );
 		}
 		cronerpid = cluster.fork( croner_env ).process.pid;
-
-		const mt = new MainTools( db.pool, configuration );
-		const et = new EnvironmentTool( db, mt );
-		et.verify( 38 );
 	} ).catch( ( err ) => {
 		console.log( '===============================================' );
 		console.log( '=== There is an error with the initiator    ===' );

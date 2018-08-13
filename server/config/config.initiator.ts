@@ -9,11 +9,11 @@ import * as _ from 'lodash';
 import { ATEnvironment } from '../../shared/models/at.environment';
 import { ATCredential } from '../../shared/models/at.credential';
 import { ATSetting } from '../../shared/models/at.setting';
-import { ATStreamType } from '../../shared/models/at.streamtypes';
+import { ATStreamType } from '../../shared/models/at.stream';
 import { ATProcessStepType } from '../../shared/models/at.process';
 import { ATStream, ATStreamField, ATStreamFieldDetailOLD } from '../../shared/models/at.stream';
 import { ATTuple } from 'shared/models/at.tuple';
-import { FieldInfo } from '../../node_modules/@types/mysql';
+import { FieldInfo } from 'mysql';
 
 interface InitiatorStep { expectedCurrentVersion: number, operatorFunction: any, shouldSetVersion?: boolean }
 

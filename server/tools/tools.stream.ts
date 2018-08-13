@@ -21,8 +21,9 @@ export class StreamTool {
 		return this.tools.prepareTupleToRead<ATStream>( tuple );
 	}
 
-	public create = async (): Promise<ATStream> => {
-		const newStream = <ATStream>{ name: 'New Stream' };
+	public create = async ( payload: ATStream ): Promise<ATStream> => {
+		delete payload.id;
+		const newStream = Object.assign( <ATStream>{ name: 'New Stream' }, payload );
 		const { tuple } = await this.db.queryOne<any>( 'INSERT INTO streams SET ?', this.tools.prepareTupleToWrite( newStream ) );
 		newStream.id = tuple.insertId;
 		return newStream;

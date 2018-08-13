@@ -1,12 +1,13 @@
 // After RTDB implementation
 import { ATStoreClass } from './at.storeconcept';
+import { JSONDeepCopy } from '../utilities/utilityFunctions';
 
 export class ATStreamClass extends ATStoreClass<ATStream> { }
 
 export interface ATStream {
 	id: number,
 	name: string,
-	type: number,
+	type: ATStreamType,
 	environment: number,
 	dbName: string,
 	tableName: string,
@@ -18,6 +19,8 @@ export interface ATStream {
 	tableList: { name: string }[],
 	fieldList: ATStreamField[]
 }
+
+export const getDefaultATStream = () => ( <ATStream>JSONDeepCopy( { tags: {} } ) );
 
 export interface ATStreamField {
 	name: string,
@@ -116,4 +119,24 @@ export interface ATStreamFieldDetailOLD extends ATStreamFieldOLD {
 	ddfPrecision: number,
 	ddfDecimals: number,
 	ddfDateFormat: string
+}
+
+export enum ATStreamType {
+	'RDBT' = 1,
+	'HPDB' = 2
+}
+
+export function getStreamTypeDescription( typecode: number | string ) {
+	switch ( typecode ) {
+		case 1:
+		case '1':
+		case 'RDBT': {
+			return 'Relational Database Table/View';
+		}
+		case 2:
+		case '2':
+		case 'HPDB': {
+			return 'Hyperion Planning Database';
+		}
+	}
 }
