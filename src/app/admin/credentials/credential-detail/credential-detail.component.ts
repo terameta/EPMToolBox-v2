@@ -31,9 +31,6 @@ export class CredentialDetailComponent implements OnInit, OnDestroy {
 	) { }
 
 	ngOnInit() {
-		this.ds.showInterest( { concept: 'credentials' } );
-		this.ds.showInterest( { concept: 'tags' } );
-		this.ds.showInterest( { concept: 'taggroups' } );
 		this.subscriptions.push( this.ds.store.credentials.subject.
 			pipe(
 				combineLatest( this.ss.currentIDO ),

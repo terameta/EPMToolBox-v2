@@ -31,8 +31,6 @@ export class AdminToolbarComponent implements OnInit, OnDestroy {
 	) { }
 
 	ngOnInit() {
-		this.ds.showInterest( { concept: 'tags' } );
-		this.ds.showInterest( { concept: 'taggroups' } );
 		this.subscriptions.push( this.ds.store.tags.items.subscribe( ( i ) => { this.tags = i; } ) );
 		this.subscriptions.push( this.ds.store.taggroups.items.subscribe( ( i ) => { this.tagGroups = i; } ) );
 	}

@@ -1,6 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { DataStoreService } from '../../data-store/data-store.service';
-import { ATDataStoreInterest } from 'shared/models/at.datastoreinterest';
 import { Subscription } from 'rxjs';
 import { ATProcessStatus } from 'shared/models/at.process';
 
@@ -24,29 +23,9 @@ export class AdminFrontPageComponent implements OnInit, OnDestroy {
 	public credentialCount = 0;
 	public userCount = 0;
 
-	private interests: ATDataStoreInterest[] = [
-		{ concept: 'environments' },
-		{ concept: 'streams' },
-		{ concept: 'maps' },
-		{ concept: 'matrices' },
-		{ concept: 'schedules' },
-		{ concept: 'processes' },
-		{ concept: 'secrets' },
-		{ concept: 'credentials' },
-		{ concept: 'users' }
-	];
-
 	constructor( public ds: DataStoreService ) { }
 
 	ngOnInit() {
-
-		// 	.subscribe( result => {
-		// 	this.processCount = result.ids.length;
-		// 	this.runningProcessCount = result.ids.map( id => result.subject[id] ).filter( e => e.status === ATProcessStatus.Running ).length;
-		// } ) );
-
-		this.interests.forEach( this.ds.showInterest );
-
 		this.subscriptions.push( this.ds.store.environments.items.subscribe( s => { this.environmentCount = s.length; this.verifiedEnvironmentCount = s.filter( e => e.verified ).length; } ) );
 		this.subscriptions.push( this.ds.store.streams.items.subscribe( s => this.streamCount = s.length ) );
 		this.subscriptions.push( this.ds.store.maps.items.subscribe( s => this.mapCount = s.length ) );
@@ -59,7 +38,6 @@ export class AdminFrontPageComponent implements OnInit, OnDestroy {
 	}
 
 	ngOnDestroy() {
-		this.interests.forEach( this.ds.looseInterest );
 		this.subscriptions.forEach( s => s.unsubscribe() );
 	}
 

@@ -37,11 +37,10 @@ export class CommunicationService {
 		console.log( 'We should throughly test the authentication mechanism once again' );
 
 		this.socket.on( 'connect', () => {
-			// console.log( 'Client side socket is connected', this.socket.id );
 			this.isConnected$.next( true );
-			this.interestSubscription = this.ds.interests$.pipe( debounce( () => timer( 500 ) ) ).subscribe( ( interests ) => {
-				// console.log( 'Interests changed', JSON.stringify( interests ) );
-				this.showInterest( interests );
+			if ( this.interestSubscription ) this.interestSubscription.unsubscribe();
+			this.interestSubscription = this.ds.interests$.pipe( debounce( () => timer( 100 ) ) ).subscribe( ( interests ) => {
+				this.sendInterest( interests );
 			} );
 		} );
 		this.socket.on( 'disconnect', () => {
@@ -141,7 +140,7 @@ export class CommunicationService {
 		console.log( '===========================================' );
 	}
 
-	private showInterest = ( payload: ATDataStoreInterest[] ) => {
+	private sendInterest = ( payload: ATDataStoreInterest[] ) => {
 		this.socket.emit( 'interest', payload );
 	}
 }

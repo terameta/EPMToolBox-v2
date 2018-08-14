@@ -24,7 +24,6 @@ export class EnvironmentListComponent implements OnInit, OnDestroy {
 		public ss: AdminSharedService,
 		public ms: EnvironmentsService
 	) {
-		this.ds.showInterest( { concept: 'environments' } );
 		this.subscriptions.push( this.ds.store.environments.items.subscribe( i => this.environments = i ) );
 	}
 

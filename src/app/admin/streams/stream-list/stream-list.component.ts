@@ -27,8 +27,6 @@ export class StreamListComponent implements OnInit, OnDestroy {
 		public ss: AdminSharedService,
 		public ms: StreamsService
 	) {
-		this.ds.showInterest( { concept: 'streams' } );
-		this.ds.showInterest( { concept: 'environments' } );
 		this.subscriptions.push( this.ds.store.streams.items.subscribe( i => this.streams = i ) );
 		this.subscriptions.push( this.ds.store.environments.subject.subscribe( i => this.environments = i ) );
 	}

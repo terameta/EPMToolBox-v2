@@ -35,10 +35,6 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
 	) { }
 
 	ngOnInit() {
-		this.ds.showInterest( { concept: 'environments' } );
-		this.ds.showInterest( { concept: 'credentials' } );
-		this.ds.showInterest( { concept: 'tags' } );
-		this.ds.showInterest( { concept: 'taggroups' } );
 		this.subscriptions.push( this.ds.store.environments.subject.
 			pipe(
 				combineLatest( this.cs.currentIDO ),

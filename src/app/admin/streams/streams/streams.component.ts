@@ -16,7 +16,6 @@ export class StreamsComponent implements OnInit, OnDestroy {
 	constructor( private ds: DataStoreService ) { }
 
 	ngOnInit() {
-		this.ds.showInterest( { concept: 'streams' } );
 		this.subscriptions.push( this.ds.store.streams.items.subscribe( i => this.streams = i ) );
 	}
 

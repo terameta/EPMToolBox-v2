@@ -16,7 +16,6 @@ export class CredentialsComponent implements OnInit, OnDestroy {
 	constructor( private ds: DataStoreService ) { }
 
 	ngOnInit() {
-		this.ds.showInterest( { concept: 'credentials' } );
 		this.subscriptions.push( this.ds.store.credentials.items.subscribe( i => this.credentials = i ) );
 	}
 

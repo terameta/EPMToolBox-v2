@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { ATDataStoreInterest } from 'shared/models/at.datastoreinterest';
 import { ATEnvironmentClass } from 'shared/models/at.environment';
 import { ATStreamClass } from 'shared/models/at.stream';
@@ -38,15 +38,15 @@ export class DataStoreService {
 		logs: new ATLogClass()
 	};
 
-	public interests$: BehaviorSubject<ATDataStoreInterest[]>;
+	public subscribables: any = {};
+
+	public interests$: BehaviorSubject<ATDataStoreInterest[]> = new BehaviorSubject( [] );
 
 
 
 	constructor() {
-		this.interests$ = new BehaviorSubject( [] );
-		// setInterval( () => {
-		// 	console.log( 'Interest observer count:', this.interests$.observers.length, this.interests$.getValue() );
-		// }, 5000 );
+		this.prepareSubscribables();
+		setInterval( this.checkSubscriptions, 300 );
 	}
 
 	public react = ( response: ATApiCommunication ) => {
@@ -65,12 +65,34 @@ export class DataStoreService {
 	public looseInterest = ( payload: ATDataStoreInterest ) => {
 		const currentInterests = this.interests$.getValue();
 		const filteredInterests = currentInterests.filter( interest => this.interestToString( interest ) !== this.interestToString( payload ) );
-		this.interests$.next( filteredInterests );
+		if ( currentInterests.length !== filteredInterests.length ) this.interests$.next( filteredInterests );
 	}
 
 	private interestToString = ( interest: ATDataStoreInterest ) => {
 		return JSON.stringify( { concept: interest.concept, id: interest.id || interest.id === 0 ? interest.id : undefined } );
 	}
 
+	private prepareSubscribables = () => {
+		Object.keys( this.store ).forEach( conceptKey => {
+			this.subscribables[conceptKey] = {};
 
+		} );
+	}
+
+	private checkSubscriptions = () => {
+		Object.keys( this.store ).forEach( ck => {
+			const ckCount = Object.values( this.store[ck] ).
+				filter( sk => typeof sk === 'object' ).
+				filter( sk => sk.constructor.name.indexOf( 'Subject' ) >= 0 ).
+				reduce( ( acc: number, currentSubject: Subject<any> ) => acc + currentSubject.observers.length, 0 );
+			this.subscribables[ck] = ckCount;
+		} );
+		Object.keys( this.subscribables ).forEach( ck => {
+			if ( this.subscribables[ck] > 0 ) {
+				this.showInterest( <ATDataStoreInterest>( { concept: ck } ) );
+			} else {
+				this.looseInterest( <ATDataStoreInterest>( { concept: ck } ) );
+			}
+		} );
+	}
 }

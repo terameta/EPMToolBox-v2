@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../auth/auth.service';
 import { Router } from '@angular/router';
+import { DataStoreService } from '../../data-store/data-store.service';
 
 @Component( {
 	selector: 'app-admin-navbar',
@@ -12,6 +13,7 @@ export class AdminNavbarComponent implements OnInit {
 
 	constructor(
 		public as: AuthService,
+		public ds: DataStoreService,
 		public router: Router
 	) { }
 

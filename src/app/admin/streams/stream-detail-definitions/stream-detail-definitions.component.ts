@@ -23,16 +23,13 @@ export class StreamDetailDefinitionsComponent implements OnInit, OnDestroy {
 	private subscriptions: Subscription[] = [];
 
 	constructor(
-		private ds: DataStoreService,
+		public ds: DataStoreService,
 		public cs: CentralStatusService,
 		public ss: AdminSharedService,
 		public ms: StreamsService
 	) { }
 
 	ngOnInit() {
-		this.ds.showInterest( { concept: 'streams' } );
-		this.ds.showInterest( { concept: 'tags' } );
-		this.ds.showInterest( { concept: 'taggroups' } );
 		this.subscriptions.push( this.ds.store.streams.subject.
 			pipe(
 				combineLatest( this.cs.currentIDO ),

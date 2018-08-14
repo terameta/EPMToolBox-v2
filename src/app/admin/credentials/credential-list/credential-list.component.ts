@@ -20,7 +20,6 @@ export class CredentialListComponent implements OnInit, OnDestroy {
 		public ss: CentralStatusService,
 		public ms: CredentialsService
 	) {
-		this.ds.showInterest( { concept: 'credentials' } );
 		this.subscriptions.push( this.ds.store.credentials.items.subscribe( i => this.credentials = i ) );
 	}
 
