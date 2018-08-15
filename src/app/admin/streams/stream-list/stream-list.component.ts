@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ATStream, getStreamTypeDescription, ATStreamType } from 'shared/models/at.stream';
+import { ATStream, atGetStreamTypeDescription, ATStreamType } from 'shared/models/at.stream';
 import { Subscription } from 'rxjs';
 import { DataStoreService } from '../../../data-store/data-store.service';
 import { CentralStatusService } from '../../../central-status/central-status.service';
@@ -16,7 +16,7 @@ import { AdminSharedService } from '../../admin-shared/admin-shared.service';
 export class StreamListComponent implements OnInit, OnDestroy {
 	public streams: ATStream[] = [];
 	public environments: ATStoreSubject<ATEnvironment> = {};
-	public getStreamTypeDescription = getStreamTypeDescription;
+	public getStreamTypeDescription = atGetStreamTypeDescription;
 	public streamTypes = ATStreamType;
 
 	private subscriptions: Subscription[] = [];

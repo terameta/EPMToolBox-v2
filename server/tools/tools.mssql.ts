@@ -18,6 +18,9 @@ export class MSSQLTool {
 			server: payload.server || '',
 			connectionTimeout: 300000,
 			requestTimeout: 6000000,
+			options: {
+				encrypt: false
+			}
 		};
 
 		if ( payload.database ) { dbConfig.database = payload.database; }
@@ -40,9 +43,8 @@ export class MSSQLTool {
 	public listTables = async ( payload: ATEnvironmentDetail ) => {
 		await this.connect( payload );
 		const { recordset } = await payload.mssql.connection.request().query( 'SELECT TABLE_NAME, TABLE_TYPE FROM ' + payload.database + '.INFORMATION_SCHEMA.Tables ORDER BY 2, 1' );
-		return recordset.
-			map( tuple => ( { name: tuple.TABLE_NAME, type: tuple.TABLE_TYPE } ) ).
-			push( { name: 'Custom Query', type: 'Custom Query' } );
+		recordset.push( { TABLE_NAME: 'Custom Query', TABLE_TYPE: 'Custom Query' } );
+		return recordset.map( tuple => ( { name: tuple.TABLE_NAME, type: tuple.TABLE_TYPE } ) );
 	}
 
 	public listFields = async ( payload: ATEnvironmentDetail ) => {

@@ -53,11 +53,11 @@ export class EnvironmentTool {
 			toReturn.username = username;
 			toReturn.password = password;
 		}
+		if ( toReturn.type === ATEnvironmentType.MSSQL && !toReturn.mssql ) toReturn.mssql = { connection: null };
 		return toReturn;
 	}
 
 	public verify = async ( id: number ) => {
-		// throw new Error( 'Testing error' );
 		const payload = await this.getEnvironmentDetails( id, true );
 		await this.sourceTools[payload.type].verify( payload );
 		await this.setVerified( payload );
@@ -69,10 +69,12 @@ export class EnvironmentTool {
 		const payload = await this.getEnvironmentDetails( id, true );
 		return await this.sourceTools[payload.type].listDatabases( payload );
 	}
-	public listTables = async ( id: number, database: string ) => {
-		const payload = await this.getEnvironmentDetails( id, true );
-		if ( database ) payload.database = database;
-		return await this.sourceTools[payload.type].listTables( payload );
+	public listTables = async ( payload: { id: number, database: string } ) => {
+		console.log( 'We are at listTables@tools.environment.ts', payload );
+		const lister = await this.getEnvironmentDetails( payload.id, true );
+		console.log( 'We are at listTables@tools.environment.ts, received environment details' );
+		if ( payload.database ) lister.database = payload.database;
+		return await this.sourceTools[lister.type].listTables( lister );
 	}
 	public listDescriptiveTables = async ( id: number, database: string, table: string ) => {
 		const payload = await this.getEnvironmentDetails( id, true );

@@ -49,6 +49,6 @@
 	"zenMode.hideTabs": false,
 	"zenMode.hideStatusBar": false,
 	"zenMode.hideActivityBar": false,
-	"javascript.showUnused": true,
-	"typescript.showUnused": true
+	"breadcrumbs.enabled": true,
+	"editor.showUnused": true
 }

@@ -1,13 +1,89 @@
-Subscribables
-<hr>
-<pre>{{ ds.subscribables | json }}</pre>
-<hr>
-<pre>{{ ds.interests$ | async | json }}</pre>
-<hr>
-<form (ngSubmit)="ss.update(ms.framework, cStream)">
+<form (ngSubmit)="ss.update(ms.framework, cStream)" #f="ngForm" #formSpy>
 	<div class="form-group row m-0">
-
+		<label for="sName" class="col-3 col-md-1 col-form-label font-weight-bold">Name:</label>
+		<div class="col-9 col-md-11">
+			<input type="text" name="sName" class="form-control form-control-sm" [(ngModel)]="cStream.name" required minlength="1">
+		</div>
+	</div>
+	<div class="form-group row m-0">
+		<label for="sEnvironment" class="col-3 col-md-1 col-form-label font-weight-bold">Environment:</label>
+		<div class="col-9 col-md-11">
+			<div class="input-group input-group-sm">
+				<select name="sEnvironment" class="form-control form-control-sm" [(ngModel)]="cStream.environment" (change)="handleEnvironmentChange()" required>
+					<option value="undefined">Please select an environment</option>
+					<option *ngFor="let environment of (ds.store.environments.items | async)" [value]="environment.id">{{environment.name}}</option>
+				</select>
+				<div class="input-group-append">
+					<button class="btn btn-outline-secondary" type="button" routerLink="/admin/environments/{{cStream.environment}}">
+						<i class="fas fa-link fa-fw"></i>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="form-group row m-0">
+		<label for="sType" class="col-3 col-md-1 col-form-label font-weight-bold">Type:</label>
+		<div class="col-9 col-md-11">
+			<select name="sType" class="form-control form-control-sm" [(ngModel)]="cStream.type" disabled required>
+				<option value="undefined">Please select a type</option>
+				<option *ngFor="let streamType of streamTypes" [value]="streamType.value">{{getTypeDescription(streamType.label)}}</option>
+			</select>
+		</div>
+	</div>
+	<div class="form-group row m-0">
+		<label for="sDatabase" class="col-3 col-md-1 col-form-label font-weight-bold">
+			<span *ngIf="cStream.type!=streamType.HPDB">Database:</span>
+			<span *ngIf="cStream.type==streamType.HPDB">Application:</span>
+		</label>
+		<div class="col-9 col-md-11">
+			<div class="input-group input-group-sm">
+				<select name="sDatabase" class="form-control form-control-sm" [(ngModel)]="cStream.dbName" (change)="handleDatabaseChange()" required>
+					<option value="undefined">Please select</option>
+					<option *ngFor="let database of cStream.databaseList" [value]="database.name">{{database.name}}</option>
+				</select>
+				<div class="input-group-append">
+					<button class="btn btn-outline-secondary" type="button" (click)="refreshDatabases()">
+						<i class="fas fa-sync-alt fa-fw"></i> Refresh
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="form-group row m-0">
+		<label for="sTable" class="col-3 col-md-1 col-form-label font-weight-bold">
+			<span *ngIf="cStream.type!=streamType.HPDB">Table:</span>
+			<span *ngIf="cStream.type==streamType.HPDB">Cube:</span>
+		</label>
+		<div class="col-9 col-md-11">
+			<div class="input-group input-group-sm">
+				<select name="sTables" class="form-control form-control-sm" [(ngModel)]="cStream.tableName" required>
+					<option value="undefined">Please select</option>
+					<option *ngFor="let table of cStream.tableList" [value]="table.name">{{table.name}}</option>
+				</select>
+				<div class="input-group-append">
+					<button class="btn btn-outline-secondary" type="button" (click)="refreshTables()">
+						<i class="fas fa-sync-alt fa-fw"></i> Refresh
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="form-group row m-0">
+		<label class="col-3 col-md-1 col-form-label font-weight-bold">&nbsp;</label>
+		<div class="col-9 col-md-11 text-right">
+			<div class="btn-group btn-group-sm" role="group">
+				<button type="submit" class="btn btn-outline-primary">
+					<i class="fas fa-save fa-fw"></i> Save
+				</button>
+				<button class="btn btn-outline-dark" type="button" (click)="ss.clone(ms.framework, cStream)">
+					<i class="far fa-clone fa-fw "></i> Clone
+				</button>
+				<button class="btn btn-outline-danger" type="button" (click)="ss.delete(ms.framework, cStream.id, cStream.name)">
+					<i class="fas fa-trash fa-fw "></i> Delete
+				</button>
+			</div>
+		</div>
 	</div>
 </form>
-
+{{formSpy.className}}
 <pre>{{ cStream | json }}</pre>

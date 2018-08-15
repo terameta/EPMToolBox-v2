@@ -22,4 +22,7 @@ export class EnvironmentsService {
 			this.cs.communicate( { framework: this.framework, action: 'verify', payload: { status: 'request', data: id } }, true ).subscribe( resolve, reject );
 		} );
 	}
+
+	public listDatabases = ( id: number ) => this.cs.communicate( { framework: this.framework, action: 'listDatabases', payload: { status: 'request', data: id } }, true );
+	public listTables = ( id: number, database: string ) => this.cs.communicate( { framework: this.framework, action: 'listTables', payload: { status: 'request', data: { id, database } } }, true );
 }

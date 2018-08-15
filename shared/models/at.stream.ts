@@ -126,7 +126,7 @@ export enum ATStreamType {
 	'HPDB' = 2
 }
 
-export function getStreamTypeDescription( typecode: number | string ) {
+export function atGetStreamTypeDescription( typecode: number | string ) {
 	switch ( typecode ) {
 		case 1:
 		case '1':

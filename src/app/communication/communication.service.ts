@@ -7,7 +7,7 @@ import { DataStoreService } from '../data-store/data-store.service';
 import { withLatestFrom, map, filter, debounce } from 'rxjs/operators';
 import { BehaviorSubject, Subscription, timer } from 'rxjs';
 import { ATUser } from 'shared/models/at.user';
-import { ATApiCommunication } from 'shared/models/at.socketrequest';
+import { ATApiCommunication, ATApiPayload } from 'shared/models/at.socketrequest';
 import { CentralStatusService } from '../central-status/central-status.service';
 import { ATDataStoreInterest } from '../../../shared/models/at.datastoreinterest';
 import { v4 as uuid } from 'uuid';
@@ -107,7 +107,7 @@ export class CommunicationService {
 		payload = { token: this.as.encodedToken, ...payload };
 		if ( followup ) {
 			payload = { uuid: uniqueid, ...payload };
-			this.followUps[uniqueid] = new BehaviorSubject( <any>{} );
+			this.followUps[uniqueid] = new BehaviorSubject<ATApiPayload>( null ).pipe( filter( v => !!v ) );
 			notification.type = 'working';
 		} else {
 			notification.expires = ( new Date( +new Date() + 5000 ) );
