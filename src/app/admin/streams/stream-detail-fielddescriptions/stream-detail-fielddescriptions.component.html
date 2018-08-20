@@ -1,3 +1,2 @@
-<p>
-  stream-detail-fielddescriptions works!
-</p>
+<app-stream-detail-fielddescriptions-hpdb *ngIf="csType == streamType.HPDB"></app-stream-detail-fielddescriptions-hpdb>
+<app-stream-detail-fielddescriptions-rdbt *ngIf="csType == streamType.RDBT"></app-stream-detail-fielddescriptions-rdbt>

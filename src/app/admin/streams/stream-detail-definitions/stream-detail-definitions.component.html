@@ -1,4 +1,17 @@
-<form (ngSubmit)="ss.update(ms.framework, cStream)" #f="ngForm" #formSpy>
+<form (ngSubmit)="ss.update(ms.framework, cStream, f)" #f="ngForm" #formSpy>
+	<div class="btn-toolbar w-100 mb-3" role="toolbar" aria-label="Stream Definitions Toolbar">
+		<div class="btn-group btn-group-sm ml-auto" role="group" aria-label="Stream Definitions Button Group">
+			<button type="submit" class="btn btn-outline-primary">
+				<i class="fas fa-save fa-fw"></i> Save
+			</button>
+			<button class="btn btn-outline-dark" type="button" (click)="ss.clone(ms.framework, cStream)">
+				<i class="far fa-clone fa-fw "></i> Clone
+			</button>
+			<button class="btn btn-outline-danger" type="button" (click)="ss.delete(ms.framework, cStream.id, cStream.name)">
+				<i class="fas fa-trash fa-fw "></i> Delete
+			</button>
+		</div>
+	</div>
 	<div class="form-group row m-0">
 		<label for="sName" class="col-3 col-md-1 col-form-label font-weight-bold">Name:</label>
 		<div class="col-9 col-md-11">
@@ -24,10 +37,7 @@
 	<div class="form-group row m-0">
 		<label for="sType" class="col-3 col-md-1 col-form-label font-weight-bold">Type:</label>
 		<div class="col-9 col-md-11">
-			<select name="sType" class="form-control form-control-sm" [(ngModel)]="cStream.type" disabled required>
-				<option value="undefined">Please select a type</option>
-				<option *ngFor="let streamType of streamTypes" [value]="streamType.value">{{getTypeDescription(streamType.label)}}</option>
-			</select>
+			<input type="text" name="sType" class="form-control form-control-sm" value="{{getTypeDescription(streamType[cStream.type])}}" disabled>
 		</div>
 	</div>
 	<div class="form-group row m-0">
@@ -42,8 +52,8 @@
 					<option *ngFor="let database of cStream.databaseList" [value]="database.name">{{database.name}}</option>
 				</select>
 				<div class="input-group-append">
-					<button class="btn btn-outline-secondary" type="button" (click)="refreshDatabases()">
-						<i class="fas fa-sync-alt fa-fw"></i> Refresh
+					<button class="btn btn-outline-secondary" type="button" (click)="refreshDatabases()" title="Refresh Databases/Applications">
+						<i class="fas fa-sync-alt fa-fw"></i>
 					</button>
 				</div>
 			</div>
@@ -61,29 +71,31 @@
 					<option *ngFor="let table of cStream.tableList" [value]="table.name">{{table.name}}</option>
 				</select>
 				<div class="input-group-append">
-					<button class="btn btn-outline-secondary" type="button" (click)="refreshTables()">
-						<i class="fas fa-sync-alt fa-fw"></i> Refresh
+					<button class="btn btn-outline-secondary" type="button" (click)="refreshTables()" title="Refresh Tables/Cubes">
+						<i class="fas fa-sync-alt fa-fw"></i>
 					</button>
 				</div>
 			</div>
 		</div>
 	</div>
-	<div class="form-group row m-0">
-		<label class="col-3 col-md-1 col-form-label font-weight-bold">&nbsp;</label>
-		<div class="col-9 col-md-11 text-right">
-			<div class="btn-group btn-group-sm" role="group">
-				<button type="submit" class="btn btn-outline-primary">
-					<i class="fas fa-save fa-fw"></i> Save
-				</button>
-				<button class="btn btn-outline-dark" type="button" (click)="ss.clone(ms.framework, cStream)">
-					<i class="far fa-clone fa-fw "></i> Clone
-				</button>
-				<button class="btn btn-outline-danger" type="button" (click)="ss.delete(ms.framework, cStream.id, cStream.name)">
-					<i class="fas fa-trash fa-fw "></i> Delete
-				</button>
+	<!-- <div class="form-group row m-0" *ngIf="cStream.tableName == 'Custom Query'">
+		<label for="sQuery" class="col-3 col-md-1 col-form-label font-weight-bold"> Custom Query:</label>
+		<div class="col-9 col-md-11">
+			<textarea name="sQuery" class="form-control mb-2" rows="5" [(ngModel)]="cStream.customQuery"></textarea>
+		</div>
+	</div> -->
+	<div class="form-group row m-0" *ngIf="cStream.tableName == 'Custom Query'">
+		<label for="sQuery" class="col-3 col-md-1 col-form-label font-weight-bold"> Custom Query:</label>
+		<div class="col-9 col-md-11">
+			<div class="border p-0 mh-25">
+				<ngx-monaco-editor [options]="monacoOptions" [(ngModel)]="cStream.customQuery" name="sCQuery"></ngx-monaco-editor>
 			</div>
 		</div>
 	</div>
+	<div class="form-group row m-0">
+		<label class="col-3 col-md-1 col-form-label font-weight-bold">Tags:</label>
+		<div class="col-9 col-md-11">
+			<app-admin-tag-selector [tags]="cStream.tags"></app-admin-tag-selector>
+		</div>
+	</div>
 </form>
-{{formSpy.className}}
-<pre>{{ cStream | json }}</pre>

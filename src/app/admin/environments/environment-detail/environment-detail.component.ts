@@ -37,7 +37,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
 	ngOnInit() {
 		this.subscriptions.push( this.ds.store.environments.subject.
 			pipe(
-				combineLatest( this.cs.currentIDO ),
+				combineLatest( this.cs.currentID$ ),
 				filter( ( [s, id] ) => ( !!s[id] ) )
 			).
 			subscribe( ( [s, id] ) => {

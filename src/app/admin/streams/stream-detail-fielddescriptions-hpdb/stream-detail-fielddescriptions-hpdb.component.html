@@ -1,0 +1,10 @@
+<form (ngSubmit)="ss.update(ms.framework, cStream)">
+	<div class="btn-toolbar w-100 mb-3" role="toolbar" aria-label="Stream Field Descriptions Toolbar">
+		<div class="btn-group btn-group-sm ml-auto" role="group" aria-label="Stream Field Descriptions Button Group">
+			<button type="submit" class="btn btn-outline-primary">
+				<i class="fas fa-save fa-fw"></i> Save
+			</button>
+		</div>
+	</div>
+</form>
+<pre>{{cStream | json}}</pre>

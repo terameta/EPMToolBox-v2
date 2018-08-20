@@ -1,24 +1,27 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ATStreamType } from 'shared/models/at.stream';
 import { DataStoreService } from '../../../data-store/data-store.service';
-import { Subscription } from 'rxjs';
 import { CentralStatusService } from '../../../central-status/central-status.service';
+import { ATStream, getDefaultATStream } from 'shared/models/at.stream';
+import { Subscription } from 'rxjs';
 import { combineLatest, filter, map } from 'rxjs/operators';
+import { AdminSharedService } from '../../admin-shared/admin-shared.service';
+import { StreamsService } from '../streams.service';
 
 @Component( {
-	selector: 'app-stream-detail-fielddescriptions',
-	templateUrl: './stream-detail-fielddescriptions.component.html',
-	styleUrls: ['./stream-detail-fielddescriptions.component.scss']
+	selector: 'app-stream-detail-fielddescriptions-hpdb',
+	templateUrl: './stream-detail-fielddescriptions-hpdb.component.html',
+	styleUrls: ['./stream-detail-fielddescriptions-hpdb.component.scss']
 } )
-export class StreamDetailFielddescriptionsComponent implements OnInit, OnDestroy {
-	public csType: ATStreamType = null;
-	public streamType = ATStreamType;
+export class StreamDetailFielddescriptionsHpdbComponent implements OnInit, OnDestroy {
+	public cStream: ATStream = getDefaultATStream();
 
 	private subscriptions: Subscription[] = [];
 
 	constructor(
 		private ds: DataStoreService,
-		private cs: CentralStatusService
+		private cs: CentralStatusService,
+		public ss: AdminSharedService,
+		public ms: StreamsService
 	) { }
 
 	ngOnInit() {
@@ -28,7 +31,7 @@ export class StreamDetailFielddescriptionsComponent implements OnInit, OnDestroy
 				filter( ( [s, id] ) => ( !!s[id] ) ),
 				map( ( [s, id] ) => ( s[id] ) )
 			).
-			subscribe( s => this.csType = s.type )
+			subscribe( s => this.cStream = s )
 		);
 	}
 

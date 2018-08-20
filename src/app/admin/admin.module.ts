@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AdminNavbarComponent } from './admin-navbar/admin-navbar.component';
 import { AdminFrontPageComponent } from './admin-front-page/admin-front-page.component';
 import { RouterModule, Routes } from '@angular/router';
-import { CollapseModule } from '../../../node_modules/ngx-bootstrap/collapse';
+import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { AdminComponent } from './admin/admin.component';
 import { AdminSharedModule } from './admin-shared/admin-shared.module';
 

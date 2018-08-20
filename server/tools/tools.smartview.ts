@@ -12,11 +12,6 @@ import * as Url from 'url';
 import { ATStreamField } from '../../shared/models/at.stream';
 import { SortByName, encodeXML, SortByPosition, arrayCartesian } from '../../shared/utilities/utilityFunctions';
 import { findMembers } from '../../shared/utilities/hpUtilities';
-import * as puppeteer from 'puppeteer';
-import { HttpMethod } from 'puppeteer';
-import * as Got from 'got';
-import * as Cookie from 'cookie';
-import * as FormData from 'form-data';
 
 export class SmartViewTool {
 	constructor( private db: DB, private tools: MainTools ) { }

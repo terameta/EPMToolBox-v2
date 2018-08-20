@@ -33,7 +33,7 @@ export class CredentialDetailComponent implements OnInit, OnDestroy {
 	ngOnInit() {
 		this.subscriptions.push( this.ds.store.credentials.subject.
 			pipe(
-				combineLatest( this.ss.currentIDO ),
+				combineLatest( this.ss.currentID$ ),
 				filter( ( [s, id] ) => ( !!s[id] ) )
 			).
 			subscribe( ( [s, id] ) => {

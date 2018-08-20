@@ -5,6 +5,9 @@ import { NgModule } from '@angular/core';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { ModalModule } from 'ngx-bootstrap/modal';
 
+// Monaco Editor
+import { MonacoEditorModule } from 'ngx-monaco-editor';
+
 import { AppComponent } from './app.component';
 import { Routes, RouterModule } from '@angular/router';
 import { JwtModule } from '@auth0/angular-jwt';
@@ -54,6 +57,7 @@ export function tokenGetter() {
 		DataStoreModule,
 		CollapseModule.forRoot(),
 		ModalModule.forRoot(),
+		MonacoEditorModule.forRoot(),
 		CentralStatusModule
 	],
 	providers: [],

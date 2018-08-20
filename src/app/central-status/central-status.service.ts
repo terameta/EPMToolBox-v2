@@ -19,9 +19,9 @@ export class CentralStatusService {
 	public notifications$ = new BehaviorSubject<ATNotification[]>( [] );
 
 	public currentComponent = '';
-	public currentComponentO = new BehaviorSubject( '' );
+	public currentComponent$ = new BehaviorSubject( '' );
 	public currentID = 0;
-	public currentIDO = new BehaviorSubject( 0 );
+	public currentID$ = new BehaviorSubject( 0 );
 
 	public selectedTags: any = {};
 
@@ -80,8 +80,8 @@ export class CentralStatusService {
 				this.currentID = parseInt( urlSegments[3], 10 );
 			}
 		}
-		this.currentComponentO.next( this.currentComponent );
-		this.currentIDO.next( this.currentID );
+		this.currentComponent$.next( this.currentComponent );
+		this.currentID$.next( this.currentID );
 		// console.log( 'Current id changed to', this.currentID );
 	}
 

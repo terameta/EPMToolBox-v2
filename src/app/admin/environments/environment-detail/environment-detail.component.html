@@ -1,7 +1,7 @@
 <div class="container-fluid">
 	<div class="row">
 		<div class="col-12">
-			<form (ngSubmit)="ss.update(ms.framework, cEnvironment)">
+			<form (ngSubmit)="ss.update(ms.framework, cEnvironment, f)" #f="ngForm">
 				<div class="form-group row m-0">
 					<label for="eName" class="col-3 col-md-1 col-form-label font-weight-bold">Name:</label>
 					<div class="col-9 col-md-11">
@@ -61,19 +61,7 @@
 				<div class="form-group row m-0">
 					<label class="col-3 col-md-1 col-form-label font-weight-bold">Tags:</label>
 					<div class="col-9 col-md-11">
-						<div class="row">
-							<div class="col-{{decideColWidth(tagGroups.length)}}" *ngFor="let tagGroup of tagGroups">
-								{{tagGroup.name}}
-								<hr />
-								<ng-container *ngFor="let tagItem of tags">
-									<div class="checkbox" *ngIf="tagItem.taggroup == tagGroup.id">
-										<label>
-											<input type="checkbox" name="tagName{{tagItem.id}}" [(ngModel)]="cEnvironment?.tags[tagItem.id]"> {{tagItem.name}}
-										</label>
-									</div>
-								</ng-container>
-							</div>
-						</div>
+						<app-admin-tag-selector [tags]="cEnvironment.tags"></app-admin-tag-selector>
 					</div>
 				</div>
 				<div class="form-group row m-0">

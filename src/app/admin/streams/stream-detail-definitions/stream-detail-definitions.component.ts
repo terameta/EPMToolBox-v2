@@ -2,16 +2,14 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AdminSharedService } from '../../admin-shared/admin-shared.service';
 import { StreamsService } from '../streams.service';
 import { ATStream, getDefaultATStream, atGetStreamTypeDescription, ATStreamType } from '../../../../../shared/models/at.stream';
-import { Subscription, Observable, fromEvent, Subject, of, interval } from 'rxjs';
+import { Subscription, Subject } from 'rxjs';
 import { DataStoreService } from '../../../data-store/data-store.service';
-import { combineLatest, filter, debounceTime, switchMap, tap, delay, map } from 'rxjs/operators';
+import { combineLatest, filter, switchMap } from 'rxjs/operators';
 import { CentralStatusService } from '../../../central-status/central-status.service';
-import { ATTag } from '../../../../../shared/models/at.tag';
-import { ATTagGroup } from '../../../../../shared/models/at.taggroup';
-import { SortByName, SortByPosition, EnumToArray } from '../../../../../shared/utilities/utilityFunctions';
 import { ATEnvironmentType } from 'shared/models/at.environment';
 import { EnvironmentsService } from '../../environments/environments.service';
 import { ATApiPayload } from 'shared/models/at.socketrequest';
+import { EnumToArray } from 'shared/utilities/utilityFunctions';
 
 @Component( {
 	selector: 'app-stream-detail-definitions',
@@ -20,8 +18,6 @@ import { ATApiPayload } from 'shared/models/at.socketrequest';
 } )
 export class StreamDetailDefinitionsComponent implements OnInit, OnDestroy {
 	public cStream: ATStream = <ATStream>{};
-	public tags: ATTag[] = [];
-	public tagGroups: ATTagGroup[] = [];
 	public getTypeDescription = atGetStreamTypeDescription;
 	public streamType = ATStreamType;
 	public streamTypes = EnumToArray( ATStreamType );
@@ -30,6 +26,8 @@ export class StreamDetailDefinitionsComponent implements OnInit, OnDestroy {
 	private tableRefresh$ = new Subject();
 
 	private subscriptions: Subscription[] = [];
+
+	public monacoOptions = { theme: 'vs-light', language: 'sql', minimap: { enabled: false }, fontSize: 12, fontFamily: 'consolas', scrollBeyondLastLine: false };
 
 	constructor(
 		public ds: DataStoreService,
@@ -42,7 +40,7 @@ export class StreamDetailDefinitionsComponent implements OnInit, OnDestroy {
 	ngOnInit() {
 		this.subscriptions.push( this.ds.store.streams.subject.
 			pipe(
-				combineLatest( this.cs.currentIDO ),
+				combineLatest( this.cs.currentID$ ),
 				filter( ( [s, id] ) => ( !!s[id] ) )
 			).
 			subscribe( ( [s, id] ) => {
@@ -51,19 +49,6 @@ export class StreamDetailDefinitionsComponent implements OnInit, OnDestroy {
 				this.handleDatabaseChange();
 			} )
 		);
-		this.subscriptions.push( this.ds.store.tags.items.subscribe( c => this.tags = c.sort( SortByName ) ) );
-		this.subscriptions.push( this.ds.store.taggroups.items.subscribe( c => this.tagGroups = c.sort( SortByPosition ) ) );
-		// this.subscriptions.push( this.databaseRefresh$.
-		// 	pipe(
-		// 		tap( ( val: any ) => { console.log( 'This is pipe tap of databaseRefresh$', val ); } ),
-		// 		filter( () => {
-		// 			console.log( 'Environment is', this.cStream.environment, 'and !! is', !!this.cStream.environment );
-		// 			return !!this.cStream.environment;
-		// 		} ),
-		// 		switchMap( this.environmentService.listDatabases( this.cStream.environment ) )
-		// 	).
-		// 	subscribe( this.handleListDatabases )
-		// );
 		this.databaseRefresh$.pipe(
 			switchMap( () => this.environmentService.listDatabases( this.cStream.environment ) )
 		).subscribe( this.handleListDatabases );
@@ -97,6 +82,8 @@ export class StreamDetailDefinitionsComponent implements OnInit, OnDestroy {
 		}
 		this.cStream.dbName = null;
 		this.cStream.tableName = null;
+		this.cStream.databaseList = [];
+		this.cStream.tableList = [];
 		this.refreshDatabases();
 	}
 
@@ -110,6 +97,7 @@ export class StreamDetailDefinitionsComponent implements OnInit, OnDestroy {
 
 	public handleDatabaseChange = () => {
 		this.refreshTables();
+		this.cStream.tableList = [];
 	}
 
 	public refreshTables = () => {

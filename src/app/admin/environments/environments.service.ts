@@ -25,4 +25,5 @@ export class EnvironmentsService {
 
 	public listDatabases = ( id: number ) => this.cs.communicate( { framework: this.framework, action: 'listDatabases', payload: { status: 'request', data: id } }, true );
 	public listTables = ( id: number, database: string ) => this.cs.communicate( { framework: this.framework, action: 'listTables', payload: { status: 'request', data: { id, database } } }, true );
+	public listFields = ( id: number, database: string, table: string, query: string ) => this.cs.communicate( { framework: this.framework, action: 'listFields', payload: { status: 'request', data: { id, database, table, query } } }, true );
 }

@@ -31,10 +31,12 @@ export class StreamTool {
 
 	public update = async ( payload: ATStream ) => {
 		await this.db.queryOne( 'UPDATE streams SET ? WHERE id = ?', [this.tools.prepareTupleToWrite( payload ), payload.id] );
+		return { status: 'success' };
 	}
 
 	public delete = async ( id: number ) => {
 		await this.db.query( 'DELETE FROM streams WHERE id = ?', id );
+		return { status: 'success' };
 	}
 
 }
@@ -177,18 +179,6 @@ export class StreamTools {
 			} );
 		} );
 	}
-	public fieldsStartOver = ( refObj: DimeStreamDetail ) => {
-		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'DELETE FROM streamfields WHERE stream = ?', refObj.id, ( err, rows, fields ) => {
-				if ( err ) {
-					reject( err );
-				} else {
-					resolve( refObj );
-				}
-			} );
-		} );
-	}
-
 	public retrieveField = ( id: number ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM streamfields WHERE id = ?', id, ( err, rows, fields ) => {

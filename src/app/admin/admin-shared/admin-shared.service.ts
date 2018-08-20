@@ -3,6 +3,7 @@ import { CommunicationService } from '../../communication/communication.service'
 import { Router } from '@angular/router';
 import { CentralStatusService } from '../../central-status/central-status.service';
 import { JSONDeepCopy } from '../../../../shared/utilities/utilityFunctions';
+import { NgForm } from '@angular/forms';
 
 @Injectable( {
 	providedIn: 'root'
@@ -17,12 +18,14 @@ export class AdminSharedService {
 
 	public delete = async ( framework: string, id: number, name: string ) => {
 		const shouldDelete = await this.ss.confirm( 'Do you really want to delete ' + ( name || id ) + '?' );
-		if ( shouldDelete ) this.cs.communicate( { framework: framework, action: 'delete', payload: { status: 'request', data: id } } );
+		if ( shouldDelete ) this.cs.communicate( { framework: framework, action: 'delete', payload: { status: 'request', data: id } }, true );
 		this.router.navigateByUrl( '/admin/' + framework );
 	}
 
-	public update = async <T>( framework: string, payload: T ) => {
-		this.cs.communicate( { framework, action: 'update', payload: { status: 'request', data: payload } } );
+	public update = async <T>( framework: string, payload: T, form?: NgForm ) => {
+		this.cs.communicate( { framework, action: 'update', payload: { status: 'request', data: payload } }, true ).subscribe( () => {
+			if ( form ) form.form.markAsPristine();
+		} );
 	}
 
 	public clone = async <T>( framework: string, source ) => {

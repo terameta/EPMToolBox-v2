@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { ATStream } from 'shared/models/at.stream';
 import { JSONDeepCopy } from '../../../../shared/utilities/utilityFunctions';
 import { EnvironmentsService } from '../environments/environments.service';
+import { AdminSharedService } from '../admin-shared/admin-shared.service';
 
 @Injectable( {
 	providedIn: 'root'
@@ -15,35 +16,18 @@ export class StreamsService {
 	constructor(
 		private ss: CentralStatusService,
 		private cs: CommunicationService,
+		private gss: AdminSharedService,
 		private router: Router
 	) { }
 
 
-	/*
-	public delete = async ( id: number, name: string ) => {
-		const shouldDelete = await this.ss.confirm( 'Do you really want to delete ' + ( name || id ) + '?' );
-		if ( shouldDelete ) this.cs.communicate( { framework: this.framework, action: 'delete', payload: { status: 'request', data: id } } );
-		this.router.navigateByUrl( '/admin/' + this.framework );
+	public fieldsStartOver = async ( stream: ATStream ) => {
+		const sure = await this.ss.confirm( 'Are you sure to delete all the assigned fields?' );
+		if ( sure ) {
+			stream.fieldList = [];
+			this.gss.update( this.framework, stream );
+		}
 	}
-
-	public update = ( payload: ATStream ) => {
-		this.cs.communicate( { framework: this.framework, action: 'update', payload: { status: 'request', data: payload } } );
-	}
-
-	public clone = async ( source: ATStream ) => {
-		const result = await this.ss.prompt( 'Please enter the name of the new item' );
-		const payload: ATStream = JSONDeepCopy( source );
-		if ( !result ) return;
-		payload.name = result.toString();
-		delete payload.id;
-		this.cs.communicate( { framework: this.framework, action: 'create', payload: { status: 'request', data: payload } }, true ).subscribe( ( response ) => {
-			// console.log( response.data );
-			if ( response.data && response.data.id ) {
-				this.router.navigateByUrl( '/admin/' + this.framework + '/' + response.data.id );
-			}
-		} );
-	}
-	*/
 }
 
 /*
@@ -119,12 +103,7 @@ export class DimeStreamService {
 		this.store.dispatch( DimeStreamActions.ONE.FIELDS.LIST.FROMSOURCEENVIRONMENT.initiate( id ) );
 	}
 
-	public fieldsStartOver = ( id?: number ) => {
-		if ( !id ) { id = this.currentItem.id; }
-		if ( confirm( 'Are you sure to delete all the assigned fields?' ) ) {
-			this.store.dispatch( DimeStreamActions.ONE.FIELDS.STARTOVER.initiate( id ) );
-		}
-	}
+
 
 	public fieldMove = ( theFieldList: any[], theField, direction ) => {
 		const curOrder = theField.position;

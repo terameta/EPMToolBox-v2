@@ -39,10 +39,12 @@ export class EnvironmentTool {
 	public update = async ( payload: ATEnvironmentDetail ) => {
 		atEnvironmentPrepareToSave( payload );
 		await this.db.queryOne( 'UPDATE environments SET ? WHERE id = ?', [this.tools.prepareTupleToWrite( payload ), payload.id] );
+		return { status: 'success' };
 	}
 
 	public delete = async ( id: number ) => {
 		await this.db.query( 'DELETE FROM environments WHERE id = ?', id );
+		return { status: 'success' };
 	}
 
 	public getEnvironmentDetails = async ( id: number, reveal = false ): Promise<ATEnvironmentDetail> => {
@@ -70,9 +72,7 @@ export class EnvironmentTool {
 		return await this.sourceTools[payload.type].listDatabases( payload );
 	}
 	public listTables = async ( payload: { id: number, database: string } ) => {
-		console.log( 'We are at listTables@tools.environment.ts', payload );
 		const lister = await this.getEnvironmentDetails( payload.id, true );
-		console.log( 'We are at listTables@tools.environment.ts, received environment details' );
 		if ( payload.database ) lister.database = payload.database;
 		return await this.sourceTools[lister.type].listTables( lister );
 	}
@@ -82,12 +82,12 @@ export class EnvironmentTool {
 		if ( table ) payload.table = table;
 		return await this.sourceTools[payload.type].listTables( payload );
 	}
-	public listFields = async ( id: number, database: string, query: string, table: string ) => {
-		const payload = await this.getEnvironmentDetails( id, true );
-		if ( database ) payload.database = database;
-		if ( query ) payload.query = query;
-		if ( table ) payload.table = table;
-		return await this.sourceTools[payload.type].listFields( payload );
+	public listFields = async ( payload: { id: number, database: string, table: string, query: string } ) => {
+		const currentEnvironment = await this.getEnvironmentDetails( payload.id, true );
+		if ( payload.database ) currentEnvironment.database = payload.database;
+		if ( payload.table ) currentEnvironment.table = payload.table;
+		if ( payload.query ) currentEnvironment.query = payload.query;
+		return await this.sourceTools[currentEnvironment.type].listFields( currentEnvironment );
 	}
 	public listAliasTables = async ( id: number, database: string, query: string, table: string ) => {
 		const payload = await this.getEnvironmentDetails( id, true );
