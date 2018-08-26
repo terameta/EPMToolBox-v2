@@ -12,7 +12,7 @@ import { PromptComponent } from './prompt/prompt.component';
 	providedIn: 'root'
 } )
 export class CentralStatusService {
-	public currentURL = new BehaviorSubject<string>( '' );
+	public url$ = new BehaviorSubject<string>( '' );
 	public shouldShowHeader = true;
 	public shouldShowFooter = true;
 
@@ -41,7 +41,7 @@ export class CentralStatusService {
 		private modalService: BsModalService
 	) {
 		this.router.events.subscribe( this.routeHandler );
-		this.currentURL.subscribe( this.urlHandler );
+		this.url$.subscribe( this.urlHandler );
 		// console.log( 'Constructed central-status.service' );
 		setInterval( this.notificationClear, 1000 );
 		if ( localStorage.getItem( 'selectedTags' ) ) this.selectedTags = JSON.parse( localStorage.getItem( 'selectedTags' ) );
@@ -49,7 +49,7 @@ export class CentralStatusService {
 
 	private routeHandler = ( event: Event ) => {
 		if ( event instanceof NavigationEnd ) {
-			this.currentURL.next( event.url );
+			this.url$.next( event.url );
 			this.shouldShowHeader = true;
 			this.shouldShowFooter = true;
 			if ( this.urlsToHideHeader.includes( event.url ) ) {
@@ -82,7 +82,6 @@ export class CentralStatusService {
 		}
 		this.currentComponent$.next( this.currentComponent );
 		this.currentID$.next( this.currentID );
-		// console.log( 'Current id changed to', this.currentID );
 	}
 
 	public notificationAdd = ( payload: ATNotification ) => this.notifications$.next( this.notifications$.getValue().concat( [{ ...newATNotification(), ...payload }] ) );
@@ -124,4 +123,6 @@ export class CentralStatusService {
 			modalRef.content.onClose.subscribe( resolve, reject );
 		} );
 	}
+
+	public goto = ( targetURL: string ) => this.router.navigateByUrl( targetURL );
 }

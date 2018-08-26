@@ -1,2 +1,28 @@
-<app-stream-detail-fielddescriptions-hpdb *ngIf="csType == streamType.HPDB"></app-stream-detail-fielddescriptions-hpdb>
-<app-stream-detail-fielddescriptions-rdbt *ngIf="csType == streamType.RDBT"></app-stream-detail-fielddescriptions-rdbt>
+<!-- <app-stream-detail-fielddescriptions-hpdb *ngIf="csType == streamType.HPDB"></app-stream-detail-fielddescriptions-hpdb>
+<app-stream-detail-fielddescriptions-rdbt *ngIf="csType == streamType.RDBT"></app-stream-detail-fielddescriptions-rdbt> -->
+<div class="alert alert-info" *ngIf="!doWeHaveDescribedFields">
+	<h4><i class="icon fa fa-info mr-3"></i> No field is marked as described!</h4>
+	<hr> If you would like to assign fields as described and assign description definitions, please go to the "Fields" tab and check the tick marks under the column "Described?"
+</div>
+<div class="container-fluid p-0" *ngIf="doWeHaveDescribedFields">
+	<div class="row">
+		<div class="col">
+			<ul class="nav nav-tabs w-100">
+				<ng-container *ngFor="let field of item.fieldList">
+					<li class="nav-item">
+						<a routerLink="{{field.name}}" class="nav-link" routerLinkActive="active" data-toggle="tab">{{field.name}}</a>
+					</li>
+				</ng-container>
+			</ul>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col">
+			<div class="tab-content w-100 border border-top-0 p-3">
+				<div class="tab-pane active">
+					<router-outlet></router-outlet>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

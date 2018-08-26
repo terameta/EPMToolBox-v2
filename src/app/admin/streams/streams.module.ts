@@ -17,6 +17,7 @@ import { StreamDetailFieldsRdbtComponent } from './stream-detail-fields-rdbt/str
 import { StreamDetailFieldsHpdbComponent } from './stream-detail-fields-hpdb/stream-detail-fields-hpdb.component';
 import { StreamDetailFielddescriptionsHpdbComponent } from './stream-detail-fielddescriptions-hpdb/stream-detail-fielddescriptions-hpdb.component';
 import { StreamDetailFielddescriptionsRdbtComponent } from './stream-detail-fielddescriptions-rdbt/stream-detail-fielddescriptions-rdbt.component';
+import { StreamDetailFielddescriptionsSelectorComponent } from './stream-detail-fielddescriptions-selector/stream-detail-fielddescriptions-selector.component';
 
 const routes: Routes = [
 	{
@@ -27,7 +28,11 @@ const routes: Routes = [
 					{ path: '', redirectTo: 'definitions', pathMatch: 'prefix' },
 					{ path: 'definitions', component: StreamDetailDefinitionsComponent },
 					{ path: 'fields', component: StreamDetailFieldsComponent },
-					{ path: 'fielddescriptions', component: StreamDetailFielddescriptionsComponent },
+					{
+						path: 'fielddescriptions', component: StreamDetailFielddescriptionsComponent, children: [
+							{ path: ':name', component: StreamDetailFielddescriptionsSelectorComponent }
+						]
+					},
 					{ path: 'exports', component: StreamDetailExportsComponent }
 				]
 			}
@@ -54,7 +59,8 @@ const routes: Routes = [
 		StreamDetailFieldsRdbtComponent,
 		StreamDetailFieldsHpdbComponent,
 		StreamDetailFielddescriptionsHpdbComponent,
-		StreamDetailFielddescriptionsRdbtComponent
+		StreamDetailFielddescriptionsRdbtComponent,
+		StreamDetailFielddescriptionsSelectorComponent
 	]
 } )
 export class StreamsModule { }
