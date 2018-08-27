@@ -97,7 +97,9 @@ export class StreamDetailDefinitionsComponent implements OnInit, OnDestroy {
 
 	public handleDatabaseChange = () => {
 		this.refreshTables();
-		this.cStream.tableList = [];
+		if ( this.cStream.type === ATStreamType.RDBT ) this.cStream.tableList = [{ name: 'Custom Query', type: 'Custom Query' }];
+		if ( this.cStream.type === ATStreamType.HPDB ) this.cStream.tableList = [];
+		if ( this.cStream.tableName && this.cStream.tableName !== 'Custom Query' ) this.cStream.tableList.push( { name: this.cStream.tableName } );
 	}
 
 	public refreshTables = () => {

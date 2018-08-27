@@ -64,8 +64,6 @@ export class CommunicationService {
 				notification.type = 'success';
 				if ( response.uuid ) {
 					this.followUps[response.uuid].next( response.payload );
-					this.followUps[response.uuid].complete();
-					delete this.followUps[response.uuid];
 					if ( response.action === 'getAll' ) this.ds.react( response );
 				} else {
 					if ( response.framework === 'auth' ) {
@@ -82,6 +80,8 @@ export class CommunicationService {
 			if ( response.uuid ) {
 				notification.id = response.uuid;
 				this.cs.notificationUpdate( notification.id, notification );
+				this.followUps[response.uuid].complete();
+				delete this.followUps[response.uuid];
 			} else {
 				this.cs.notificationAdd( notification );
 			}

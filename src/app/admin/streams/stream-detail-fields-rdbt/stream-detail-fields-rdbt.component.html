@@ -1,3 +1,130 @@
-<p>
-  stream-detail-fields-rdbt works!
-</p>
+<div class="btn-toolbar w-100 mb-3" role="toolbar" aria-label="Stream Fields Toolbar">
+	<div class="btn-group btn-group-sm ml-auto" role="group" aria-label="Stream Fields Button Group">
+		<button class="btn btn-outline-primary" type="button" (click)="ss.update(ms.framework, cStream)">
+			<i class="fas fa-save fa-fw"></i> Save
+		</button>
+		<button class="btn btn-outline-evwarning" type="button" (click)="ms.fieldsStartOver(cStream)" [disabled]="!cStream.fieldList || cStream.fieldList.length == 0">
+			<i class="fas fa-eraser fa-fw"></i> Start Over
+		</button>
+		<button class="btn btn-outline-dark" type="button" (click)="listFields()" [disabled]="cStream.fieldList && cStream.fieldList.length > 0">
+			<i class="fas fa-sync-alt fa-fw"></i> Refresh from Environment
+		</button>
+	</div>
+</div>
+<div class="jumbotron col-8 offset-2 mt-5" *ngIf="!cStream.fieldList || cStream.fieldList.length == 0">
+	<h1>No Fields Exist</h1>
+	<hr class="my-4">
+	<p>To get the list of fields please click to "Refresh from Server" button on the toolbar above.</p>
+</div>
+<div class="table-responsive" *ngIf="cStream.fieldList && cStream.fieldList.length > 0">
+	<table class="table table-sm table-hover table-bordered">
+		<thead>
+			<tr>
+				<th class="text-center" width="30">Actions</th>
+				<th class="text-center">Name</th>
+				<th class="text-center">Type</th>
+				<th class="text-center" title="Is field described?">
+					<i class="fas fa-comment-alt fa-fw"></i>
+				</th>
+				<th class="text-center" title="Is field a filter?">
+					<i class="fas fa-filter fa-fw"></i>
+				</th>
+				<th class="text-center" title="Is field a crosstab?">
+					<i class="fas fa-crosshairs fa-fw"></i>
+				</th>
+				<th class="text-center" title="Should we ignore for crosstab?">
+					<i class="fas fa-crosshairs fa-fw"></i>
+					<i class="fas fa-ban" style="color:Tomato"></i>
+				</th>
+				<th class="text-center" title="Is this crosstab filter?">
+					<i class="fas fa-crosshairs fa-fw"></i>
+					<i class="fas fa-filter fa-fw"></i>
+				</th>
+				<th class="text-center" title="Is this a data field?">
+					<i class="fas fa-database fa-fw"></i>
+				</th>
+				<th class="text-center" title="Aggregation logic">
+					<i class="fas fa-calculator fa-fw"></i>
+				</th>
+				<th class="text-center" title="Properties">
+					<i class="fas fa-sliders-h fa-fw"></i>
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			<ng-container *ngFor="let field of cStream.fieldList; let i = index; let first = first; let last = last;">
+				<tr>
+					<td>
+						<div class="d-flex w-100 h-100 px-1 my-auto mx-0 py-auto">
+							<i class="fas fa-caret-square-down pointer mx-1" (click)="fieldMove(i, +1)"></i>
+							<i class="fas fa-caret-square-up pointer mr-1" (click)="fieldMove(i, -1)"></i>
+						</div>
+					</td>
+					<td>{{field.name}}</td>
+					<td>{{field.type}}</td>
+					<td class="text-center">
+						<input type="checkbox" [(ngModel)]="field.isDescribed">
+					</td>
+					<td class="text-center">
+						<input type="checkbox" [(ngModel)]="field.isFilter">
+					</td>
+					<td class="text-center">
+						<input type="checkbox" [(ngModel)]="field.isCrossTab">
+					</td>
+					<td class="text-center">
+						<input type="checkbox" [(ngModel)]="field.shouldIgnoreCrossTab">
+					</td>
+					<td class="text-center">
+						<input type="checkbox" [(ngModel)]="field.isCrossTabFilter">
+					</td>
+					<td class="text-center">
+						<input type="checkbox" [(ngModel)]="field.isData">
+					</td>
+					<td class="text-center" width="90">
+						<select *ngIf="field.isData" [(ngModel)]="field.aggregateFunction" class="form-control form-control-sm">
+							<option value="">NONE</option>
+							<option value="SUM">SUM</option>
+							<option value="AVG">AVG</option>
+							<option value="COUNT">COUNT</option>
+							<option value="MAX">MAX</option>
+							<option value="MIN">MIN</option>
+						</select>
+					</td>
+					<td class="text-center">
+						<div class="input-group input-group-sm" *ngIf="field.type=='number'">
+							<div class="input-group-prepend">
+								<span class="input-group-text"><b># of Digits:</b></span>
+							</div>
+							<input type="number" name="fPrecision{{i}}" class="form-control" placeholder="Whole Number Digits" [(ngModel)]="field.fPrecision" min="1" max="65">
+							<div class="input-group-prepend">
+								<span class="input-group-text">(Min:1, Max:65)</span>
+							</div>
+							<input type="number" name="fDecimals{{i}}" class="form-control" placeholder="Decimal Number of Digits" [(ngModel)]="field.fDecimals" min="0" max="{{field.fPrecision - 1 || 0}}">
+							<div class="input-group-append">
+								<span class="input-group-text">(Min:1, Max:{{field.fPrecision - 1 || 0}})</span>
+							</div>
+						</div>
+						<div class="input-group input-group-sm" *ngIf="field.type=='string'">
+							<div class="input-group-prepend">
+								<span class="input-group-text"><b># of Characters:</b></span>
+							</div>
+							<input type="number" name="fCharacters{{i}}" class="form-control" placeholder="Number of characters" [(ngModel)]="field.fCharacters" min="1" max="1024">
+							<div class="input-group-append">
+								<span class="input-group-text">(Min:1, Max:1024)</span>
+							</div>
+						</div>
+						<div class="input-group input-group-sm" *ngIf="field.type=='date'">
+							<div class="input-group-prepend">
+								<span class="input-group-text"><b>Format:</b></span>
+							</div>
+							<input type="text" name="fDateFormat{{i}}" class="form-control" placeholder="YYYY-MM-DD HH:mm" [(ngModel)]="field.fDateFormat">
+						</div>
+					</td>
+					<!-- <td>
+						<pre>{{field | json}}</pre>
+					</td> -->
+				</tr>
+			</ng-container>
+		</tbody>
+	</table>
+</div>

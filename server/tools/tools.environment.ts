@@ -76,11 +76,15 @@ export class EnvironmentTool {
 		if ( payload.database ) lister.database = payload.database;
 		return await this.sourceTools[lister.type].listTables( lister );
 	}
-	public listDescriptiveTables = async ( id: number, database: string, table: string ) => {
-		const payload = await this.getEnvironmentDetails( id, true );
-		if ( database ) payload.database = database;
-		if ( table ) payload.table = table;
-		return await this.sourceTools[payload.type].listTables( payload );
+	public listDescriptiveTables = async ( payload: { id: number, database: string, table: string } ) => {
+		const cEnv = await this.getEnvironmentDetails( payload.id, true );
+		if ( payload.database ) cEnv.database = payload.database;
+		if ( payload.table ) cEnv.table = payload.table;
+		if ( cEnv.type === ATEnvironmentType.HP || cEnv.type === ATEnvironmentType.PBCS ) {
+			return await this.sourceTools[cEnv.type].listAliasTables( cEnv );
+		} else {
+			return await this.sourceTools[cEnv.type].listTables( cEnv );
+		}
 	}
 	public listFields = async ( payload: { id: number, database: string, table: string, query: string } ) => {
 		const currentEnvironment = await this.getEnvironmentDetails( payload.id, true );

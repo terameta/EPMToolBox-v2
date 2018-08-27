@@ -67,7 +67,7 @@
 		<div class="col-9 col-md-11">
 			<div class="input-group input-group-sm">
 				<select name="sTables" class="form-control form-control-sm" [(ngModel)]="cStream.tableName" required>
-					<option value="undefined">Please select</option>
+					<option value="">Please select</option>
 					<option *ngFor="let table of cStream.tableList" [value]="table.name">{{table.name}}</option>
 				</select>
 				<div class="input-group-append">

@@ -16,7 +16,7 @@ export interface ATStream {
 	tags: any,
 	exports: ATStreamExport[],
 	databaseList: { name: string }[],
-	tableList: { name: string }[],
+	tableList: { name: string, type?: string }[],
 	fieldList: ATStreamField[]
 }
 
