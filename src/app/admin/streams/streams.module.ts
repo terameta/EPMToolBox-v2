@@ -12,7 +12,6 @@ import { StreamDetailDefinitionsComponent } from './stream-detail-definitions/st
 import { StreamDetailFieldsComponent } from './stream-detail-fields/stream-detail-fields.component';
 import { StreamDetailFielddescriptionsComponent } from './stream-detail-fielddescriptions/stream-detail-fielddescriptions.component';
 import { StreamDetailExportsComponent } from './stream-detail-exports/stream-detail-exports.component';
-import { MonacoEditorModule } from 'ngx-monaco-editor';
 import { StreamDetailFieldsRdbtComponent } from './stream-detail-fields-rdbt/stream-detail-fields-rdbt.component';
 import { StreamDetailFieldsHpdbComponent } from './stream-detail-fields-hpdb/stream-detail-fields-hpdb.component';
 import { StreamDetailFielddescriptionsHpdbComponent } from './stream-detail-fielddescriptions-hpdb/stream-detail-fielddescriptions-hpdb.component';
@@ -45,8 +44,7 @@ const routes: Routes = [
 		CommonModule,
 		FormsModule,
 		RouterModule.forChild( routes ),
-		AdminSharedModule,
-		MonacoEditorModule
+		AdminSharedModule
 	],
 	declarations: [
 		StreamsComponent,

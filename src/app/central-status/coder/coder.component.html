@@ -1,0 +1,20 @@
+<div class="modal-header">
+	<h4 class="modal-title">
+		<i class="fas fa-edit fa-fw"></i> {{name}}
+	</h4>
+</div>
+<div class="modal-body" style="height: calc(100vh - 170px);">
+	<ngx-monaco-editor class="h-100 d-block" [options]="options" [(ngModel)]="code" [name]="name"></ngx-monaco-editor>
+</div>
+<div class="modal-footer">
+	<div class="btn-toolbar w-100 m-0" role="toolbar" aria-label="Stream Definitions Toolbar">
+		<div class="btn-group btn-group-sm ml-auto" role="group" aria-label="Stream Definitions Button Group">
+			<button type="button" class="btn btn-outline-primary" (click)="save()">
+				<i class="fas fa-save fa-fw"></i> Save
+			</button>
+			<button type="button" class="btn btn-outline-danger" (click)="cancel()">
+				<i class="fas fa-trash fa-fw "></i> Cancel
+			</button>
+		</div>
+	</div>
+</div>

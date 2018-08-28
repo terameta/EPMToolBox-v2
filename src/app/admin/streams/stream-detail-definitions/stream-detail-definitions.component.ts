@@ -10,6 +10,7 @@ import { ATEnvironmentType } from 'shared/models/at.environment';
 import { EnvironmentsService } from '../../environments/environments.service';
 import { ATApiPayload } from 'shared/models/at.socketrequest';
 import { EnumToArray } from 'shared/utilities/utilityFunctions';
+import { NgForm } from '@angular/forms';
 
 @Component( {
 	selector: 'app-stream-detail-definitions',
@@ -27,7 +28,7 @@ export class StreamDetailDefinitionsComponent implements OnInit, OnDestroy {
 
 	private subscriptions: Subscription[] = [];
 
-	public monacoOptions = { theme: 'vs-light', language: 'sql', minimap: { enabled: false }, fontSize: 12, fontFamily: 'consolas', scrollBeyondLastLine: false };
+	public monacoOptions = { language: 'sql' };
 
 	constructor(
 		public ds: DataStoreService,
@@ -108,5 +109,13 @@ export class StreamDetailDefinitionsComponent implements OnInit, OnDestroy {
 
 	private handleListTables = ( payload: ATApiPayload ) => {
 		this.cStream.tableList = payload.data;
+	}
+
+	public codeCustomQuery = async ( f: NgForm ) => {
+		const result = await this.cs.coder( this.cStream.customQuery, this.monacoOptions, 'Custom Query for ' + this.cStream.name );
+		if ( result !== false ) {
+			this.cStream.customQuery = result;
+			this.ss.update( this.ms.framework, this.cStream, f );
+		}
 	}
 }

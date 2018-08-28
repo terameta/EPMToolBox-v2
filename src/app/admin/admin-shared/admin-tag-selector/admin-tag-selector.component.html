@@ -1,13 +1,14 @@
-<div class="row">
-	<div class="col-{{colWidth}}" *ngFor="let tagGroup of tagGroups">
-		{{tagGroup.name}}
-		<hr>
-		<ng-container *ngFor="let tagItem of tagsSelectable">
-			<div class="checkbox" *ngIf="tagItem.taggroup == tagGroup.id">
-				<label *ngIf="tags">
-					<input type="checkbox" name="tagName{{tagItem.id}}" [(ngModel)]="tags[tagItem.id]"> {{tagItem.name}}
-				</label>
-			</div>
-		</ng-container>
+<div class="mt-3">
+	<div class="row mt-1" *ngFor="let tagGroup of tagGroups">
+		<div class="col-6 col-md-2 col-lg-1">{{tagGroup.name}}:</div>
+		<div class="col-6 col-md-10 col-lg-11">
+			<ng-container *ngFor="let tagItem of tagsSelectable">
+				<span class="checkbox ml-3" *ngIf="tagItem.taggroup === tagGroup.id">
+					<label *ngIf="tags">
+						<input type="checkbox" name="tagName{{tagItem.id}}" [(ngModel)]="tags[tagItem.id]"> {{tagItem.name}}
+					</label>
+				</span>
+			</ng-container>
+		</div>
 	</div>
 </div>

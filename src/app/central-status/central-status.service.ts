@@ -2,11 +2,11 @@ import { Injectable } from '@angular/core';
 import { Router, NavigationEnd, Event } from '@angular/router';
 import { ATNotification, newATNotification } from 'shared/models/notification';
 import { BehaviorSubject } from 'rxjs';
-import { JSONDeepCopy } from 'shared/utilities/utilityFunctions';
 import { AuthService } from '../auth/auth.service';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import { ConfirmComponent } from './confirm/confirm.component';
 import { PromptComponent } from './prompt/prompt.component';
+import { CoderComponent } from './coder/coder.component';
 
 @Injectable( {
 	providedIn: 'root'
@@ -102,6 +102,7 @@ export class CentralStatusService {
 	}
 
 	public shouldListItem = ( tags: any ) => {
+		if ( !tags ) return false;
 		let shouldShow = true;
 		const filterers = Object.values( this.selectedTags ).filter( t => ( t !== undefined && t !== null && t !== 0 && t !== '0' ) );
 		filterers.forEach( currentFilter => {
@@ -121,6 +122,24 @@ export class CentralStatusService {
 		const modalRef: BsModalRef = this.modalService.show( PromptComponent, { initialState: { question } } );
 		return new Promise( ( resolve, reject ) => {
 			modalRef.content.onClose.subscribe( resolve, reject );
+		} );
+	}
+
+	public coder = ( code: string, options: any, name?: string ): Promise<any> => {
+		const modalRef: BsModalRef = this.modalService.show( CoderComponent, {
+			initialState: { code, options, name },
+			class: 'modal-lg'
+		} );
+		return new Promise( ( resolve, reject ) => {
+			modalRef.content.onClose.subscribe( ( result ) => {
+				resolve( result );
+			}, ( e: Error ) => {
+				const notif = newATNotification();
+				notif.title = e.message;
+				this.notificationAdd( notif );
+			}, c => {
+				resolve( false );
+			} );
 		} );
 	}
 

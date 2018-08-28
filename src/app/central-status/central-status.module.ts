@@ -6,11 +6,14 @@ import { ConfirmComponent } from './confirm/confirm.component';
 import { CentralStatusService } from './central-status.service';
 import { NotificationAreaComponent } from './notification-area/notification-area.component';
 import { NotificationToShowComponent } from './notification-to-show/notification-to-show.component';
+import { CoderComponent } from './coder/coder.component';
+import { MonacoEditorModule } from 'ngx-monaco-editor';
 
 @NgModule( {
 	imports: [
 		CommonModule,
-		FormsModule
+		FormsModule,
+		MonacoEditorModule
 	],
 	exports: [
 		NotificationAreaComponent
@@ -22,8 +25,10 @@ import { NotificationToShowComponent } from './notification-to-show/notification
 		ConfirmComponent,
 		PromptComponent,
 		NotificationAreaComponent,
-		NotificationToShowComponent
+		NotificationToShowComponent,
+		CoderComponent
 	], entryComponents: [
+		CoderComponent,
 		ConfirmComponent,
 		PromptComponent
 	]

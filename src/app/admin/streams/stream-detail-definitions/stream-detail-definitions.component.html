@@ -84,11 +84,24 @@
 			<textarea name="sQuery" class="form-control mb-2" rows="5" [(ngModel)]="cStream.customQuery"></textarea>
 		</div>
 	</div> -->
-	<div class="form-group row m-0" *ngIf="cStream.tableName == 'Custom Query'">
+	<!-- <div class="form-group row m-0" *ngIf="cStream.tableName == 'Custom Query'">
 		<label for="sQuery" class="col-3 col-md-1 col-form-label font-weight-bold"> Custom Query:</label>
 		<div class="col-9 col-md-11">
 			<div class="border p-0 mh-25">
-				<ngx-monaco-editor [options]="monacoOptions" [(ngModel)]="cStream.customQuery" name="sCQuery"></ngx-monaco-editor>
+				<!-- <ngx-monaco-editor [options]="monacoOptions" [(ngModel)]="cStream.customQuery" name="sCQuery"></ngx-monaco-editor> -- >
+			</div>
+		</div>
+	</div> -->
+	<div class="form-group row m-0" *ngIf="cStream.tableName == 'Custom Query'">
+		<label for="sType" class="col-3 col-md-1 col-form-label font-weight-bold">Custom Query:</label>
+		<div class="col-9 col-md-11">
+			<div class="input-group input-group-sm">
+				<input type="text" name="sCQuery" class="form-control form-control-sm" value="{{cStream.customQuery}}" disabled>
+				<div class="input-group-append">
+					<button class="btn btn-outline-secondary" type="button" (click)="codeCustomQuery(f)" title="Edit Custom Query">
+						<i class="fas fa-edit fa-fw"></i>
+					</button>
+				</div>
 			</div>
 		</div>
 	</div>
