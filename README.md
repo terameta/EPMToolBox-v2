@@ -34,11 +34,11 @@ ng g m auth
 ng g s auth/auth -m auth
 
 ## Command List for creating a new admin concept
-ng g m admin/credentials
-ng g s admin/credentials/credentials
-ng g c admin/credentials/credentials
-ng g c admin/credentials/credential-list
-ng g c admin/credentials/credential-detail
+ng g m admin/tags
+ng g s admin/tags/tags
+ng g c admin/tags/tags
+ng g c admin/tags/tag-list
+ng g c admin/tags/tag-detail
 
 Follow below steps to install:
 

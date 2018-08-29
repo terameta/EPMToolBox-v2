@@ -43,6 +43,7 @@ export class Initiator {
 			expectedCurrentVersion: -1,
 			operatorFunction: async ( doWeHaveTable: number ) => {
 				if ( doWeHaveTable === 0 ) {
+					console.log( 'Do we have table', doWeHaveTable );
 					await this.db.query( 'CREATE TABLE currentversion ( version SMALLINT UNSIGNED NULL)' );
 				}
 				return doWeHaveTable;
@@ -579,8 +580,11 @@ export class Initiator {
 
 	public findCurrentVersion = async () => {
 		let currentVersion = -1;
-		const resultSet = await this.db.query<{ version: number }>( 'SELECT version FROM currentversion' );
-		resultSet.tuples.map( tuple => currentVersion = tuple.version );
+		const doWeHaveTable = await this.utils.doWeHaveTable( 'currentversion' );
+		if ( doWeHaveTable > 0 ) {
+			const resultSet = await this.db.query<{ version: number }>( 'SELECT version FROM currentversion' );
+			resultSet.tuples.map( tuple => currentVersion = tuple.version );
+		}
 		return currentVersion;
 	}
 }

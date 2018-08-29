@@ -128,7 +128,8 @@ export class CentralStatusService {
 	public coder = ( code: string, options: any, name?: string ): Promise<any> => {
 		const modalRef: BsModalRef = this.modalService.show( CoderComponent, {
 			initialState: { code, options, name },
-			class: 'modal-lg'
+			class: 'modal-lg',
+			animated: false
 		} );
 		return new Promise( ( resolve, reject ) => {
 			modalRef.content.onClose.subscribe( ( result ) => {
