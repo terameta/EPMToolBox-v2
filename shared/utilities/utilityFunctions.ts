@@ -117,3 +117,13 @@ export const arrayCartesian = ( arg: any[] ) => {
 	helper( [], 0 );
 	return r;
 };
+
+export const positionMove = ( list: { position: number }[], index: number, direction: 1 | -1 ) => {
+	list.forEach( ( item, itemIndex ) => {
+		item.position = item.position * 10 + ( itemIndex === index ? direction * 11 : 0 );
+	} );
+	list.sort( SortByPosition );
+	list.forEach( ( item, itemIndex ) => {
+		item.position = itemIndex + 1;
+	} );
+};

@@ -8,6 +8,7 @@ import { NotificationAreaComponent } from './notification-area/notification-area
 import { NotificationToShowComponent } from './notification-to-show/notification-to-show.component';
 import { CoderComponent } from './coder/coder.component';
 import { MonacoEditorModule } from 'ngx-monaco-editor';
+import { NotificationDisplayComponent } from './notification-display/notification-display.component';
 
 @NgModule( {
 	imports: [
@@ -26,11 +27,13 @@ import { MonacoEditorModule } from 'ngx-monaco-editor';
 		PromptComponent,
 		NotificationAreaComponent,
 		NotificationToShowComponent,
-		CoderComponent
+		CoderComponent,
+		NotificationDisplayComponent
 	], entryComponents: [
 		CoderComponent,
 		ConfirmComponent,
-		PromptComponent
+		PromptComponent,
+		NotificationDisplayComponent
 	]
 } )
 export class CentralStatusModule { }

@@ -1,15 +1,16 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { EnumToArray, SortByName, SortByPosition } from 'shared/utilities/utilityFunctions';
+import { EnumToArray, SortByName, SortByPosition, JSONDeepCopy } from 'shared/utilities/utilityFunctions';
 import { ATEnvironment, getDefaultATEnvironment, ATEnvironmentType, atGetEnvironmentTypeDescription } from 'shared/models/at.environment';
 import { Subscription } from 'rxjs';
 import { DataStoreService } from '../../../data-store/data-store.service';
 import { CentralStatusService } from '../../../central-status/central-status.service';
 import { EnvironmentsService } from '../environments.service';
-import { ATCredential } from 'shared/models/at.credential';
+import { ATCredential, getDefaultATCredential } from 'shared/models/at.credential';
 import { combineLatest, filter } from 'rxjs/operators';
 import { ATTag } from 'shared/models/at.tag';
 import { ATTagGroup } from 'shared/models/at.taggroup';
 import { AdminSharedService } from '../../admin-shared/admin-shared.service';
+import { NgForm } from '@angular/forms';
 
 @Component( {
 	selector: 'app-environment-detail',
@@ -61,6 +62,15 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
 		}
 		if ( colWidth < 1 ) { colWidth = 1; }
 		return colWidth;
+	}
+
+	public createCredentialForEnvironment = ( form: NgForm ) => {
+		const payload = getDefaultATCredential();
+		payload.tags = JSONDeepCopy( this.cEnvironment.tags );
+		this.ss.create( 'credentials', payload, false ).then( ( result: ATCredential ) => {
+			this.cEnvironment.credential = result.id;
+			this.ss.update( this.ms.framework, this.cEnvironment, form );
+		} );
 	}
 
 }

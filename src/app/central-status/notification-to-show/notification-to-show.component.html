@@ -1,3 +1,7 @@
-<i class="fas fa-circle-notch fa-spin d-block" *ngIf="notification.type == 'working'" title="{{notification.title | titlecase}}" style="font-size: 12px"></i>
-<i class="fas fa-check text-success d-block" *ngIf="notification.type == 'success'" title="{{notification.title | titlecase}}" style="font-size: 12px"></i>
-<i class="fas fa-exclamation text-error d-block" *ngIf="notification.type == 'error'" title="{{notification.title | titlecase}}" style="font-size: 12px"></i>
+<span (click)="cs.notificationDisplay(notification)">
+	<i class="fas fa-circle-notch fa-spin d-block" *ngIf="notification.type == 'working'" title="{{notification.title | titlecase}}" style="font-size: 12px"></i>
+	<i class="fas fa-check text-success d-block" *ngIf="notification.type == 'success'" title="{{notification.title | titlecase}}" style="font-size: 12px"></i>
+	<i class="fas fa-exclamation text-danger d-block" *ngIf="notification.type == 'error' || notification.type == 'fatal'" title="{{notification.title | titlecase}}" style="font-size: 12px"></i>
+	<i class="fas fa-exclamation text-evwarning d-block" *ngIf="notification.type == 'warning'" title="{{notification.title | titlecase}}" style="font-size: 12px"></i>
+	<i class="fas fa-exclamation text-evwarning d-block" *ngIf="notification.type == 'info'" title="{{notification.title | titlecase}}" style="font-size: 12px"></i>
+</span>

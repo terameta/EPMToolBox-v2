@@ -4,7 +4,7 @@ export interface ATNotification {
 	id: string,
 	title: string,
 	detail: string,
-	type: 'fatal' | 'error' | 'info' | 'success' | 'warning' | 'working',
+	type: 'fatal' | 'error' | 'info' | 'success' | 'warning' | 'working' | 'dismissed',
 	expires?: Date,
 	shouldBlockUI?: boolean
 }

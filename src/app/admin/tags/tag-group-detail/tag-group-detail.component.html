@@ -1,3 +1,49 @@
-<p>
-  tag-group-detail works!
-</p>
+<div class="container-fluid">
+	<div class="row">
+		<div class="col">
+			<form (ngSubmit)="ss.update(framework, taggroup,f)" #f="ngForm">
+				<div class="form-group row mx-0 my-3">
+					<label class="col-3 col-md-1 col-form-label font-weight-bold">&nbsp;</label>
+					<div class="col-9 col-md-11 text-right">
+						<div class="btn-group btn-group-sm" role="group">
+							<button type="submit" class="btn btn-outline-primary">
+								<i class="fas fa-save fa-fw"></i> Save
+							</button>
+							<button class="btn btn-outline-dark" type="button" (click)="ss.create('tags', {taggroup: taggroup.id})">
+								<i class="fas fa-tag fa-fw "></i> New Tag
+							</button>
+							<button class="btn btn-outline-dark" type="button" (click)="ss.clone(framework, taggroup)">
+								<i class="far fa-clone fa-fw "></i> Clone
+							</button>
+							<button class="btn btn-outline-danger" type="button" (click)="ss.delete(framework, taggroup.id, taggroup.name)">
+								<i class="far fa-trash-alt fa-fw "></i> Delete
+							</button>
+						</div>
+					</div>
+				</div>
+				<div class="form-group row m-0">
+					<label for="eName" class="col-3 col-md-1 col-form-label font-weight-bold">Name:</label>
+					<div class="col-9 col-md-11">
+						<input type="text" name="eName" class="form-control form-control-sm" [(ngModel)]="taggroup.name">
+					</div>
+				</div>
+			</form>
+			<div class="form-group row m-0">
+				<label class="col-3 col-md-1 col-form-label font-weight-bold">Tags:</label>
+				<div class="col-9 col-md-11 pt-1">
+					<ng-container *ngFor="let tag of tags">
+						<form *ngIf="tag.taggroup === taggroup.id" (ngSubmit)="ss.update('tags', tag, f)" #f="ngForm">
+							<div class="input-group input-group-sm pb-1">
+								<input type="text" name="tag{{tag.id}}name" class="form-control form-control-sm" [(ngModel)]="tag.name">
+								<span class="input-group-append">
+									<button type="submit" class="btn btn-outline btn-outline-primary"><i class="fas fa-save fa-fw"></i></button>
+									<button type="button" class="btn btn-outline btn-outline-danger" (click)="ss.delete('tags', tag.id, tag.name, false)"><i class="far fa-trash-alt fa-fw"></i></button>
+								</span>
+							</div>
+						</form>
+					</ng-container>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

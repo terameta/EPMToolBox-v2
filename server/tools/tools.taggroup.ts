@@ -17,8 +17,9 @@ export class TagGroupTool {
 		return this.tools.prepareTupleToRead<ATTagGroup>( tuple );
 	}
 
-	public create = async (): Promise<ATTagGroup> => {
-		const newTagGroup = <ATTagGroup>{ name: 'New Tag Group' };
+	public create = async ( payload: ATTagGroup ): Promise<ATTagGroup> => {
+		delete payload.id;
+		const newTagGroup = { ...{ name: 'New Tag Group' }, ...payload };
 		const { tuple } = await this.db.queryOne<any>( 'INSERT INTO taggroups SET ?', this.tools.prepareTupleToWrite( newTagGroup ) );
 		newTagGroup.id = tuple.insertId;
 		return newTagGroup;
@@ -26,10 +27,12 @@ export class TagGroupTool {
 
 	public update = async ( payload: ATTagGroup ) => {
 		await this.db.queryOne( 'UPDATE taggroups SET ? WHERE id = ?', [this.tools.prepareTupleToWrite( payload ), payload.id] );
+		return { status: 'success' };
 	}
 
 	public delete = async ( id: number ) => {
 		await this.db.query( 'DELETE FROM taggroups WHERE id = ?', id );
+		return { status: 'success' };
 	}
 
 }

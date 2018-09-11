@@ -33,7 +33,7 @@ export class DataStoreService {
 		secrets: new ATSecretClass(),
 		credentials: new ATCredentialClass(),
 		tags: new ATTagClass(),
-		taggroups: new ATTagGroupClass(),
+		taggroups: new ATTagGroupClass( [], 'position' ),
 		users: new ATUserClass(),
 		logs: new ATLogClass()
 	};

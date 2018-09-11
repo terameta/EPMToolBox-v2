@@ -16,10 +16,10 @@ export class AdminSharedService {
 		private router: Router
 	) { }
 
-	public delete = async ( framework: string, id: number, name: string ) => {
+	public delete = async ( framework: string, id: number, name: string, shouldNavigate = true ) => {
 		const shouldDelete = await this.ss.confirm( 'Do you really want to delete ' + ( name || id ) + '?' );
 		if ( shouldDelete ) this.cs.communicate( { framework: framework, action: 'delete', payload: { status: 'request', data: id } }, true );
-		this.router.navigateByUrl( '/admin/' + framework );
+		if ( shouldNavigate ) this.router.navigateByUrl( '/admin/' + framework );
 	}
 
 	public update = async <T>( framework: string, payload: T, form?: NgForm ) => {
@@ -41,4 +41,22 @@ export class AdminSharedService {
 			}
 		} );
 	}
+
+	public create = ( framework: string, payload?: any, shouldNavigate = false ) => {
+		return new Promise( async ( resolve, reject ) => {
+			const result = await this.ss.prompt( 'Please enter the name of the new item' );
+			if ( !result ) return;
+			const data = { ...payload, ...{ name: result } };
+			this.cs.communicate( { framework, action: 'create', payload: { status: 'request', data } }, true ).
+				subscribe( ( response ) => {
+					if ( response.data && response.data.id && shouldNavigate ) {
+						this.navigateTo( framework, response.data.id );
+					}
+					resolve( response.data );
+				}, reject );
+		} );
+
+	}
+
+	public navigateTo = ( framework: string, id: number ) => this.router.navigateByUrl( '/admin/' + framework + '/' + id );
 }

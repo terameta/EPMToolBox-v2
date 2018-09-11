@@ -7,6 +7,9 @@ import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import { ConfirmComponent } from './confirm/confirm.component';
 import { PromptComponent } from './prompt/prompt.component';
 import { CoderComponent } from './coder/coder.component';
+import { DataStoreService } from '../data-store/data-store.service';
+import { take, filter } from 'rxjs/operators';
+import { NotificationDisplayComponent } from './notification-display/notification-display.component';
 
 @Injectable( {
 	providedIn: 'root'
@@ -38,13 +41,15 @@ export class CentralStatusService {
 	constructor(
 		private router: Router,
 		private authService: AuthService,
-		private modalService: BsModalService
+		private modalService: BsModalService,
+		private ds: DataStoreService
 	) {
 		this.router.events.subscribe( this.routeHandler );
 		this.url$.subscribe( this.urlHandler );
 		// console.log( 'Constructed central-status.service' );
 		setInterval( this.notificationClear, 1000 );
 		if ( localStorage.getItem( 'selectedTags' ) ) this.selectedTags = JSON.parse( localStorage.getItem( 'selectedTags' ) );
+		this.checkTagGroupExistance();
 	}
 
 	private routeHandler = ( event: Event ) => {
@@ -90,18 +95,47 @@ export class CentralStatusService {
 	private notificationClear = () => {
 		const currentNotificationList = this.notifications$.getValue();
 		const allNotificationCount = currentNotificationList.length;
-		const unExpiredNotificationCount = currentNotificationList.filter( n => ( n.expires.getTime() > ( new Date() ).getTime() ) ).length;
+		const unExpiredNotificationCount = currentNotificationList.
+			filter( n => ( n.expires.getTime() > ( new Date() ).getTime() || n.type === 'error' || n.type === 'fatal' || n.type === 'working' ) ).
+			filter( n => ( n.type !== 'dismissed' ) ).length;
 		if ( allNotificationCount > unExpiredNotificationCount ) {
-			this.notifications$.next( currentNotificationList.filter( n => ( n.expires.getTime() > ( new Date() ).getTime() ) ) );
+			this.notifications$.next(
+				currentNotificationList.
+					filter( n => ( n.expires.getTime() > ( new Date() ).getTime() || n.type === 'error' || n.type === 'fatal' || n.type === 'working' ) ).
+					filter( n => ( n.type !== 'dismissed' ) )
+			);
 		}
+	}
+
+	public notificationDisplay = ( notification: ATNotification ) => {
+		console.log( notification );
+		const modalRef: BsModalRef = this.modalService.show( NotificationDisplayComponent, { initialState: { notification } } );
 	}
 
 	public tagChanged = ( groupid: number, tagid: number ) => {
 		this.selectedTags[groupid.toString()] = tagid;
+		// this.saveTagSelections();
+		this.checkTagGroupExistance();
+	}
+
+	private saveTagSelections = () => {
 		localStorage.setItem( 'selectedTags', JSON.stringify( this.selectedTags ) );
 	}
 
+	private checkTagGroupExistance = () => {
+		this.ds.store.taggroups.ids.pipe( filter( t => t.length > 0 ), take( 1 ) ).subscribe( tagGroupIDs => {
+			const currentSavedTagGroups = Object.keys( this.selectedTags );
+			currentSavedTagGroups.forEach( id => {
+				if ( !tagGroupIDs.find( c => c === parseInt( id, 0 ) ) ) delete this.selectedTags[id];
+			} );
+			this.saveTagSelections();
+		} );
+	}
+
 	public shouldListItem = ( tags: any ) => {
+		// If All selected for a tag group, that selection is zero
+		// If all tag groups are assigned all, the total of the selection values are zero, list everything
+		if ( Object.values( this.selectedTags ).reduce( ( a: number, c: string ) => a + parseInt( c, 10 ), 0 ) === 0 ) return true;
 		if ( !tags ) return false;
 		let shouldShow = true;
 		const filterers = Object.values( this.selectedTags ).filter( t => ( t !== undefined && t !== null && t !== 0 && t !== '0' ) );

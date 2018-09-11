@@ -1,5 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { ATNotification } from 'shared/models/notification';
+import { CentralStatusService } from '../central-status.service';
 
 @Component( {
 	selector: 'app-notification-to-show',
@@ -9,7 +10,9 @@ import { ATNotification } from 'shared/models/notification';
 export class NotificationToShowComponent implements OnInit {
 	@Input() notification: ATNotification;
 
-	constructor() { }
+	constructor(
+		public cs: CentralStatusService
+	) { }
 
 	ngOnInit() {
 	}

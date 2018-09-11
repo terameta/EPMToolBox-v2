@@ -18,6 +18,9 @@ export class CredentialTool {
 	public create = async ( payload: ATCredential ): Promise<ATCredential> => {
 		delete payload.id;
 		const newCredential = Object.assign( <ATCredential>{ name: 'New Credential' }, payload );
+		if ( newCredential.password && newCredential.password !== '|||---protected---|||' ) {
+			newCredential.password = this.tools.encryptText( newCredential.password );
+		}
 		const result = await this.db.queryOne<any>( 'INSERT INTO credentials SET ?', this.tools.prepareTupleToWrite( newCredential ) );
 		newCredential.id = result.tuple.insertId;
 		return newCredential;
@@ -31,10 +34,12 @@ export class CredentialTool {
 			payload.password = this.tools.encryptText( payload.password );
 		}
 		await this.db.queryOne( 'UPDATE credentials SET ? WHERE id = ?', [this.tools.prepareTupleToWrite( payload ), payload.id] );
+		return { status: 'success' };
 	}
 
 	public delete = async ( id: number ) => {
 		await this.db.query( 'DELETE FROM credentials WHERE id = ?', id );
+		return { status: 'success' };
 	}
 
 	private prepareCredentialToRead = ( payload ) => {

@@ -17,8 +17,9 @@ export class TagTool {
 		return this.tools.prepareTupleToRead<ATTag>( tuple );
 	}
 
-	public create = async (): Promise<ATTag> => {
-		const newTag = <ATTag>{ name: 'New Tag' };
+	public create = async ( payload: ATTag ): Promise<ATTag> => {
+		delete payload.id;
+		const newTag = { ...{ name: 'New Tag' }, ...payload };
 		const { tuple } = await this.db.queryOne<any>( 'INSERT INTO tags SET ?', this.tools.prepareTupleToWrite( newTag ) );
 		newTag.id = tuple.insertId;
 		return newTag;

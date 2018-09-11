@@ -3,8 +3,13 @@
 		<div class="col">
 			<ul class="nav nav-tabs w-100">
 				<li class="nav-item">
-					<a routerLink="" class="nav-link" routerLinkActive="active" data-toggle="tab">
+					<a routerLink="/admin/tags" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" data-toggle="tab">
 						Groups
+					</a>
+				</li>
+				<li class="nav-item" *ngFor="let group of tagGroups">
+					<a [routerLink]="group.id" class="nav-link" routerLinkActive="active" data-toggle="tab">
+						{{group.name}}
 					</a>
 				</li>
 			</ul>

@@ -5,7 +5,8 @@ export class ATTagGroupClass extends ATStoreClass<ATTagGroup> { }
 export interface ATTagGroup {
 	id: number,
 	name: string,
-	position: number,
-	isReordered: boolean
+	position: number
 }
+
+export const getDefaultATTagGroup = () => ( { id: 0, name: '', position: 999999999 } );
 

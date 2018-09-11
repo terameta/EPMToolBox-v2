@@ -8,6 +8,7 @@ import { ATCredential, getDefaultATCredential } from 'shared/models/at.credentia
 import { Subscription } from 'rxjs';
 import { combineLatest, filter } from 'rxjs/operators';
 import { SortByName, SortByPosition } from 'shared/utilities/utilityFunctions';
+import { AdminSharedService } from '../../admin-shared/admin-shared.service';
 
 @Component( {
 	selector: 'app-credential-detail',
@@ -26,14 +27,15 @@ export class CredentialDetailComponent implements OnInit, OnDestroy {
 
 	constructor(
 		private ds: DataStoreService,
-		public ss: CentralStatusService,
+		public cs: CentralStatusService,
+		public ss: AdminSharedService,
 		public ms: CredentialsService
 	) { }
 
 	ngOnInit() {
 		this.subscriptions.push( this.ds.store.credentials.subject.
 			pipe(
-				combineLatest( this.ss.currentID$ ),
+				combineLatest( this.cs.currentID$ ),
 				filter( ( [s, id] ) => ( !!s[id] ) )
 			).
 			subscribe( ( [s, id] ) => {

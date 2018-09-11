@@ -1,3 +1,36 @@
-<p>
-  tag-group-list works!
-</p>
+<div class="container-fluid">
+	<div class="row">
+		<div class="col">
+			<div class="table-responsive">
+				<table class="table table-sm table-hover">
+					<thead class="bg-dark text-light">
+						<tr>
+							<th class="text-center" width="100">Actions</th>
+							<th>Name</th>
+						</tr>
+					</thead>
+					<tbody>
+						<ng-container *ngFor="let item of taggroups; let i = index;">
+							<tr>
+								<td>
+									<div class="d-flex w-100 h-100 px-1 m-0 py-0">
+										<a [routerLink]="item.id" title="Edit">
+											<i class="far fa-edit fa-fw my-auto"></i>
+										</a>
+										<i class="far fa-clone fa-fw my-auto pointer mx-2" title="Clone" (click)="ss.clone(concept, item)"></i>
+										<i class="fas fa-caret-up fa-fw my-auto pointer" (click)="positionMove(i, -1)"></i>
+										<i class="fas fa-caret-down fa-fw my-auto pointer" (click)="positionMove(i, 1)"></i>
+										<i class="far fa-trash-alt fa-fw my-auto ml-3 pointer mr-1 text-danger" title="Delete" (click)="ss.delete(concept, item.id, item.name)"></i>
+									</div>
+								</td>
+								<td>
+									<a [routerLink]="item.id">{{item.name}}</a>
+								</td>
+							</tr>
+						</ng-container>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>

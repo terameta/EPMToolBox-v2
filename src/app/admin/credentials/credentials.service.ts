@@ -9,7 +9,7 @@ import { JSONDeepCopy } from '../../../../shared/utilities/utilityFunctions';
 	providedIn: 'root'
 } )
 export class CredentialsService {
-	private framework = 'credentials';
+	public framework = 'credentials';
 
 	constructor(
 		private ss: CentralStatusService,

@@ -16,7 +16,7 @@
 								<i class="far fa-clone fa-fw "></i> Clone
 							</button>
 							<button class="btn btn-outline-danger" type="button" (click)="ss.delete(ms.framework, cEnvironment.id, cEnvironment.name)">
-								<i class="fas fa-trash fa-fw "></i> Delete
+								<i class="far fa-trash-alt fa-fw "></i> Delete
 							</button>
 						</div>
 					</div>
@@ -59,6 +59,9 @@
 							<div class="input-group-append">
 								<button class="btn btn-outline-secondary" type="button" routerLink="/admin/credentials/{{cEnvironment.credential}}">
 									<i class="fas fa-link fa-fw"></i>
+								</button>
+								<button class="btn btn-outline-secondary" type="button" (click)="createCredentialForEnvironment(f)">
+									<i class="fas fa-plus fa-fw"></i>
 								</button>
 							</div>
 						</div>

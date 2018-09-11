@@ -39,9 +39,7 @@ export class AdminToolbarComponent implements OnInit, OnDestroy {
 		this.subscriptions.forEach( s => s.unsubscribe() );
 	}
 
-	public navigateTo = ( id: number ) => {
-		this.router.navigateByUrl( '/admin/' + this.concept + '/' + id );
-	}
+	public navigateTo = ( id: number ) => this.router.navigateByUrl( '/admin/' + this.concept + '/' + id );
 
 	public create = async () => {
 		const result = await this.ss.prompt( 'Please enter the name of the new item' );
