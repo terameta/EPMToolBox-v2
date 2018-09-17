@@ -1,5 +1,7 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { ATNotification } from 'shared/models/notification';
+import { BsModalRef } from 'ngx-bootstrap/modal';
+import { Subject } from 'rxjs';
 
 @Component( {
 	selector: 'app-notification-display',
@@ -9,11 +11,24 @@ import { ATNotification } from 'shared/models/notification';
 export class NotificationDisplayComponent implements OnInit, OnDestroy {
 	@Input() notification: ATNotification = <ATNotification>{};
 
-	constructor() { }
+	public onClose: Subject<any>;
 
-	ngOnInit() {
+	constructor( public modalRef: BsModalRef ) { }
+
+	ngOnInit() { this.onClose = new Subject(); }
+
+	ngOnDestroy() { this.cancel(); }
+
+	public dismiss = () => {
+		this.onClose.next( 'dismissed' );
+		this.modalRef.hide();
+		this.onClose.complete();
 	}
 
-	ngOnDestroy() { }
+	public cancel = () => {
+		this.onClose.next( false );
+		this.modalRef.hide();
+		this.onClose.complete();
+	}
 
 }

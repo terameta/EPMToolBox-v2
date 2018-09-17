@@ -16,6 +16,12 @@ export class MainTools {
 		console.log( 'Main tools initiated @ tools.main.ts' );
 	}
 
+	public promisedWait = ( duration = 1000 ) => {
+		return new Promise( ( resolve ) => {
+			setTimeout( resolve, duration );
+		} );
+	}
+
 	public htmlEncode = ( str: string ): string => {
 		return String( str ).replace( /&/g, '&amp;' ).replace( /</g, '&lt;' ).replace( />/g, '&gt;' ).replace( /"/g, '&quot;' );
 	}

@@ -61,11 +61,13 @@ export class EnvironmentTool {
 
 	public verify = async ( id: number ) => {
 		const payload = await this.getEnvironmentDetails( id, true );
+		await this.setUnVerified( payload );
 		await this.sourceTools[payload.type].verify( payload );
 		await this.setVerified( payload );
 		return { id, result: 'OK' };
 	}
-	private setVerified = async ( payload: ATEnvironmentDetail ) => this.update( Object.assign( payload, { verified: true } ) );
+	private setVerified = async ( payload: ATEnvironmentDetail ) => this.update( { ...payload, ...{ verified: true } } );
+	private setUnVerified = async ( payload: ATEnvironmentDetail ) => this.update( { ...payload, ...{ verified: false } } );
 
 	public listDatabases = async ( id: number ) => {
 		const payload = await this.getEnvironmentDetails( id, true );

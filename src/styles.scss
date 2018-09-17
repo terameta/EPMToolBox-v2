@@ -47,6 +47,8 @@ a:hover {
 	border-left: 5px solid theme-color("danger") !important;
 }
 
-.ng-dirty {
+.ng-dirty:not(form) {
 	border-color: theme-color("evwarning") !important;
+	border-width: 2px;
+	border-style: solid;
 }

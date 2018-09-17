@@ -10,6 +10,8 @@ import { CoderComponent } from './coder/coder.component';
 import { DataStoreService } from '../data-store/data-store.service';
 import { take, filter } from 'rxjs/operators';
 import { NotificationDisplayComponent } from './notification-display/notification-display.component';
+import { v4 as uuid } from 'uuid';
+
 
 @Injectable( {
 	providedIn: 'root'
@@ -108,8 +110,10 @@ export class CentralStatusService {
 	}
 
 	public notificationDisplay = ( notification: ATNotification ) => {
-		console.log( notification );
 		const modalRef: BsModalRef = this.modalService.show( NotificationDisplayComponent, { initialState: { notification } } );
+		modalRef.content.onClose.subscribe( ( result ) => {
+			if ( result === 'dismissed' ) notification.type = 'dismissed';
+		} );
 	}
 
 	public tagChanged = ( groupid: number, tagid: number ) => {

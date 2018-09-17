@@ -547,6 +547,8 @@ export class Initiator {
 		this.steps.push( { expectedCurrentVersion: 140, operatorFunction: () => this.db.query( 'ALTER TABLE acmservers DROP sslenabled, DROP istrusted, DROP basedn, DROP userdn, DROP password' ) } );
 		this.steps.push( { expectedCurrentVersion: 141, operatorFunction: () => this.db.query( 'ALTER TABLE logs MODIFY details LONGTEXT NULL DEFAULT NULL' ) } );
 		this.steps.push( { expectedCurrentVersion: 142, operatorFunction: () => this.db.query( 'ALTER TABLE logs MODIFY reftype VARCHAR(256) NULL DEFAULT NULL' ) } );
+		this.steps.push( { expectedCurrentVersion: 143, operatorFunction: () => this.utils.checkAndCreateTable( tableDefinitions.dbchecker ) } );
+		this.steps.push( { expectedCurrentVersion: 144, operatorFunction: () => this.db.query( 'INSERT INTO dbchecker SET ?', ( { lastwrite: ( new Date() ), lastread: ( new Date() ) } ) ) } );
 	}
 
 	public initiate = async () => {

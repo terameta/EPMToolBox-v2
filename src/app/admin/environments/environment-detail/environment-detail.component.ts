@@ -23,8 +23,6 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
 	public getTypeDescripton = atGetEnvironmentTypeDescription;
 	public cEnvironment: ATEnvironment = getDefaultATEnvironment();
 	public credentials: ATCredential[] = [];
-	public tags: ATTag[] = [];
-	public tagGroups: ATTagGroup[] = [];
 
 	private subscriptions: Subscription[] = [];
 
@@ -46,8 +44,6 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
 				this.cEnvironment = Object.assign( getDefaultATEnvironment(), s[id] );
 			} ) );
 		this.subscriptions.push( this.ds.store.credentials.items.subscribe( c => this.credentials = c ) );
-		this.subscriptions.push( this.ds.store.tags.items.subscribe( c => this.tags = c.sort( SortByName ) ) );
-		this.subscriptions.push( this.ds.store.taggroups.items.subscribe( c => this.tagGroups = c.sort( SortByPosition ) ) );
 	}
 
 	ngOnDestroy() {

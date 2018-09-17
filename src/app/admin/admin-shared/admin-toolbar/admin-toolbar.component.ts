@@ -7,6 +7,7 @@ import { ATTag } from 'shared/models/at.tag';
 import { ATTagGroup } from 'shared/models/at.taggroup';
 import { Router } from '@angular/router';
 import { CommunicationService } from '../../../communication/communication.service';
+import { NgForm } from '@angular/forms';
 
 @Component( {
 	selector: 'app-admin-toolbar',
@@ -39,7 +40,10 @@ export class AdminToolbarComponent implements OnInit, OnDestroy {
 		this.subscriptions.forEach( s => s.unsubscribe() );
 	}
 
-	public navigateTo = ( id: number ) => this.router.navigateByUrl( '/admin/' + this.concept + '/' + id );
+	public navigateTo = ( id: number, f?: NgForm ) => {
+		this.router.navigateByUrl( '/admin/' + this.concept + '/' + id );
+		if ( f ) f.form.markAsPristine();
+	}
 
 	public create = async () => {
 		const result = await this.ss.prompt( 'Please enter the name of the new item' );

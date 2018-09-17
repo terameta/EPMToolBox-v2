@@ -77,7 +77,7 @@ export class SmartViewTool {
 					return this.hpObtainSID( payload ).then( this.smartviewListApplicationsValidator );
 				}
 				default: {
-					throw ( new Error( 'Not a valid environment type' ) );
+					throw ( new Error( 'Provided environment type is not valid' ) );
 				}
 			}
 		} );

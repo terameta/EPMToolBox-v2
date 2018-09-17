@@ -32,7 +32,7 @@
 					<div class="col-9 col-md-11">
 						<select name="eType" class="form-control form-control-sm" [(ngModel)]="cEnvironment.type">
 							<option value="undefined">Please select a type</option>
-							<option *ngFor="let envType of environmentTypes" [value]="envType.value">{{getTypeDescripton(envType.label)}}</option>
+							<option *ngFor="let envType of environmentTypes" [ngValue]="envType.value">{{getTypeDescripton(envType.label)}}</option>
 						</select>
 					</div>
 				</div>
@@ -54,7 +54,7 @@
 						<div class="input-group input-group-sm">
 							<select name="eCred" class="form-control form-control-sm" [(ngModel)]="cEnvironment.credential">
 								<option value="undefined">Please select a credential</option>
-								<option *ngFor="let cred of credentials" [value]="cred.id">{{cred.name}}</option>
+								<option *ngFor="let cred of credentials" [ngValue]="cred.id">{{cred.name}}</option>
 							</select>
 							<div class="input-group-append">
 								<button class="btn btn-outline-secondary" type="button" routerLink="/admin/credentials/{{cEnvironment.credential}}">
@@ -67,10 +67,19 @@
 						</div>
 					</div>
 				</div>
-				<div class="form-group row m-0" *ngIf="cEnvironment.type === environmentType['PBCS']">
+				<div class="form-group row m-0" *ngIf="cEnvironment.type == environmentType.PBCS">
 					<label for="eDom" class="col-3 col-md-1 col-form-label font-weight-bold">PBCS Domain:</label>
 					<div class="col-9 col-md-11">
 						<input type="text" name="eDom" class="form-control form-control-sm" [(ngModel)]="cEnvironment.identitydomain">
+					</div>
+				</div>
+				<div class="form-group row m-0" *ngIf="cEnvironment.type == environmentType.PBCS">
+					<label for="eSSO" class="col-3 col-md-1 col-form-label font-weight-bold">SSO Activated?</label>
+					<div class="col-9 col-md-11">
+						<select name="eSSO" [(ngModel)]="cEnvironment.isSSOActive" class="form-control form-control-sm">
+							<option [ngValue]="false">No</option>
+							<option [ngValue]="true">Yes</option>
+						</select>
 					</div>
 				</div>
 				<div class="form-group row m-0">

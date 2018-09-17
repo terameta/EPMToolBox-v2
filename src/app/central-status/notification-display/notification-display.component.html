@@ -1,1 +1,34 @@
-<pre>{{notification | json}}</pre>
+<div class="modal-content">
+	<div class="modal-header">
+		<h5 class="modal-title">
+			{{notification.title | titlecase}}
+		</h5>
+	</div>
+	<div class="modal-body" *ngIf="notification.type == 'success'">
+		<i class="fas fa-thumbs-up"></i> Completed successfully.
+	</div>
+	<div class="modal-body" *ngIf="notification.type == 'error' || notification.type == 'fatal'">
+		<i class="fas fa-exclamation"></i><br>
+		<span *ngIf="notification.detail">
+			<span *ngIf="notification.detail.message">
+				<pre>{{notification.detail.message}}</pre>
+			</span>
+			<span *ngIf="!notification.detail.message">
+				<pre>{{notification.detail | json}}</pre>
+			</span>
+		</span>
+	</div>
+	<div class="modal-body" *ngIf="notification.type == 'info' || notification.type == 'warning'">
+		<i class="fas fa-info-circle"></i><br>
+		{{notification.detail}}
+	</div>
+	<div class="modal-body" *ngIf="notification.type == 'working'">
+		<i class="fas fa-circle-notch fa-spin"></i><br>
+		Please wait, we are still working on this one.
+	</div>
+	<div class="modal-body" *ngIf="notification.type == 'success'"></div>
+	<div class="modal-footer">
+		<button type="button" class="btn btn-secondary btn-sm" (click)="cancel()">Cancel</button>
+		<button type="button" class="btn btn-primary btn-sm" (click)="dismiss()">Dismiss Notification</button>
+	</div>
+</div>

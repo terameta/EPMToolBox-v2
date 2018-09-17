@@ -1,4 +1,4 @@
-<form class="form-inline bg-accent text-dark border-evwarning border-bottom border-top w-100" style="position: fixed; margin-top: -3.4rem; z-index: 100;">
+<form class="form-inline bg-accent text-dark border-evwarning border-bottom border-top w-100" style="position: fixed; margin-top: -3.4rem; z-index: 100;" #f="ngForm">
 	<div class="form-group form-group-sm">
 		<div class="input-group">
 			<div class="input-group-prepend">
@@ -6,7 +6,7 @@
 					<i class="{{icon}}"></i> &nbsp; {{concept}}
 				</a>
 			</div>
-			<select name="itemselector" class="form-control bg-accent border-top-0 border-bottom-0 border-dark rounded-0" (change)="navigateTo($event.target.value)" [ngModel]="ss.currentID">
+			<select name="itemselector" class="form-control bg-accent border-top-0 border-bottom-0 border-dark rounded-0" (change)="navigateTo($event.target.value, f)" [ngModel]="ss.currentID">
 				<option value="0">Select an item to go to details</option>
 				<option *ngFor="let item of items" value="{{item.id}}">{{item.name}}</option>
 			</select>

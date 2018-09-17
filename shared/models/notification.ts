@@ -3,7 +3,7 @@ import { JSONDeepCopy } from '../utilities/utilityFunctions';
 export interface ATNotification {
 	id: string,
 	title: string,
-	detail: string,
+	detail: any,
 	type: 'fatal' | 'error' | 'info' | 'success' | 'warning' | 'working' | 'dismissed',
 	expires?: Date,
 	shouldBlockUI?: boolean

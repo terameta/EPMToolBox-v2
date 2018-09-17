@@ -22,7 +22,6 @@ export class MSSQLTool {
 				encrypt: false
 			}
 		};
-
 		if ( payload.database ) { dbConfig.database = payload.database; }
 		if ( payload.server ) {
 			dbConfig.server = payload.server;

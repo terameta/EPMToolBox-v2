@@ -374,6 +374,11 @@ export const processdefaulttargets: TableDefiner = {
 	primaryKey: 'id'
 };
 
+export const dbchecker: TableDefiner = {
+	name: 'dbchecker',
+	fields: ['lastwrite DATETIME', 'lastread DATETIME']
+};
+
 export const tableDef: TableDefiner = {
 	name: 'processsteps',
 	fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',

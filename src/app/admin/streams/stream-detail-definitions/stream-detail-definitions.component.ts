@@ -46,14 +46,17 @@ export class StreamDetailDefinitionsComponent implements OnInit, OnDestroy {
 			).
 			subscribe( ( [s, id] ) => {
 				this.cStream = Object.assign( getDefaultATStream(), s[id] );
-				this.refreshDatabases();
-				this.handleDatabaseChange();
+				if ( this.cStream.environment ) {
+					this.refreshDatabases();
+					this.handleDatabaseChange();
+				}
 			} )
 		);
 		this.databaseRefresh$.pipe(
 			switchMap( () => this.environmentService.listDatabases( this.cStream.environment ) )
 		).subscribe( this.handleListDatabases );
 		this.tableRefresh$.pipe(
+			filter( e => !!this.cStream.dbName ),
 			switchMap( () => this.environmentService.listTables( this.cStream.environment, this.cStream.dbName ) )
 		).subscribe( this.handleListTables );
 	}

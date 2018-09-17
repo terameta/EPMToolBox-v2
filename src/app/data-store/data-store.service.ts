@@ -50,7 +50,11 @@ export class DataStoreService {
 	}
 
 	public react = ( response: ATApiCommunication ) => {
-		if ( response.payload.status === 'success' ) this.store[response.framework][response.action]( response.payload.data );
+		if ( response.payload.status === 'success' && response.action ) {
+			if ( this.store[response.framework][response.action] ) {
+				this.store[response.framework][response.action]( response.payload.data );
+			}
+		}
 	}
 
 	public showInterest = ( payload: ATDataStoreInterest ) => {

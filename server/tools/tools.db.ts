@@ -36,6 +36,20 @@ export class DB {
 			console.error( 'There is a db error@tools.db.ts' );
 			console.error( error, a, b, c );
 		} );
+
+		setInterval( async () => {
+			await this.queryOne( 'UPDATE dbchecker SET lastwrite = ?', ( new Date() ) );
+			const { tuple } = await this.queryOne<any>( 'SELECT * FROM dbchecker' );
+			const lastread = this.gfdt( new Date( tuple.lastread.toString() ) );
+			const lastwrite = this.gfdt( new Date( tuple.lastwrite.toString() ) );
+			console.log( 'Last Read:', lastread, 'Last Write:', lastwrite );
+		}, 60000 );
+
+		if ( this.rtdb ) {
+			this.rtdb.changes$.subscribe( async ( tableName: string ) => {
+				console.log( 'Last Read (async):', this.gfdt( new Date() ) );
+			} );
+		}
 	}
 
 	public query = <T>( queryToExecute: string, queryArguments?: any ): Promise<{ tuples: T[], fields: FieldInfo[] }> => {
@@ -63,5 +77,22 @@ export class DB {
 		const { tuples, fields } = await this.query<T>( queryToExecute, queryArguments );
 		if ( tuples.length !== 1 && Array.isArray( tuples ) ) throw new Error( 'Wrong number of records. 1 expected' );
 		return { tuple: Array.isArray( tuples ) ? tuples[0] : tuples, fields };
+	}
+
+	private gfdt = ( theDate?: Date ) => {
+		const curDate = theDate || new Date();
+		let toReturn: string; toReturn = '';
+		toReturn += curDate.getFullYear();
+		toReturn += '-';
+		toReturn += ( '0' + ( curDate.getMonth() + 1 ).toString() ).substr( -2 );
+		toReturn += '-';
+		toReturn += ( '0' + curDate.getDate().toString() ).substr( -2 );
+		toReturn += ' ';
+		toReturn += ( '0' + curDate.getHours().toString() ).substr( -2 );
+		toReturn += '-';
+		toReturn += ( '0' + curDate.getMinutes().toString() ).substr( -2 );
+		toReturn += '-';
+		toReturn += ( '0' + curDate.getSeconds().toString() ).substr( -2 );
+		return toReturn;
 	}
 }

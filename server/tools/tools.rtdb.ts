@@ -47,6 +47,7 @@ export class RealtimeDB {
 			console.error( 'There is a ZongJi error' );
 			console.error( error );
 			if ( error.fatal ) {
+				this.backendDB.stop();
 				this.backendDB.start( {
 					includeEvents: ['tablemap', 'writerows', 'updaterows', 'deleterows'],
 					startAtEnd: true,

@@ -13,6 +13,7 @@ export interface ATEnvironment {
 	port: string,
 	verified: boolean,
 	identitydomain: string,
+	isSSOActive: string,
 	credential: number,
 	tags: { [key: number]: boolean },
 	SID: string,
