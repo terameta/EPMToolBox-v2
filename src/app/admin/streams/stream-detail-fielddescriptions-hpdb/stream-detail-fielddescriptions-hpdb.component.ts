@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { DataStoreService } from '../../../data-store/data-store.service';
 import { CentralStatusService } from '../../../central-status/central-status.service';
-import { ATStream, getDefaultATStream, ATStreamField } from 'shared/models/at.stream';
+import { ATStream, getDefaultATStream, ATStreamField, ATStreamFieldDescription } from 'shared/models/at.stream';
 import { Subscription, timer } from 'rxjs';
 import { combineLatest, filter, map, debounce } from 'rxjs/operators';
 import { AdminSharedService } from '../../admin-shared/admin-shared.service';
@@ -39,7 +39,7 @@ export class StreamDetailFielddescriptionsHpdbComponent implements OnInit, OnDes
 			).
 			subscribe( ( [s, url] ) => {
 				this.cStream = s;
-				this.field = this.cStream.fieldList.find( f => f.name === url.split( '/' ).pop() ) || ( { description: {} } as ATStreamField );
+				this.field = { ...( { description: {} } as ATStreamField ), ...this.cStream.fieldList.find( f => f.name === url.split( '/' ).pop() ) };
 				if ( !this.field.description.database ) this.field.description.database = this.cStream.dbName;
 				if ( !this.field.description.tableList ) this.field.description.tableList = [];
 				if ( this.cStream && this.cStream.environment && this.field.description.database && this.cStream.tableName && this.field.description.tableList.length === 0 ) this.refreshAliasTables();
@@ -61,6 +61,7 @@ export class StreamDetailFielddescriptionsHpdbComponent implements OnInit, OnDes
 
 	public setToAllFields = ( form: NgForm ) => {
 		this.cStream.fieldList.forEach( f => {
+			if ( !f.description ) f.description = ( {} as ATStreamFieldDescription );
 			f.description.table = this.field.description.table;
 		} );
 		this.ss.update( this.ms.framework, this.cStream, form );

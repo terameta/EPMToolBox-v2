@@ -49,7 +49,7 @@
 	"zenMode.hideTabs": false,
 	"zenMode.hideStatusBar": false,
 	"zenMode.hideActivityBar": false,
-	"breadcrumbs.enabled": true,
 	"editor.showUnused": true,
-	"html.format.wrapAttributes": "aligned-multiple"
+	"html.format.wrapAttributes": "aligned-multiple",
+	"breadcrumbs.enabled": true
 }

@@ -49,10 +49,9 @@ export class SmartViewTool {
 		return payload;
 	}
 	private smartviewOpenApplication = async ( payload: ATEnvironmentDetail ): Promise<ATEnvironmentDetail> => {
-		await this.listApplications( payload );
+		const appList = await this.listApplications( payload );
 		const body = await this.smartviewGetXMLTemplate( 'req_OpenApplication.xml', payload );
-		const { $ } = await this.smartviewPoster( { url: payload.smartview.planningurl, body, jar: payload.smartview.jar } );
-
+		const { $, body: rBody } = await this.smartviewPoster( { url: payload.smartview.planningurl, body, jar: payload.smartview.jar } );
 		const hasFailed = $( 'body' ).children().toArray().filter( e => e.name === 'res_openapplication' ).length === 0;
 		if ( hasFailed ) throw ( new Error( 'Failure to open application ' + payload.name + '@smartviewOpenApplication' ) );
 		return payload;
@@ -64,6 +63,12 @@ export class SmartViewTool {
 		return this.validateSID( payload );
 	}
 	public validateSID = async ( payload: ATEnvironmentDetail ): Promise<ATEnvironmentDetail> => {
+		if ( !payload.SID ) {
+			delete payload.cookie;
+			delete payload.ssotoken;
+			if ( payload.type === ATEnvironmentType.HP ) await this.hpObtainSID( payload );
+			if ( payload.type === ATEnvironmentType.PBCS ) await this.pbcsObtainSID( payload );
+		}
 		await this.smartviewPrepareEnvironment( payload );
 		await this.smartviewListApplicationsValidator( payload ).catch( () => {
 			delete payload.SID;
@@ -175,8 +180,6 @@ export class SmartViewTool {
 				}
 				if ( payload.currentRowIntersection.reduce( ( accumulator, currentValue ) => accumulator + currentValue ) === 0 ) keepWorking = false;
 
-				// await waiter( 5000 );
-				// if ( whichChunck > 100 ) keepWorking = false;
 			}
 		}
 
@@ -199,8 +202,6 @@ export class SmartViewTool {
 			this.smartviewReadDataPullChunckAction( payload, chunck, whichChunck ).then( () => resolve( thread ) ).catch( issue => {
 				if ( retrycount < maxRetry ) {
 					retrycount++;
-					console.log( '?????', payload.pullThreadPool.join( '' ), thread, retrycount, maxRetry, 'Chunck Length:', chunck.length, issue );
-					// payload.pullThreadPool[thread]++;
 					resolve( this.smartviewReadDataPullChunck( thread, payload, chunck, retrycount, whichChunck ) );
 				} else {
 					reject( issue );
@@ -256,12 +257,10 @@ export class SmartViewTool {
 		const bodyTemplate = Handlebars.compile( bodyXML );
 		const body = bodyTemplate( params );
 
-		console.log( '>>>', payload.pullThreadPool.join( '' ), 'Pulling chunck', whichChunck, '/', payload.numberOfChuncks, 'posted.' );
 		const response = await this.smartviewPoster( { url: payload.planningurl, body, cookie: payload.cookies, timeout: 120000000 } );
 
 		const doWeHaveData = response.$( 'body' ).children().toArray().filter( elem => ( elem.name === 'res_refresh' ) ).length > 0;
 		const totalTime = ( ( new Date() ).getTime() - startTime.getTime() ) / 1000;
-		console.log( '>>>', payload.pullThreadPool.join( '' ), 'Pulling chunck', whichChunck, '/', payload.numberOfChuncks, 'received. WithData:', doWeHaveData, '-', totalTime, 'secs' );
 		if ( doWeHaveData ) {
 			const rangeStart = parseInt( response.$( 'range' ).attr( 'start' ), 10 );
 			const rangeEnd = parseInt( response.$( 'range' ).attr( 'end' ), 10 );
@@ -277,7 +276,6 @@ export class SmartViewTool {
 			if ( response.body.indexOf( 'there are no valid rows of data' ) >= 0 ) {
 				return Promise.resolve( payload );
 			} else {
-				console.log( response.body );
 				return Promise.reject( new Error( response.$( 'desc' ).text() ) );
 			}
 		}
@@ -285,7 +283,6 @@ export class SmartViewTool {
 	private waitForAllThreadsCompletion = ( list: number[] ): Promise<boolean> => {
 		return new Promise( ( resolve, reject ) => {
 			const toClear = setInterval( () => {
-				console.log( 'Waiting for All threads completion:', list.join( '' ) );
 				if ( list.filter( i => i > 0 ).length === 0 ) {
 					resolve();
 					clearInterval( toClear );
@@ -310,7 +307,6 @@ export class SmartViewTool {
 		} );
 	}
 	private smartviewReadDataPullChuncks = ( payload ) => {
-		console.log( '>>> Pulling chunck', ( payload.consumedChuncks + 1 ), '/', payload.numberOfChuncks );
 		const startTime = new Date();
 		return new Promise( ( resolve, reject ) => {
 			if ( payload.query.rowMembers.length < 1 ) {
@@ -320,7 +316,6 @@ export class SmartViewTool {
 				this.smartviewReadDataPullChuncksTry( payload, chunck ).then( result => {
 					payload.consumedChuncks++;
 					const finishTime = new Date();
-					console.log( '>>> Pulling chunck', payload.consumedChuncks, '/', payload.numberOfChuncks, 'finished. Duration:', ( finishTime.getTime() - startTime.getTime() ) / 1000 );
 					resolve( this.smartviewReadDataPullChuncks( payload ) );
 				} ).catch( reject );
 			}
@@ -395,7 +390,6 @@ export class SmartViewTool {
 						typeArray.push( '7' );
 					} );
 					payload.query.colMembers.forEach( colMember => {
-						// console.log( '***', colMember );
 						valueArray.push( colMember[colDimIndex].RefField );
 						typeArray.push( '0' );
 					} );
@@ -409,10 +403,7 @@ export class SmartViewTool {
 						valueArray.push( '' );
 						typeArray.push( '2' );
 					} );
-					// console.log( rowMemberIndex, rowMemberList );
 				} );
-				// console.log( valueArray.join( '|' ) );
-				// console.log( typeArray.join( '|' ) );
 				body += '<vals>' + valueArray.join( '|' ) + '</vals>';
 				body += '<types>' + typeArray.join( '|' ) + '</types>';
 				body += '</range>';
@@ -423,14 +414,10 @@ export class SmartViewTool {
 				body += '</slices>';
 				body += '</grid>';
 				body += '</req_Refresh>';
-				console.log( '>>> Pulling chunck', ( payload.consumedChuncks + 1 ), '/', payload.numberOfChuncks, 'posted.' );
 				return this.smartviewPoster( { url: resEnv.smartview.planningurl, body, jar: resEnv.smartview.jar, timeout: 120000000 } );
-				// return Promise.reject( 'Trying something' );
 			} )
 			.then( response => {
-				console.log( '>>> Pulling chunck', ( payload.consumedChuncks + 1 ), '/', payload.numberOfChuncks, 'received.' );
 				const doWeHaveData = response.$( 'body' ).children().toArray().filter( elem => ( elem.name === 'res_refresh' ) ).length > 0;
-				console.log( '>>>>>>>>>>>Do We Have Data:', doWeHaveData, '>>>>>>>>>>>Duration Passed:', ( ( new Date() ).getTime() - startTime.getTime() ) / 1000, 'seconds' );
 				if ( doWeHaveData ) {
 					const rangeStart = parseInt( response.$( 'range' ).attr( 'start' ), 10 );
 					const rangeEnd = parseInt( response.$( 'range' ).attr( 'end' ), 10 );
@@ -447,13 +434,10 @@ export class SmartViewTool {
 					if ( errcode === '1000' ) {
 						return Promise.resolve( payload );
 					} else {
-						console.log( response.body );
 						return Promise.reject( new Error( response.$( 'desc' ).text() ) );
 					}
 				}
 			} ).catch( issue => {
-				console.log( issue );
-				console.log( 'Time to failure:', ( ( new Date() ).getTime() - startTime.getTime() ) / 1000, 'seconds' );
 				return Promise.reject( issue );
 			} );
 	}
@@ -832,9 +816,12 @@ export class SmartViewTool {
 		if ( hasFailed ) throw ( new Error( 'Failure to list dimensions ' + payload.name + '@smartviewListDimensions' ) );
 
 		payload.smartview.dimensions = [];
-		$( 'dim' ).toArray().forEach( curDim => {
-			payload.smartview.dimensions.push( { name: curDim.attribs.name, type: ( curDim.attribs.type === 'None' ? 'Generic' : curDim.attribs.type ), isDescribed: 1 } );
-		} );
+		$( 'dim' ).toArray().
+			filter( d => d.attribs.type !== 'Attribute' ).
+			forEach( curDim => {
+				payload.smartview.dimensions.push( { name: curDim.attribs.name, type: ( curDim.attribs.type === 'None' ? 'Generic' : curDim.attribs.type ), isDescribed: 1 } );
+			} );
+		payload.smartview.dimensions.forEach( ( dimension, index ) => dimension.position = index + 1 );
 		return payload;
 	}
 	public listCubes = async ( payload: ATEnvironmentDetail ) => {
@@ -864,12 +851,9 @@ export class SmartViewTool {
 	private smartviewListApplicationsValidator = async ( payload: ATEnvironmentDetail ): Promise<ATEnvironmentDetail> => {
 		await this.smartviewListServers( payload );
 		const body = await this.smartviewGetXMLTemplate( 'req_ListApplications.xml', payload );
-		const { $ } = await this.smartviewPoster( { url: payload.smartview.planningurl, body, jar: payload.smartview.jar } );
+		const { $, body: rBody } = await this.smartviewPoster( { url: payload.smartview.planningurl, body, jar: payload.smartview.jar } );
 
-		let isListed = false;
-		$( 'body' ).children().toArray().forEach( curElem => {
-			if ( curElem.name === 'res_listapplications' ) { isListed = true; }
-		} );
+		const isListed = $( 'body' ).children().toArray().filter( e => ( e.name === 'res_listapplications' ) ).length > 0;
 
 		if ( !isListed ) throw new Error( 'Failure to list applications@smartviewListApplications' );
 
@@ -883,10 +867,7 @@ export class SmartViewTool {
 	public smartviewListServers = async ( payload: ATEnvironmentDetail ): Promise<ATEnvironmentDetail> => {
 		const body = await this.smartviewGetXMLTemplate( 'req_ListServers.xml', payload );
 		const { $ } = await this.smartviewPoster( { url: payload.smartview.planningurl, body, jar: payload.smartview.jar } );
-		let isListed = false;
-		$( 'body' ).children().toArray().forEach( curElem => {
-			if ( curElem.name === 'res_listservers' ) { isListed = true; }
-		} );
+		const isListed = $( 'body' ).children().toArray().filter( e => ( e.name === 'res_listservers' ) ).length > 0;
 
 		if ( !isListed ) throw new Error( 'Failure to list servers@smartviewListServers' );
 
@@ -941,7 +922,9 @@ export class SmartViewTool {
 		return payload;
 	}
 	private hpObtainSID = ( payload: ATEnvironmentDetail ): Promise<ATEnvironmentDetail> => {
-		return this.smartviewEstablishConnection( payload ).then( this.hpObtainSID01 ).then( this.hpObtainSID02 );
+		return this.smartviewEstablishConnection( payload ).
+			then( this.hpObtainSID01 ).
+			then( this.hpObtainSID02 );
 	}
 	private hpObtainSID01 = async ( payload: ATEnvironmentDetail ): Promise<ATEnvironmentDetail> => {
 		const body = await this.smartviewGetXMLTemplate( 'req_GetProvisionedDataSourcesWithCredentials.xml', payload );
@@ -965,6 +948,8 @@ export class SmartViewTool {
 		const body = await this.smartviewGetXMLTemplate( 'req_ConnectToProviderSSO.xml', { ssotoken: payload.ssotoken } );
 		const { $ } = await this.smartviewPoster( { url: payload.smartview.planningurl, body } );
 		payload.SID = $( 'sID' ).text();
+		const toSave = atEnvironmentPrepareToSave( JSON.parse( JSON.stringify( payload ) ) );
+		await this.db.queryOne( 'UPDATE environments SET ? WHERE id = ?', [this.tools.prepareTupleToWrite( toSave ), payload.id] );
 		if ( payload.SID ) {
 			return payload;
 		} else {
@@ -978,7 +963,6 @@ export class SmartViewTool {
 		$( 'form[name=signin_form]' ).each( ( i: any, elem: any ) => {
 			payload.smartview.nexturl = response.request.uri.protocol + '//' + response.request.uri.hostname + $( elem ).attr( 'action' );
 			$( elem ).find( 'input' ).each( ( a: any, input: any ) => {
-				// console.log( $( input ).attr( 'name' ), ':', $( input ).val() );
 				formData[$( input ).attr( 'name' )] = $( input ).val();
 			} );
 		} );

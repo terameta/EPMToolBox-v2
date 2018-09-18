@@ -38,28 +38,30 @@ export interface ATStreamField {
 	isMonth: boolean,
 	isData: boolean,
 	aggregateFunction: string,
-	description: {
-		database: string,
-		table: string,
-		query: string,
-		tableList: any[],
-		fieldList: any[],
-		referenceField: {
-			name: string,
-			type: string,
-			characters: number,
-			precision: number,
-			decimals: number,
-			dateformat: string
-		},
-		descriptionField: {
-			name: string,
-			type: string,
-			characters: number,
-			precision: number,
-			decimals: number,
-			dateformat: string
-		}
+	description: ATStreamFieldDescription
+}
+
+export interface ATStreamFieldDescription {
+	database: string,
+	table: string,
+	query: string,
+	tableList: any[],
+	fieldList: any[],
+	referenceField: {
+		name: string,
+		type: string,
+		characters: number,
+		precision: number,
+		decimals: number,
+		dateformat: string
+	},
+	descriptionField: {
+		name: string,
+		type: string,
+		characters: number,
+		precision: number,
+		decimals: number,
+		dateformat: string
 	}
 }
 
