@@ -32,8 +32,8 @@ export class AuthTool {
 		if ( !payload.username || !payload.password ) { throw new Error( 'Either username or password missing' ); }
 		return this.authenticate( payload );
 	}
-	public reauthenticate = async ( payload: ATApiPayload ) => {
-		const oldToken: any = await this.tools.verifyToken( payload.data.token ).catch();
+	public reauthenticate = async ( payload: { token: string } ) => {
+		const oldToken: any = await this.tools.verifyToken( payload.token ).catch();
 		if ( oldToken ) {
 			delete oldToken.iat;
 			delete oldToken.exp;

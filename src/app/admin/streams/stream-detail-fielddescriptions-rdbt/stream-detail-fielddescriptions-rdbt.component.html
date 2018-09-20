@@ -1,3 +1,143 @@
-<p>
-  stream-detail-fielddescriptions-rdbt works!
-</p>
+<form (ngSubmit)="ss.update(ms.framework, cStream, f)" #f="ngForm">
+	<div class="btn-toolbar w-100 mb-3" role="toolbar" aria-label="Stream Field Descriptions Toolbar">
+		<div class="btn-group btn-group-sm ml-auto" role="group" aria-label="Stream Field Descriptions Button Group">
+			<button type="submit" class="btn btn-outline-primary">
+				<i class="fas fa-save fa-fw"></i> Save
+			</button>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label for="descDB" class="col-3 col-md-1 col-form-label font-weight-bold">Database:</label>
+		<div class="col-9 col-md-11">
+			<div class="input-group input-group-sm">
+				<select name="descDB" class="form-control" [(ngModel)]="field.description.database">
+					<option value="">Please select a database</option>
+					<option *ngFor="let db of cStream.databaseList" [value]="db.name">{{db.name}}</option>
+				</select>
+				<div class="input-group-append">
+					<button type="button" class="btn btn-outline-secondary" title="Refresh Database List" (click)="refreshDatabases()">
+						<i class="fas fa-sync-alt fa-fw"></i>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label for="descTable" class="col-3 col-md-1 col-form-label font-weight-bold">Table:</label>
+		<div class="col-9 col-md-11">
+			<div class="input-group input-group-sm">
+				<select name="descTable" class="form-control" [(ngModel)]="field.description.table" (change)="tableChanged()">
+					<option value="">Please select a table</option>
+					<option *ngFor="let table of field.description.tableList" [value]="table.name">
+						{{table.name}}
+						<span *ngIf="table.type">({{table.type}})</span>
+					</option>
+				</select>
+				<div class="input-group-append">
+					<button type="button" class="btn btn-outline-secondary" title="Refresh Table List" (click)="refreshDescriptiveTables()">
+						<i class="fas fa-sync-alt fa-fw"></i>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="form-group row" *ngIf="field.description.table == 'Custom Query'">
+		<label for="sCQuery" class="col-3 col-md-1 col-form-label font-weight-bold">Custom Query:</label>
+		<div class="col-9 col-md-11">
+			<div class="input-group input-group-sm">
+				<input type="text" name="sCQuery" class="form-control form-control-sm" value="{{field.description.query}}" disabled>
+				<div class="input-group-append">
+					<button class="btn btn-outline-secondary" type="button" (click)="codeCustomQuery(f)" title="Edit Custom Query">
+						<i class="fas fa-edit fa-fw"></i>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label for="fdRefresh" class="col-3 col-md-1 col-form-label font-weight-bold">Field List:</label>
+		<div class="col-9 col-md-11">
+			<button type="button" class="btn btn-outline-dark btn-sm" title="Refresh Field List" (click)="refreshFields()">
+				<i class="fas fa-sync-alt fa-fw"></i> Refresh
+			</button>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-3 col-md-1 col-form-label font-weight-bold text-nowrap">Reference Field:</label>
+		<div class="col-9 col-md-11">
+			<div class="input-group input-group-sm">
+				<select name="fRefName" class="form-control" [(ngModel)]="field.description.referenceField.name" (change)="setFieldType('ref')">
+					<option value="">Please Select Reference Field</option>
+					<option *ngFor="let f of field.description.fieldList" value="{{f.name}}">{{f.name}}</option>
+				</select>
+				<ng-container *ngIf="field.description.referenceField.type == 'number'">
+					<div class="input-group-prepend">
+						<span class="input-group-text"><b># of Digits:</b></span>
+					</div>
+					<input type="number" name="rPrecision" class="form-control" placeholder="Whole Number Digits" [(ngModel)]="field.description.referenceField.precision" min="1" max="65">
+					<div class="input-group-prepend">
+						<span class="input-group-text">(Min:1, Max:65)</span>
+					</div>
+					<input type="number" name="rDecimals" class="form-control" placeholder="Decimal Number of Digits" [(ngModel)]="field.description.referenceField.decimals" min="0" max="{{field.description.referenceField.precision - 1 || 0}}">
+					<div class="input-group-append">
+						<span class="input-group-text">(Min:1, Max:{{field.fPrecision - 1 || 0}})</span>
+					</div>
+				</ng-container>
+				<ng-container *ngIf="field.description.referenceField.type == 'string'">
+					<div class="input-group-prepend">
+						<span class="input-group-text"><b># of Characters:</b></span>
+					</div>
+					<input type="number" name="rCharacters" class="form-control" placeholder="Number of characters" [(ngModel)]="field.description.referenceField.characters" min="1" max="1024">
+					<div class="input-group-append">
+						<span class="input-group-text">(Min:1, Max:1024)</span>
+					</div>
+				</ng-container>
+				<ng-container *ngIf="field.description.referenceField.type == 'date'">
+					<div class="input-group-prepend">
+						<span class="input-group-text"><b>Format:</b></span>
+					</div>
+					<input type="text" name="rDateFormat" class="form-control" placeholder="YYYY-MM-DD HH:mm" [(ngModel)]="field.description.referenceField.dateformat">
+				</ng-container>
+			</div>
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-3 col-md-1 col-form-label font-weight-bold text-nowrap">Description Field:</label>
+		<div class="col-9 col-md-11">
+			<div class="input-group input-group-sm">
+				<select name="fDescName" class="form-control" [(ngModel)]="field.description.descriptionField.name" (change)="setFieldType('des')">
+					<option value="">Please Select Reference Field</option>
+					<option *ngFor="let f of field.description.fieldList" value="{{f.name}}">{{f.name}}</option>
+				</select>
+				<ng-container *ngIf="field.description.descriptionField.type == 'number'">
+					<div class="input-group-prepend">
+						<span class="input-group-text"><b># of Digits:</b></span>
+					</div>
+					<input type="number" name="dPrecision" class="form-control" placeholder="Whole Number Digits" [(ngModel)]="field.description.descriptionField.precision" min="1" max="65">
+					<div class="input-group-prepend">
+						<span class="input-group-text">(Min:1, Max:65)</span>
+					</div>
+					<input type="number" name="dDecimals" class="form-control" placeholder="Decimal Number of Digits" [(ngModel)]="field.description.descriptionField.decimals" min="0" max="{{field.description.descriptionField.precision - 1 || 0}}">
+					<div class="input-group-append">
+						<span class="input-group-text">(Min:1, Max:{{field.fPrecision - 1 || 0}})</span>
+					</div>
+				</ng-container>
+				<ng-container *ngIf="field.description.descriptionField.type == 'string'">
+					<div class="input-group-prepend">
+						<span class="input-group-text"><b># of Characters:</b></span>
+					</div>
+					<input type="number" name="dCharacters" class="form-control" placeholder="Number of characters" [(ngModel)]="field.description.descriptionField.characters" min="1" max="1024">
+					<div class="input-group-append">
+						<span class="input-group-text">(Min:1, Max:1024)</span>
+					</div>
+				</ng-container>
+				<ng-container *ngIf="field.description.descriptionField.type == 'date'">
+					<div class="input-group-prepend">
+						<span class="input-group-text"><b>Format:</b></span>
+					</div>
+					<input type="text" name="dDateFormat" class="form-control" placeholder="YYYY-MM-DD HH:mm" [(ngModel)]="field.description.descriptionField.dateformat">
+				</ng-container>
+			</div>
+		</div>
+	</div>
+</form>

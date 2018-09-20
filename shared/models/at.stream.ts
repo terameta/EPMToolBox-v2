@@ -20,7 +20,7 @@ export interface ATStream {
 	fieldList: ATStreamField[]
 }
 
-export const getDefaultATStream = () => ( <ATStream>JSONDeepCopy( { tags: {} } ) );
+export const getDefaultATStream = () => ( <ATStream>JSONDeepCopy( { tags: {}, exports: [] } ) );
 
 export interface ATStreamField {
 	name: string,

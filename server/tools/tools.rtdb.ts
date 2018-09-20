@@ -46,28 +46,25 @@ export class RealtimeDB {
 		this.backendDB.on( 'error', ( error, a, b, c ) => {
 			console.error( 'There is a ZongJi error' );
 			console.error( error );
-			if ( error.fatal ) {
-				this.backendDB.stop();
-				this.backendDB.start( {
-					includeEvents: ['tablemap', 'writerows', 'updaterows', 'deleterows'],
-					startAtEnd: true,
-					includeSchema: this.includeSchemaAssigner,
-					serverId: serverid
-				} );
-			}
+			this.backendDB.stop();
+			this.backendStart( serverid );
 		} );
 
-		this.backendDB.start( {
-			includeEvents: ['tablemap', 'writerows', 'updaterows', 'deleterows'],
-			startAtEnd: true,
-			includeSchema: this.includeSchemaAssigner,
-			serverId: serverid
-		} );
+		this.backendStart( serverid );
 
 		process.on( 'SIGINT', () => {
 			console.log( 'Realtime DB received SIGINT' );
 			this.backendDB.stop();
 		} );
 
+	}
+
+	private backendStart = ( serverid: number ) => {
+		this.backendDB.start( {
+			includeEvents: ['tablemap', 'writerows', 'updaterows', 'deleterows'],
+			startAtEnd: true,
+			includeSchema: this.includeSchemaAssigner,
+			serverId: serverid
+		} );
 	}
 }

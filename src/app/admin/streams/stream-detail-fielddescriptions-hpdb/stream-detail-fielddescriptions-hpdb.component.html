@@ -27,6 +27,9 @@
 			<div class="input-group input-group-sm">
 				<select name="aliasTable" class="form-control form-control-sm" [(ngModel)]="field.description.table" required>
 					<option value="">Please select an alias table</option>
+					<!-- <ng-container *ngFor="let aliasTable of field.description.tableList">
+						<option value="aliasTable.name">{{aliasTable.name}}</option>
+					</ng-container> -->
 					<option *ngFor="let aliasTable of field.description.tableList" [value]="aliasTable.name">{{aliasTable.name}}</option>
 				</select>
 				<div class="input-group-append">

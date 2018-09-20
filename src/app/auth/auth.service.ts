@@ -78,8 +78,6 @@ export class AuthService {
 	}
 
 	public reauthenticate = ( payload: ATApiPayload ) => {
-		console.log( 'Reauthenticate result' );
-		console.log( payload );
 		this.isReAuthenticating$.next( false );
 		this.setSignedIn( payload.data.token );
 	}

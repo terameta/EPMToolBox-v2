@@ -125,7 +125,6 @@ export class CommunicationService {
 	}
 
 	private processReauthenticate = ( token: string ) => {
-		// console.log( 'We will now reauthenticate user' );
 		this.communicate( { framework: 'auth', action: 'reauthenticate', payload: { status: 'request', data: { token } } } );
 	}
 

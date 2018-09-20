@@ -11,6 +11,7 @@ import { EnvironmentsService } from '../../environments/environments.service';
 import { ATApiPayload } from 'shared/models/at.socketrequest';
 import { EnumToArray } from 'shared/utilities/utilityFunctions';
 import { NgForm } from '@angular/forms';
+import { subsDispose, subsCreate } from 'shared/utilities/ngUtilities';
 
 @Component( {
 	selector: 'app-stream-detail-definitions',
@@ -26,7 +27,7 @@ export class StreamDetailDefinitionsComponent implements OnInit, OnDestroy {
 	private databaseRefresh$ = new Subject();
 	private tableRefresh$ = new Subject();
 
-	private subscriptions: Subscription[] = [];
+	private subs = subsCreate();
 
 	public monacoOptions = { language: 'sql' };
 
@@ -39,7 +40,7 @@ export class StreamDetailDefinitionsComponent implements OnInit, OnDestroy {
 	) { }
 
 	ngOnInit() {
-		this.subscriptions.push( this.ds.store.streams.subject.
+		this.subs.push( this.ds.store.streams.subject.
 			pipe(
 				combineLatest( this.cs.currentID$ ),
 				filter( ( [s, id] ) => ( !!s[id] ) )
@@ -61,10 +62,7 @@ export class StreamDetailDefinitionsComponent implements OnInit, OnDestroy {
 		).subscribe( this.handleListTables );
 	}
 
-	ngOnDestroy() {
-		this.subscriptions.forEach( s => s.unsubscribe() );
-		this.subscriptions = [];
-	}
+	ngOnDestroy() { subsDispose( this.subs ); }
 
 	public handleEnvironmentChange = () => {
 		const cEnvironment = this.ds.store.environments.subject.getValue()[this.cStream.environment];

@@ -1,9 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ATStream, getDefaultATStream } from 'shared/models/at.stream';
 import { DataStoreService } from '../../../data-store/data-store.service';
-import { Subscription } from 'rxjs';
 import { CentralStatusService } from '../../../central-status/central-status.service';
 import { combineLatest, filter, map } from 'rxjs/operators';
+import { subsCreate, subsDispose } from 'shared/utilities/ngUtilities';
 
 @Component( {
 	selector: 'app-stream-detail-fielddescriptions',
@@ -14,7 +14,7 @@ export class StreamDetailFielddescriptionsComponent implements OnInit, OnDestroy
 	public item: ATStream = getDefaultATStream();
 	public doWeHaveDescribedFields = false;
 
-	private subscriptions: Subscription[] = [];
+	private subs = subsCreate();
 
 	constructor(
 		private ds: DataStoreService,
@@ -22,7 +22,7 @@ export class StreamDetailFielddescriptionsComponent implements OnInit, OnDestroy
 	) { }
 
 	ngOnInit() {
-		this.subscriptions.push( this.ds.store.streams.subject.
+		this.subs.push( this.ds.store.streams.subject.
 			pipe(
 				combineLatest( this.cs.currentID$ ),
 				filter( ( [s, id] ) => ( !!s[id] ) ),
@@ -41,9 +41,6 @@ export class StreamDetailFielddescriptionsComponent implements OnInit, OnDestroy
 		);
 	}
 
-	ngOnDestroy() {
-		this.subscriptions.forEach( s => s.unsubscribe() );
-		this.subscriptions = [];
-	}
+	ngOnDestroy() { subsDispose( this.subs ); }
 
 }
