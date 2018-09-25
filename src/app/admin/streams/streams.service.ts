@@ -28,6 +28,14 @@ export class StreamsService {
 			this.gss.update( this.framework, stream );
 		}
 	}
+
+	public cloneExport = () => {
+
+	}
+
+	public deleteExport = () => {
+
+	}
 }
 
 /*

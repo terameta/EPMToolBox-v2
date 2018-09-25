@@ -1,9 +1,18 @@
+<div class="btn-toolbar w-100 mb-3" role="toolbar" aria-label="Stream Exports Toolbar">
+	<div class="btn-group btn-group-sm ml-auto" role="group" aria-label="Stream Exports Button Group">
+		<button class="btn btn-outline-dark" type="button" (click)="create()">
+			<i class="fas fa-plus fa-fw"></i> New Export
+		</button>
+	</div>
+</div>
 <div class="container-fluid p-0">
 	<div class="row">
 		<div class="col">
 			<ul class="nav nav-tabs w-100">
 				<li class="nav-item">
-					<a routerLink="./" class="nav-link" routerLinkActive="active">List</a>
+					<a routerLink="./" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+						<i class="fas fa-list"></i> List
+					</a>
 				</li>
 				<li class="nav-item" *ngFor="let export of item.exports; let i = index;">
 					<a routerLink="{{i}}" class="nav-link" routerLinkActive="active" data-toggle="tab">{{export.name}}</a>
@@ -21,4 +30,3 @@
 		</div>
 	</div>
 </div>
-<pre>{{ item | json }}</pre>

@@ -1,0 +1,37 @@
+<div class="btn-toolbar w-100 mb-3">
+	<div class="btn-group btn-group-sm ml-auto">
+		<button class="btn btn-outline-dark" type="button" (click)="ss.update('streams', item)">
+			<i class="fas fa-save fa-fw"></i> Save
+		</button>
+	</div>
+</div>
+<div class="jumbotron col-8 offset-2 mt-5" *ngIf="!itemLoaded">
+	<h1><i class="fas fa-circle-notch fa-spin"></i></h1>
+	<hr class="my-4">
+	<p>Please wait... We are loading the stream.</p>
+</div>
+<div class="jumbotron col-8 offset-2 mt-5" *ngIf="exports.length == 0 && itemLoaded">
+	<h1>No exports exist</h1>
+	<hr class="my-4">
+	<p>To create a new export please click to the "New Export" button.</p>
+</div>
+<div class="table-responsive" *ngIf="exports.length > 0">
+	<table class="table table-sm table-hover table-bordered">
+		<thead>
+			<tr>
+				<th class="text-nowrap" width="10">
+					<i class="fa fa-trash fa-fw"></i>
+				</th>
+				<th>Name</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr *ngFor=" let export of exports; let i=index;">
+				<td>
+					<i class="fa fa-trash fa-fw text-danger my-auto ml-auto pointer" aria-hidden="true" title="Delete" (click)="delete(i)"></i>
+				</td>
+				<td><a routerLink="./{{i}}">{{export.name}}</a></td>
+			</tr>
+		</tbody>
+	</table>
+</div>

@@ -1,12 +1,23 @@
 import { Pool, createPool, FieldInfo } from 'mysql';
 import { RealtimeDB } from './tools.rtdb';
 import { MysqlConfig } from 'shared/models/systemconfig';
+import { Subscription } from 'rxjs';
 
 export class DB {
 	public pool: Pool;
 	public rtdb: RealtimeDB;
+	private rtdbSub: Subscription;
 
 	constructor( private dbConfig: MysqlConfig, serverid: number ) {
+		this.initiate( dbConfig, serverid );
+	}
+
+	private initiate = ( dbConfig: MysqlConfig, serverid: number ) => {
+		this.pool = null;
+		if ( this.rtdbSub ) {
+			this.rtdbSub.unsubscribe();
+			this.rtdbSub = null;
+		}
 		this.pool = createPool( {
 			connectionLimit: 10,
 			queueLimit: 0,
@@ -18,6 +29,15 @@ export class DB {
 		} );
 		if ( process.env.isWorker === 'true' ) {
 			this.rtdb = new RealtimeDB( dbConfig, serverid );
+			this.rtdbSub = this.rtdb.errors$.subscribe( ( error ) => {
+				console.log( '===========================================' );
+				console.log( '===========================================' );
+				console.log( 'We have caught RTDB error at tools.db.ts' );
+				console.log( error );
+				console.log( '===========================================' );
+				console.log( '===========================================' );
+				this.initiate( dbConfig, serverid );
+			} );
 		}
 
 		this.pool.on( 'binlog', ( event ) => {
@@ -37,15 +57,17 @@ export class DB {
 			console.error( error, a, b, c );
 		} );
 
-		setInterval( async () => {
-			await this.queryOne( 'UPDATE dbchecker SET lastwrite = ?', ( new Date() ) );
-			const { tuple } = await this.queryOne<any>( 'SELECT * FROM dbchecker' );
-			const lastread = this.gfdt( new Date( tuple.lastread.toString() ) );
-			const lastwrite = this.gfdt( new Date( tuple.lastwrite.toString() ) );
-			console.log( 'Last Read:', lastread, 'Last Write:', lastwrite );
-		}, 60000 );
+		if ( this.rtdb && process.env.isWorker === 'true' ) {
+			setInterval( async () => {
+				await this.queryOne( 'UPDATE dbchecker SET lastwrite = ?', ( new Date() ) );
+				const { tuple } = await this.queryOne<any>( 'SELECT * FROM dbchecker' );
+				const lastread = this.gfdt( new Date( tuple.lastread.toString() ) );
+				const lastwrite = this.gfdt( new Date( tuple.lastwrite.toString() ) );
+				console.log( 'Last Read:', lastread, 'Last Write:', lastwrite );
+			}, 60000 );
+		}
 
-		if ( this.rtdb ) {
+		if ( this.rtdb && process.env.isWorker === 'true' ) {
 			this.rtdb.changes$.subscribe( async ( tableName: string ) => {
 				console.log( 'Last Read (async):', this.gfdt( new Date() ) );
 			} );

@@ -59,4 +59,5 @@ export class AdminSharedService {
 	}
 
 	public navigateTo = ( framework: string, id: number ) => this.router.navigateByUrl( '/admin/' + framework + '/' + id );
+	public navigateByUrl = ( url: string ) => this.router.navigateByUrl( url );
 }

@@ -1,11 +1,12 @@
 import { MysqlConfig } from '../../shared/models/systemconfig';
 import * as ZongJi from 'zongji';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 export class RealtimeDB {
 	private includeSchemaAssigner = {};
 	private backendDB;
 	public changes$: BehaviorSubject<string>;
+	public errors$: Subject<Error>;
 
 	constructor( private dbConfig: MysqlConfig, serverid: number ) {
 
@@ -13,6 +14,7 @@ export class RealtimeDB {
 
 		this.backendSetup( serverid );
 		this.changes$ = new BehaviorSubject( '' );
+		this.errors$ = new Subject();
 	}
 
 	private backendSetup = ( serverid: number ) => {
@@ -43,11 +45,11 @@ export class RealtimeDB {
 			console.log( 'Connection released', conn.threadId );
 		} );
 
-		this.backendDB.on( 'error', ( error, a, b, c ) => {
+		this.backendDB.on( 'error', ( error ) => {
 			console.error( 'There is a ZongJi error' );
 			console.error( error );
 			this.backendDB.stop();
-			this.backendStart( serverid );
+			this.errors$.next( error );
 		} );
 
 		this.backendStart( serverid );

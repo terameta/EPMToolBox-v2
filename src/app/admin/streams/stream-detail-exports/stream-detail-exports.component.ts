@@ -4,6 +4,8 @@ import { subsCreate, subsDispose } from 'shared/utilities/ngUtilities';
 import { DataStoreService } from '../../../data-store/data-store.service';
 import { CentralStatusService } from '../../../central-status/central-status.service';
 import { combineLatest, filter, map } from 'rxjs/operators';
+import { AdminSharedService } from '../../admin-shared/admin-shared.service';
+import { arrayContains, SortByName } from 'shared/utilities/utilityFunctions';
 
 @Component( {
 	selector: 'app-stream-detail-exports',
@@ -17,7 +19,8 @@ export class StreamDetailExportsComponent implements OnInit, OnDestroy {
 
 	constructor(
 		private ds: DataStoreService,
-		private cs: CentralStatusService
+		private cs: CentralStatusService,
+		private ss: AdminSharedService
 	) { }
 
 	ngOnInit() {
@@ -30,10 +33,30 @@ export class StreamDetailExportsComponent implements OnInit, OnDestroy {
 			).
 			subscribe( ( [s, url] ) => {
 				this.item = s;
+				if ( !this.item.exports ) this.item.exports = [];
+				this.item.exports.sort( SortByName );
 			} )
 		);
 	}
 
 	ngOnDestroy() { subsDispose( this.subs ); }
+
+	public create = async () => {
+		const name = ( await this.cs.prompt( 'What is the name of the new export?' ) ) as string;
+		if ( name ) {
+			if ( arrayContains( this.item.exports, 'name', name ) ) {
+				await this.cs.notificationDisplay( {
+					id: '-1',
+					title: 'There is already an export with the same name',
+					detail: 'Please try with another name',
+					type: 'info'
+				} );
+				this.create();
+			} else {
+				this.item.exports.push( { name } );
+				this.ss.update( 'streams', this.item );
+			}
+		}
+	}
 
 }

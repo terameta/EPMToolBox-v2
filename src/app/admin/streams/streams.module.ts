@@ -17,6 +17,10 @@ import { StreamDetailFieldsHpdbComponent } from './stream-detail-fields-hpdb/str
 import { StreamDetailFielddescriptionsHpdbComponent } from './stream-detail-fielddescriptions-hpdb/stream-detail-fielddescriptions-hpdb.component';
 import { StreamDetailFielddescriptionsRdbtComponent } from './stream-detail-fielddescriptions-rdbt/stream-detail-fielddescriptions-rdbt.component';
 import { StreamDetailFielddescriptionsSelectorComponent } from './stream-detail-fielddescriptions-selector/stream-detail-fielddescriptions-selector.component';
+import { StreamDetailExportsListComponent } from './stream-detail-exports-list/stream-detail-exports-list.component';
+import { StreamDetailExportDetailComponent } from './stream-detail-export-detail/stream-detail-export-detail.component';
+import { StreamDetailExportDetailRtdbComponent } from './stream-detail-export-detail-rtdb/stream-detail-export-detail-rtdb.component';
+import { StreamDetailExportDetailHpdbComponent } from './stream-detail-export-detail-hpdb/stream-detail-export-detail-hpdb.component';
 
 const routes: Routes = [
 	{
@@ -32,7 +36,12 @@ const routes: Routes = [
 							{ path: ':name', component: StreamDetailFielddescriptionsSelectorComponent }
 						]
 					},
-					{ path: 'exports', component: StreamDetailExportsComponent }
+					{
+						path: 'exports', component: StreamDetailExportsComponent, children: [
+							{ path: '', component: StreamDetailExportsListComponent },
+							{ path: ':exportindex', component: StreamDetailExportDetailComponent }
+						]
+					}
 				]
 			}
 		]
@@ -58,7 +67,11 @@ const routes: Routes = [
 		StreamDetailFieldsHpdbComponent,
 		StreamDetailFielddescriptionsHpdbComponent,
 		StreamDetailFielddescriptionsRdbtComponent,
-		StreamDetailFielddescriptionsSelectorComponent
+		StreamDetailFielddescriptionsSelectorComponent,
+		StreamDetailExportsListComponent,
+		StreamDetailExportDetailComponent,
+		StreamDetailExportDetailRtdbComponent,
+		StreamDetailExportDetailHpdbComponent
 	]
 } )
 export class StreamsModule { }

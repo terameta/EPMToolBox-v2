@@ -111,8 +111,11 @@ export class CentralStatusService {
 
 	public notificationDisplay = ( notification: ATNotification ) => {
 		const modalRef: BsModalRef = this.modalService.show( NotificationDisplayComponent, { initialState: { notification } } );
-		modalRef.content.onClose.subscribe( ( result ) => {
-			if ( result === 'dismissed' ) notification.type = 'dismissed';
+		return new Promise( ( resolve, reject ) => {
+			modalRef.content.onClose.subscribe( ( result ) => {
+				if ( result === 'dismissed' ) notification.type = 'dismissed';
+				resolve();
+			}, reject );
 		} );
 	}
 

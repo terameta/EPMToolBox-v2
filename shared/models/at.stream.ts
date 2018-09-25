@@ -21,6 +21,7 @@ export interface ATStream {
 }
 
 export const getDefaultATStream = () => ( <ATStream>JSONDeepCopy( { tags: {}, exports: [] } ) );
+export const getDefaultATStreamExport = () => ( <ATStreamExport>JSONDeepCopy( { name: '' } ) );
 
 export interface ATStreamField {
 	name: string,
@@ -68,7 +69,6 @@ export interface ATStreamFieldDescription {
 // Before new changes
 
 export interface ATStreamExport {
-	id: number,
 	name: string
 }
 
@@ -82,6 +82,13 @@ export interface ATStreamExportHPDB extends ATStreamExport {
 	cols: any[],
 	povs: any[]
 }
+
+export const getDefaultATStreamExportHPDB = () => ( <ATStreamExportHPDB>JSONDeepCopy( {
+	name: '',
+	rowDims: [], colDims: [], povDims: [],
+	cellCounts: <any>{},
+	rows: [], cols: [], povs: []
+} ) );
 
 export interface ATStreamFieldOLD {
 	id: number,

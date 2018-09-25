@@ -18,6 +18,8 @@ export function isInt( n: any ) { return isNumeric( n ) && n % 1 === 0; }
 
 export const JSONDeepCopy = ( payload ) => JSON.parse( JSON.stringify( payload ) );
 
+export const arrayContains = ( sourceArray: any[], element: string, toCompare: any ) => ( sourceArray.findIndex( e => e[element] === toCompare ) >= 0 );
+
 export function encodeXML( s: string ): string {
 	return s.replace( /&/g, '&amp;' )
 		.replace( /</g, '&lt;' )
