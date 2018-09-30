@@ -19,7 +19,9 @@ export class StreamDetailFieldsComponent implements OnInit, OnDestroy {
 	constructor(
 		private ds: DataStoreService,
 		private cs: CentralStatusService
-	) { }
+	) {
+		console.log( 'RDBT type streams should have the capabilitiy of having multiple data fields' );
+	}
 
 	ngOnInit() {
 		this.subscriptions.push( this.ds.store.streams.subject.

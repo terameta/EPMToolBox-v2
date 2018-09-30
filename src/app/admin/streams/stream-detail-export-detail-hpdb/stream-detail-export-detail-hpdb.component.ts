@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { getDefaultATStream, getDefaultATStreamExportHPDB } from 'shared/models/at.stream';
+import { getDefaultATStream, getDefaultATStreamExportHPDB, ATStreamField } from 'shared/models/at.stream';
 import { subsCreate, subsDispose } from 'shared/utilities/ngUtilities';
 import { DataStoreService } from '../../../data-store/data-store.service';
 import { CentralStatusService } from '../../../central-status/central-status.service';
@@ -18,7 +18,6 @@ export class StreamDetailExportDetailHpdbComponent implements OnInit, OnDestroy 
 	public framework = 'streams';
 	public cStream = getDefaultATStream();
 	public cExport = getDefaultATStreamExportHPDB();
-	public cellCount = 0;
 	private exportIndex = null;
 
 	private subs = subsCreate();
@@ -42,7 +41,11 @@ export class StreamDetailExportDetailHpdbComponent implements OnInit, OnDestroy 
 				this.exportIndex = url.split( '/' ).pop();
 				this.cStream = s;
 				this.cExport = { ...getDefaultATStreamExportHPDB(), ...this.cStream.exports[this.exportIndex] };
-
+				this.cStream.fieldList.forEach( f => {
+					if ( !this.isFieldAssigned( f ) ) {
+						this.cExport.povDims.push( { name: f.name, position: this.cExport.povDims.length + 1, selectable: false, defaultSelection: '', limits: [] } );
+					}
+				} );
 			} )
 		);
 	}
@@ -65,6 +68,10 @@ export class StreamDetailExportDetailHpdbComponent implements OnInit, OnDestroy 
 			this.ss.update( this.framework, this.cStream );
 			this.ss.navigateByUrl( '/admin/streams/' + this.cStream.id + '/exports/' + cIndex );
 		}
+	}
+
+	private isFieldAssigned = ( field: ATStreamField ) => {
+		return !!( this.cExport.rowDims.find( d => d.name === field.name ) || this.cExport.colDims.find( d => d.name === field.name ) || this.cExport.povDims.find( d => d.name === field.name ) );
 	}
 
 	ngOnDestroy() { subsDispose( this.subs ); }

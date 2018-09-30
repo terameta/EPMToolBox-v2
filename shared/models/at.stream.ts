@@ -40,6 +40,13 @@ export interface ATStreamField {
 	isData: boolean,
 	aggregateFunction: string,
 	description: ATStreamFieldDescription
+	items: ATStreamFieldItem[]
+}
+
+export interface ATStreamFieldItem {
+	name: string,
+	description: string,
+	parent: string
 }
 
 export interface ATStreamFieldDescription {
@@ -73,9 +80,9 @@ export interface ATStreamExport {
 }
 
 export interface ATStreamExportHPDB extends ATStreamExport {
-	rowDims: any[],
-	colDims: any[],
-	povDims: any[],
+	rowDims: ATStreamExportHPDBDimensionDefinition[],
+	colDims: ATStreamExportHPDBDimensionDefinition[],
+	povDims: ATStreamExportHPDBDimensionDefinition[],
 	cellCounts: any,
 	cellCount: number,
 	rows: any[],
@@ -83,10 +90,19 @@ export interface ATStreamExportHPDB extends ATStreamExport {
 	povs: any[]
 }
 
+export interface ATStreamExportHPDBDimensionDefinition {
+	name: string,
+	position: number,
+	selectable: boolean,
+	defaultSelection: string,
+	limits: any[]
+}
+
 export const getDefaultATStreamExportHPDB = () => ( <ATStreamExportHPDB>JSONDeepCopy( {
 	name: '',
 	rowDims: [], colDims: [], povDims: [],
 	cellCounts: <any>{},
+	cellCount: 0,
 	rows: [], cols: [], povs: []
 } ) );
 
